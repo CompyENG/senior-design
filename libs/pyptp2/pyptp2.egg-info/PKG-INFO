@@ -1,0 +1,14 @@
+Metadata-Version: 1.1
+Name: pyptp2
+Version: 0.1
+Summary: Python module for PTP camera connections over USB
+Home-page: http://code.google.com/p/pyptp2/
+Author: Zachary Berkowitz
+Author-email: zac.berkowitz@gmail.com
+License: GPLv3
+Description: UNKNOWN
+Platform: UNKNOWN
+Classifier: Development Status :: 3 - Alpha
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Topic :: Software Development :: Libraries
+Classifier: Topic :: Utilities
