@@ -25,7 +25,7 @@ class Motor:
         
     def setup(self):
         for pin in self.pins:
-            self.gpio.setup(pin, self.gpio.out)
+            self.gpio.setup(pin, self.gpio.OUT)
     
     def spinForward(self):
         self.gpio.output(self.pins[0], False) # Always turn one off first
@@ -65,6 +65,7 @@ s.listen(backlog)
 print 'server running on port', port, 'at', socket.gethostbyname(socket.gethostname())
 
 # Set up GPIO
+GPIO.setmode(GPIO.BCM)
 motors = [Motor((18, 23), GPIO), Motor((24, 25), GPIO), Motor((8, 7), GPIO), Motor((17, 27), GPIO)]
 for motor in motors:    # Ensure all motors are stopped to begin with
     motor.stop()
