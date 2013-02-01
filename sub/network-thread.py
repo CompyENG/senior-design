@@ -118,7 +118,7 @@ time.sleep(0.5)
 print "Camera is ready!"
 
 # Set up queue and threadd
-queue = Queue.Queue()
+queue = Queue.Queue(1)
 cam_lock = threading.Lock()
 t = LiveCameraThread(cam, queue, cam_lock)
 t.daemon = True # This way, the program will stop when we exit the main thread
