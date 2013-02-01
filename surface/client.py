@@ -117,7 +117,7 @@ while done==False:
             #        data.append(r)
             #i=0
             # Check if we're going to get live view data
-            r = recv(1)
+            r = s.recv(1)
             if r == "1":
                 r = ""
                 # TODO: Look at recvfrom_into/recv_into -- it'll give me the number of bytes received
