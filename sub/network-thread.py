@@ -94,7 +94,7 @@ size = 1024*1024*5
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((host,port))
 s.listen(backlog)
-print 'server running on port', port, 'at', socket.gethostbyname(socket.gethostname())
+print "server running on port %d at %s" % (port, socket.gethostbyname(socket.gethostname()))
 
 # Set up GPIO
 GPIO.setmode(GPIO.BCM)
