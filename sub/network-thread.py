@@ -59,10 +59,11 @@ class Motor:
 class LiveCameraThread(threading.Thread):
     """Threaded Camera Live View Grab
     Goal: Be able to respond instantly to gamepad presses, but be able to send live view data as soon as we have it"""
-    def __init__(self, queue, camera):
+    def __init__(self, camera, queue, lock):
         threading.Thread.__init__(self)
         self.queue = queue
         self.camera = camera
+        self.lock = lock
 
     def run(self):
         while True:
@@ -70,8 +71,10 @@ class LiveCameraThread(threading.Thread):
             # Grab and process image, then block before putting it in the queue
             #  That way, the delay is built in to the call grabbing items out of the queue
             # TODO: How do we then signal the other host that we do or do not have livew view data?
-            # TODO: We probably need a mutex or a semaphore here...
+            # DONE: We probably need a mutex or a semaphore here...
+            self.lock.acquire()
             lv_data = self.camera.get_live_view_data() # This is the critical part
+            self.lock.release()
             
             lv_data = lv_data[1].vp_data
             img = chdkimage.convertColorspace(lv_data.vp_data, 0, 360, 480)
@@ -116,7 +119,8 @@ print "Camera is ready!"
 
 # Set up queue and threadd
 queue = Queue.Queue()
-t = LiveCameraThread(queue, cam)
+cam_lock = threading.Lock()
+t = LiveCameraThread(cam, queue, cam_lock)
 t.daemon = True # This way, the program will stop when we exit the main thread
 t.start()
 
@@ -238,13 +242,17 @@ while True:
                     state['pitch_down'] = False
             elif i == 3:
                 if cmd == 1 and state['zoom_out'] == False and state['zoom_in'] == False: #Can't zoom in and out at the same time
+                    cam_lock.acquire()
                     cam.execute_lua("click('zoom_out')")
+                    cam_lock.release()
                     state['zoom_out'] = True
                 elif cmd == 0 and state['zoom_out'] == True:
                     state['zoom_out'] = False
             elif i == 4:
                 if cmd == 1 and state['zoom_in'] == False and state['zoom_out'] == False:
+                    cam_lock.acquire()
                     cam.execute_lua("click('zoom_in')")
+                    cam_lock.release()
                     state['zoom_in'] = True
                 elif cmd == 0 and state['zoom_in'] == True:
                     state['zoom_in'] = False
@@ -287,7 +295,9 @@ while True:
                     state['ascend'] = False
             elif i == 7:
                 if cmd == 1 and state['shoot'] == False:
+                    cam_lock.acquire()
                     cam.execute_lua('shoot()')
+                    cam_lock.release()
                     state['shoot'] = True
                 elif cmd == 0 and state['shoot'] == True:
                     state['shoot'] = False
