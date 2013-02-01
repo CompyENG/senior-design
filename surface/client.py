@@ -47,8 +47,8 @@ else:
     my_joystick.init()
     buttons = my_joystick.get_numbuttons()
     hats = my_joystick.get_numhats()
-    axis = my_joystick.get_numaxes()
-    print "Buttons:",buttons,"Hats:",hats,"Axis:",axis
+    axes = my_joystick.get_numaxes()
+    print "Buttons: %d ; Hats: %d ; Axes: %d" % (buttons, hats, axes)
     z = 0
 while done==False:
     # ALL EVENT PROCESSING SHOULD GO BELOW THIS COMMENT
