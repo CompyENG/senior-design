@@ -20,9 +20,9 @@ try:
 except socket.error, (value,message):
     if s:
         s.close()
-    print "Could not open socket: " + message
+    print "Could not open socket: %s" % (message, )
     sys.exit(1) 
-print 'connected to port', port, 'on', host
+print "connected to port %d on %s" % (port, host)
 s.close()
 pygame.init()
 
@@ -39,7 +39,7 @@ done=False
 joystick_count=pygame.joystick.get_count()
 if joystick_count == 0:
     # No joysticks!
-    print ("Error, I didn't find any joysticks.")
+    print "Error, I didn't find any joysticks."
     sys.exit(1)
 else:
     # Use joystick #0 and initialize it
@@ -105,7 +105,7 @@ while done==False:
             except socket.error, (value,message):
                 if s:
                     s.close()
-                print "Could not open socket: " + message
+                print "Could not open socket: %s" % (message, )
                 sys.exit(1) 
             s.sendall(comm)
             #data = []
