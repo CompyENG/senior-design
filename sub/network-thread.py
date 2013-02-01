@@ -4,6 +4,7 @@ import time
 import threading
 import random
 from ptp2 import *
+import chdkimage
 import socket
 import RPi.GPIO as GPIO
 import threading
@@ -78,7 +79,7 @@ class LiveCameraThread(threading.Thread):
             # I don't think we need to join() because put() can block until a spot opens
             #  Since there's only one spot in the queue........
             #self.queue.join() # Block until the image currently in the queue has been processed -- Most likely, this will never really block
-            self.queue.put(img, True, None) # Put img in the queue, block, no timeout
+            self.queue.put(img[:len(img)/2], True, None) # Put img in the queue, block, no timeout
             
 
 # Setup socket
@@ -147,7 +148,7 @@ while True:
         # forward/back||left/right||pitch up/down||zoom out||zoom in||descend||ascend||take picture||E
         print full_r
         commands = full_r.split('||')
-        for i in range(len(commands)):
+        for i in range(len(commands)-1):
             cmd = float(commands[i])
             # TODO: Wow, this is difficult to read...
             if i == 7:
@@ -276,7 +277,7 @@ while True:
                     # Motor 3 backward
                     motors[2].spinBackward()
                     # Motor 4 forward
-                    motors[3].spinForward
+                    motors[3].spinForward()
                     
                     # Set state
                     state['pitch_up'] = True
