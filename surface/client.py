@@ -6,7 +6,6 @@ This program sends joystick data to the server
 import pygame
 import socket
 import sys
-import Image
 
 #setup socket
 #host = 'localhost'
