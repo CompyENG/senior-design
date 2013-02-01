@@ -151,25 +151,7 @@ while True:
         for i in range(len(commands)-1):
             cmd = float(commands[i])
             # TODO: Wow, this is difficult to read...
-            if i == 7:
-                if cmd == 1 and state['shoot'] == False:
-                    cam.execute_lua('shoot()')
-                    state['shoot'] = True
-                elif cmd == 0 and state['shoot'] == True:
-                    state['shoot'] = False
-            elif i == 3:
-                if cmd == 1 and state['zoom_out'] == False and state['zoom_in'] == False: #Can't zoom in and out at the same time
-                    cam.execute_lua("click('zoom_out')")
-                    state['zoom_out'] = True
-                elif cmd == 0 and state['zoom_out'] == True:
-                    state['zoom_out'] = False
-            elif i == 4:
-                if cmd == 1 and state['zoom_in'] == False and state['zoom_out'] == False:
-                    cam.execute_lua("click('zoom_in')")
-                    state['zoom_in'] = True
-                elif cmd == 0 and state['zoom_in'] == True:
-                    state['zoom_in'] = False
-            elif i == 0:
+            if i == 0:
                 # Forward/backward
                 if cmd == 1 and state['backward'] == False and (state['left'] == False and state['right'] == False):
                     # Motor 1 backward
@@ -225,6 +207,47 @@ while True:
                     # Set state
                     state['left'] = False
                     state['right'] = False
+            elif i == 2:
+                # Pitch up/down
+                if cmd == 1 and state['pitch_down'] == False and (state['ascend'] == False and state['descend'] == False):
+                    # Motor 3 forward
+                    motors[2].spinForward()
+                    # Motor 4 backward
+                    motors[3].spinBackward()
+                    
+                    # Set state
+                    state['pitch_down'] = True
+                    state['pitch_up'] = False
+                elif cmd == -1 and state['pitch_up'] == False and (state['ascend'] == False and state['descend'] == False):
+                    # Motor 3 backward
+                    motors[2].spinBackward()
+                    # Motor 4 forward
+                    motors[3].spinForward()
+                    
+                    # Set state
+                    state['pitch_up'] = True
+                    state['pitch_down'] = False
+                elif cmd == 0 and state['ascend'] == False and state['descend'] == False:
+                    # Motor 3 off
+                    motors[2].stop()
+                    # Motor 4 off
+                    motors[3].stop()
+                    
+                    # Set state
+                    state['pitch_up'] = False
+                    state['pitch_down'] = False
+            elif i == 3:
+                if cmd == 1 and state['zoom_out'] == False and state['zoom_in'] == False: #Can't zoom in and out at the same time
+                    cam.execute_lua("click('zoom_out')")
+                    state['zoom_out'] = True
+                elif cmd == 0 and state['zoom_out'] == True:
+                    state['zoom_out'] = False
+            elif i == 4:
+                if cmd == 1 and state['zoom_in'] == False and state['zoom_out'] == False:
+                    cam.execute_lua("click('zoom_in')")
+                    state['zoom_in'] = True
+                elif cmd == 0 and state['zoom_in'] == True:
+                    state['zoom_in'] = False
             # TODO: examine ascend/descend / tilt conflict cases
             elif i == 5:
                 # Descend
@@ -262,35 +285,12 @@ while True:
                     
                     # Set state
                     state['ascend'] = False
-            elif i == 2:
-                # Pitch up/down
-                if cmd == 1 and state['pitch_down'] == False and (state['ascend'] == False and state['descend'] == False):
-                    # Motor 3 forward
-                    motors[2].spinForward()
-                    # Motor 4 backward
-                    motors[3].spinBackward()
-                    
-                    # Set state
-                    state['pitch_down'] = True
-                    state['pitch_up'] = False
-                elif cmd == -1 and state['pitch_up'] == False and (state['ascend'] == False and state['descend'] == False):
-                    # Motor 3 backward
-                    motors[2].spinBackward()
-                    # Motor 4 forward
-                    motors[3].spinForward()
-                    
-                    # Set state
-                    state['pitch_up'] = True
-                    state['pitch_down'] = False
-                elif cmd == 0 and state['ascend'] == False and state['descend'] == False:
-                    # Motor 3 off
-                    motors[2].stop()
-                    # Motor 4 off
-                    motors[3].stop()
-                    
-                    # Set state
-                    state['pitch_up'] = False
-                    state['pitch_down'] = False
+            elif i == 7:
+                if cmd == 1 and state['shoot'] == False:
+                    cam.execute_lua('shoot()')
+                    state['shoot'] = True
+                elif cmd == 0 and state['shoot'] == True:
+                    state['shoot'] = False
                     
 
         #img = chdkimage.convertColorspace(cam.get_live_view_data()[1].vp_data, 0, 360, 480)
