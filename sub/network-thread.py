@@ -77,7 +77,7 @@ class LiveCameraThread(threading.Thread):
             self.lock.release()
             
             lv_data = lv_data[1].vp_data
-            img = chdkimage.convertColorspace(lv_data.vp_data, 0, 360, 480)
+            img = chdkimage.convertColorspace(lv_data, 0, 360, 480)
             
             # I don't think we need to join() because put() can block until a spot opens
             #  Since there's only one spot in the queue........
