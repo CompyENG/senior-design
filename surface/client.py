@@ -116,29 +116,32 @@ while done==False:
 			#	else:
 			#		data.append(r)
 			#i=0
-			r = ""
-			while len(r) < 259201:
-				r = r+s.recv(4096)
-				#i = i+1
-			#r = s.recv(259200) # We should only actually receive 259200
-			#print len(r)
-			# TODO: Make this happen in a different thread?
-			# This is horribly inefficient -- but PyGame didn't want to read the image data
-			#im = Image.frombuffer("RGB", (360, 240), r, 'raw', "RGB", 0, 1)
-			#im.save("/tmp/live.jpg", 'jpeg')
-			#sys.stderr.write("".join(data))
-			#img = pygame.image.frombuffer(r, (720, 240), "RGB")
-			#img = pygame.image.load("/tmp/live.jpg")
-			#img = pygame.transform.scale(img, screen.get_size())
-			#screen.blit(img, (0,0))
-			print "Length: %d ; Last character: %d" % (len(r), ord(r[-1]))
-			img_data = r[:-1]
-			if len(img_data) == 259200:
-				img = pygame.image.frombuffer(r[:-1], (360, 240), "RGB")
-				new_img = pygame.transform.scale(img, screen.get_size())
-				screen.blit(new_img, (0,0))
-				#pygame.display.flip()
-				pygame.display.update()
+			# Check if we're going to get live view data
+			r = recv(1)
+			if r == "1":
+			    r = ""
+			    while len(r) < 259200:
+				    r = r+s.recv(4096)
+				    #i = i+1
+			    #r = s.recv(259200) # We should only actually receive 259200
+			    #print len(r)
+			    # TODO: Make this happen in a different thread?
+			    # This is horribly inefficient -- but PyGame didn't want to read the image data
+			    #im = Image.frombuffer("RGB", (360, 240), r, 'raw', "RGB", 0, 1)
+			    #im.save("/tmp/live.jpg", 'jpeg')
+			    #sys.stderr.write("".join(data))
+			    #img = pygame.image.frombuffer(r, (720, 240), "RGB")
+			    #img = pygame.image.load("/tmp/live.jpg")
+			    #img = pygame.transform.scale(img, screen.get_size())
+			    #screen.blit(img, (0,0))
+			    #print "Length: %d ; Last character: %d" % (len(r), ord(r[-1]))
+			    img_data = r
+			    if len(img_data) == 259200: # TODO: Do we need this anymore since the receive loop was changed?
+				    img = pygame.image.frombuffer(r, (360, 240), "RGB")
+				    new_img = pygame.transform.scale(img, screen.get_size())
+				    screen.blit(new_img, (0,0))
+				    #pygame.display.flip()
+				    pygame.display.update()
 			s.close()
 	
 	# ALL GAME LOGIC SHOULD GO ABOVE THIS COMMENT
