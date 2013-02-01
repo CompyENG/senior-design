@@ -120,6 +120,7 @@ while done==False:
 			r = recv(1)
 			if r == "1":
 			    r = ""
+			    # TODO: Look at recvfrom_into/recv_into -- it'll give me the number of bytes received
 			    while len(r) < 259200:
 				    r = r+s.recv(4096)
 				    #i = i+1
