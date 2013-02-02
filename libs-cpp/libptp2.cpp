@@ -30,6 +30,13 @@ CameraBase::CameraBase(libusb_device * dev) {
     this->open(dev);
 }
 
+CameraBase::~CameraBase() {
+    if(this->handle != NULL) {
+        libusb_close(this->handle);
+        libusb_release_interface(this->handle, this->intf->bInterfaceNumber);
+    }
+}
+
 PTPCamera::PTPCamera() {
     fprintf(stderr, "This class is not implemented.\n");
 }
@@ -71,6 +78,7 @@ bool CameraBase::open(libusb_device * dev) {
             struct libusb_interface_descriptor altsetting = interface.altsetting[k];
             if(altsetting.bInterfaceClass == 6) { // If this has the PTP interface
                 this->intf = &altsetting;
+                libusb_claim_interface(this->handle, this->intf->bInterfaceNumber); // Claim the interface -- Needs to be done before I/O operations
                 break;
             }
         }

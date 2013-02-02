@@ -36,6 +36,7 @@ class CameraBase {
     public:
         CameraBase();
         CameraBase(libusb_device *dev);
+        ~CameraBase();
         bool open(libusb_device *dev);
         bool close();
         bool reopen();
