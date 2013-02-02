@@ -28,6 +28,13 @@ int main(int argc, char * argv[]) {
 		desc.idVendor, desc.idProduct,
 		libusb_get_bus_number(dev), libusb_get_device_address(dev));
 		
+	try {
+	    CHDKCamera cam(dev);
+    } catch(int e) {
+        printf("Error occured opening device: %d\n", e);
+        return -1;
+    }
+		
 	libusb_exit(NULL);
 	
 	return 0;

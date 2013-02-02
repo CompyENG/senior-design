@@ -1,3 +1,8 @@
+// Error codes
+#define LIBPTP2_CANNOT_CONNECT  1
+#define LIBPTP2_NO_DEVICE       2
+#define LIBPTP2_ALREADY_OPEN    3
+
 // Placeholder structs
 struct ptp_command {
     int x;
@@ -16,7 +21,13 @@ struct lv_data {
 };
 
 class CameraBase {
-    
+    private:
+        libusb_device_handle *handle;
+        int usb_error;
+        struct libusb_interface_descriptor *intf;
+        uint8_t ep_in;
+        uint8_t ep_out;
+        void init();
     protected:
         bool _bulk_write(char * bytestr, int timeout);
         bool _bulk_write(char * bytestr);
@@ -38,6 +49,7 @@ class CameraBase {
         // TODO: Does C++ allow a different way of doing "default" parameter values?
         struct ptp_response * ptp_transaction(struct ptp_command * command, int * params, char * tx_data, bool receiving, int timeout);
         static libusb_device * find_first_camera();
+        int get_usb_error();
 };
 
 class PTPCamera : public CameraBase {
