@@ -1,6 +1,27 @@
 // A conversion of pyptp2 and all that comes with it
 //  Targeted at libusb version 1.0, since that's recommended
-#include "libusb.h"
+#include <stdio.h>
+
+#include <libusb-1.0/libusb.h>
+
+#include "libptp2.hpp"
+
+// Placeholder structs
+struct ptp_command {
+    int x;
+};
+
+struct ptp_response {
+    int x;
+};
+
+struct script_return {
+    int x;
+};
+
+struct lv_data {
+    int x;
+};
 
 class CameraBase {
     
@@ -20,10 +41,10 @@ class CameraBase {
         char * recv_ptp_message(int timeout);
         char * recv_ptp_message(void);
         // TODO: Should params be an int?
-        struct ptp_command * new_ptp_command(int op_code, int[] params);
+        struct ptp_command * new_ptp_command(int op_code, int * params);
         struct ptp_command * new_ptp_command(int op_code);
         // TODO: Does C++ allow a different way of doing "default" parameter values?
-        struct ptp_response * ptp_transaction(struct ptp_command * command, int[] params, char * tx_data, bool receiving, timeout);
+        struct ptp_response * ptp_transaction(struct ptp_command * command, int * params, char * tx_data, bool receiving, int timeout);
 };
 
 class PTPCamera : public CameraBase {
@@ -36,7 +57,7 @@ class CHDKCamera : public CameraBase {
     struct filebuf * _pack_file_for_upload(char * local_filename);
     public:
         CHDKCamera() : CameraBase() { ; }
-        CHDKCamera(struct usb_device *dev) : CameraBase(dev) { ; }
+        CHDKCamera(libusb_device *dev) : CameraBase(dev) { ; }
         float get_chdk_version(void);
         int check_script_status(void);
         struct script_return * execute_lua(char * script, bool block);
