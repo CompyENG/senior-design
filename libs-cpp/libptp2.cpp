@@ -37,6 +37,38 @@ CameraBase::~CameraBase() {
     }
 }
 
+int CameraBase::_bulk_write(unsigned char * bytestr, int length, int timeout) {
+    int transferred;
+    
+    if(this->handle == NULL) {
+        throw LIBPTP2_NOT_OPEN;
+        return 0;
+    }
+    
+    // TODO: Return the amount of data transferred? Check it here? What should we do if not enough was sent?
+    return libusb_bulk_transfer(this->handle, this->ep_in, bytestr, length, &transferred, timeout);
+}
+
+int CameraBase::_bulk_write(unsigned char * bytestr, int length) {
+    return this->_bulk_write(bytestr, length, 0);
+}
+
+int CameraBase::_bulk_read(unsigned char * data_out, int size, int timeout) {
+    int transferred;
+    
+    if(this->handle == NULL) {
+        throw LIBPTP2_NOT_OPEN;
+        return 0;
+    }
+    
+    // TODO: Return the amount of data transferred? We might get less than we ask for, which means we need to tell the calling function?
+    return libusb_bulk_transfer(this->handle, this->ep_out, data_out, size, &transferred, timeout);
+}
+
+int CameraBase::_bulk_read(unsigned char * data_out, int size) {
+    return this->_bulk_read(data_out, size, 0);
+}
+
 PTPCamera::PTPCamera() {
     fprintf(stderr, "This class is not implemented.\n");
 }

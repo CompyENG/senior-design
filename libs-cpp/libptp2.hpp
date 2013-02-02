@@ -2,6 +2,7 @@
 #define LIBPTP2_CANNOT_CONNECT  1
 #define LIBPTP2_NO_DEVICE       2
 #define LIBPTP2_ALREADY_OPEN    3
+#define LIBPTP2_NOT_OPEN        4
 
 // Placeholder structs
 struct ptp_command {
@@ -29,10 +30,10 @@ class CameraBase {
         uint8_t ep_out;
         void init();
     protected:
-        bool _bulk_write(char * bytestr, int timeout);
-        bool _bulk_write(char * bytestr);
-        bool _bulk_read(int size, int timeout);
-        bool _bulk_read(int size);
+        int _bulk_write(unsigned char * bytestr, int length, int timeout);
+        int _bulk_write(unsigned char * bytestr, int length);
+        int _bulk_read(unsigned char * data_out, int size, int timeout);
+        int _bulk_read(unsigned char * data_out, int size);
     public:
         CameraBase();
         CameraBase(libusb_device *dev);
