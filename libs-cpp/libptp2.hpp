@@ -41,8 +41,8 @@ class CameraBase {
         bool open(libusb_device *dev);
         bool close();
         bool reopen();
-        bool send_ptp_message(char * bytestr, int timeout);
-        bool send_ptp_message(char * bytestr);
+        int send_ptp_message(unsigned char * bytestr, int size, int timeout);
+        int send_ptp_message(unsigned char * bytestr, int size);
         char * recv_ptp_message(int timeout);
         char * recv_ptp_message(void);
         // TODO: Should params be an int?

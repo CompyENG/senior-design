@@ -69,6 +69,14 @@ int CameraBase::_bulk_read(unsigned char * data_out, int size) {
     return this->_bulk_read(data_out, size, 0);
 }
 
+int CameraBase::send_ptp_message(unsigned char * data, int size, int timeout) {
+    return this->_bulk_write(data, size, timeout);
+}
+
+int CameraBase::send_ptp_message(unsigned char * data, int size) {
+    return this->send_ptp_message(data, size, 0);
+}
+
 PTPCamera::PTPCamera() {
     fprintf(stderr, "This class is not implemented.\n");
 }
