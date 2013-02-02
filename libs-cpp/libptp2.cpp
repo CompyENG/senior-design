@@ -1,77 +1,34 @@
 // A conversion of pyptp2 and all that comes with it
 //  Targeted at libusb version 1.0, since that's recommended
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <libusb-1.0/libusb.h>
 
 #include "libptp2.hpp"
 
-// Placeholder structs
-struct ptp_command {
-    int x;
-};
+// TODO: Implementation
+CameraBase::CameraBase() {
+    ;
+}
 
-struct ptp_response {
-    int x;
-};
+CameraBase::CameraBase(libusb_device * dev) {
+    ;
+}
 
-struct script_return {
-    int x;
-};
+PTPCamera::PTPCamera() {
+    fprintf(stderr, "This class is not implemented.\n");
+}
 
-struct lv_data {
-    int x;
-};
+CHDKCamera::CHDKCamera() : CameraBase() {
+    ;
+}
 
-class CameraBase {
-    
-    protected:
-        bool _bulk_write(char * bytestr, int timeout);
-        bool _bulk_write(char * bytestr);
-        bool _bulk_read(int size, int timeout);
-        bool _bulk_read(int size);
-    public:
-        CameraBase();
-        CameraBase(libusb_device *dev);
-        bool open(libusb_device *dev);
-        bool close();
-        bool reopen();
-        bool send_ptp_message(char * bytestr, int timeout);
-        bool send_ptp_message(char * bytestr);
-        char * recv_ptp_message(int timeout);
-        char * recv_ptp_message(void);
-        // TODO: Should params be an int?
-        struct ptp_command * new_ptp_command(int op_code, int * params);
-        struct ptp_command * new_ptp_command(int op_code);
-        // TODO: Does C++ allow a different way of doing "default" parameter values?
-        struct ptp_response * ptp_transaction(struct ptp_command * command, int * params, char * tx_data, bool receiving, int timeout);
-};
+CHDKCamera::CHDKCamera(libusb_device * dev) : CameraBase(dev) {
+    ;
+}
 
-class PTPCamera : public CameraBase {
-    public:
-        PTPCamera() { printf("This class is not implemented.\n"); }
-};
-
-class CHDKCamera : public CameraBase {
-    struct filebuf * _pack_file_for_upload(char * local_filename, char * remote_filename);
-    struct filebuf * _pack_file_for_upload(char * local_filename);
-    public:
-        CHDKCamera() : CameraBase() { ; }
-        CHDKCamera(libusb_device *dev) : CameraBase(dev) { ; }
-        float get_chdk_version(void);
-        int check_script_status(void);
-        struct script_return * execute_lua(char * script, bool block);
-        struct script_return * execute_lua(char * script);
-        struct ptp_response * read_script_message(void);
-        bool write_script_message(char * message, int script_id);
-        bool write_script_message(char * message);
-        bool upload_file(char * local_filename, char * remote_filename, int timeout);
-        char * download_file(char * filename, int timeout);
-        struct lv_data * get_live_view_data(bool liveview, bool overlay, bool palette);
-        char * _wait_for_script_return(int timeout);
-};
-
-libusb_device * find_first_camera() {
+libusb_device * CameraBase::find_first_camera() {
     // discover devices
     libusb_device **list;
     libusb_device *found = NULL;
@@ -121,6 +78,12 @@ libusb_device * find_first_camera() {
 
     libusb_free_device_list(list, 1); // Can I do this here?
     */
+    
+    if(found) {
+        libusb_ref_device(found);     // Add a reference to the device so it doesn't get destroyed when we free_device_list
+    }
+    
+    libusb_free_device_list(list, 1);   // Free the device list with dereferencing. Shouldn't delete our device, since we ref'd it
     
     return found;
 }

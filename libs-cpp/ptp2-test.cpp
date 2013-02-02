@@ -10,7 +10,7 @@ int main(int argc, char * argv[]) {
     if (r < 0)
         return r;
         
-    libusb_device * dev = find_first_camera();
+    libusb_device * dev = CHDKCamera::find_first_camera();
     
     if(dev == NULL) {
         fprintf(stderr, "No camera found.\n");
