@@ -2,7 +2,7 @@
 //  Targeted at libusb version 0.1, since that's what pyptp2 uses
 #include "usb.h"
 
-class _CameraBase {
+class CameraBase {
     
     protected:
         bool _bulk_write(char * bytestr, int timeout);
@@ -10,8 +10,8 @@ class _CameraBase {
         bool _bulk_read(int size, int timeout);
         bool _bulk_read(int size);
     public:
-        _CameraBase();
-        _CameraBase(struct usb_device *dev);
+        CameraBase();
+        CameraBase(struct usb_device *dev);
         bool open(struct usb_device *dev);
         bool close();
         bool reopen();
@@ -26,17 +26,17 @@ class _CameraBase {
         struct ptp_response * ptp_transaction(struct ptp_command * command, int[] params, char * tx_data, bool receiving, timeout);
 };
 
-class PTPCamera : public _CameraBase {
+class PTPCamera : public CameraBase {
     public:
         PTPCamera() { printf("This class is not implemented.\n"); }
 };
 
-class CHDKCamera : public _CameraBase {
-    struct filebuf * __pack_file_for_upload(char * local_filename, char * remote_filename);
-    struct filebuf * __pack_file_for_upload(char * local_filename);
+class CHDKCamera : public CameraBase {
+    struct filebuf * _pack_file_for_upload(char * local_filename, char * remote_filename);
+    struct filebuf * _pack_file_for_upload(char * local_filename);
     public:
-        CHDKCamera() : _CameraBase() { ; }
-        CHDKCamera(struct usb_device *dev) : _CameraBase(dev) { ; }
+        CHDKCamera() : CameraBase() { ; }
+        CHDKCamera(struct usb_device *dev) : CameraBase(dev) { ; }
         float get_chdk_version(void);
         int check_script_status(void);
         struct script_return * execute_lua(char * script, bool block);
