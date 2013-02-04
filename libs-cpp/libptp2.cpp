@@ -77,6 +77,29 @@ int CameraBase::send_ptp_message(unsigned char * data, int size) {
     return this->send_ptp_message(data, size, 0);
 }
 
+char * CameraBase::recv_ptp_message(int timeout) {
+    // Determine size we need to read
+    char buffer[512];
+    this->_bulk_read(buffer, 512, timeout); // TODO: Error checking on response
+    unsigned int size;
+    size = (buffer[0] >> 24) | (buffer[1] >> 8 & 0x0000FF00) | (buffer[2] << 8 & 0x00FF0000) | (buffer[3] << 24); // TODO: Is this correct...?
+    
+    // Copy our first part into the output buffer -- so we can reuse buffer
+    char out_buf[size];
+    memcpy(out_buf, buffer, 512);
+    
+    if(size > 512) {    // We've already read 512 bytes
+        this->_bulk_read(buffer, size-512, timeout);
+        memcpy(&out_buf[512], buffer, size-512);    // Copy the rest in
+    }
+    
+    return out_buf;
+}
+
+char * CameraBase::recv_ptp_message() {
+    return this->recv_ptp_message(0);
+}
+
 PTPCamera::PTPCamera() {
     fprintf(stderr, "This class is not implemented.\n");
 }
