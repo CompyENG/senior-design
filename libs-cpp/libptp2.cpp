@@ -2,6 +2,7 @@
 //  Targeted at libusb version 1.0, since that's recommended
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <libusb-1.0/libusb.h>
 
@@ -80,7 +81,7 @@ int CameraBase::send_ptp_message(unsigned char * data, int size) {
 char * CameraBase::recv_ptp_message(int timeout) {
     // Determine size we need to read
     char buffer[512];
-    this->_bulk_read(buffer, 512, timeout); // TODO: Error checking on response
+    this->_bulk_read((unsigned char *)buffer, 512, timeout); // TODO: Error checking on response
     unsigned int size;
     size = (buffer[0] >> 24) | (buffer[1] >> 8 & 0x0000FF00) | (buffer[2] << 8 & 0x00FF0000) | (buffer[3] << 24); // TODO: Is this correct...?
     
@@ -89,7 +90,7 @@ char * CameraBase::recv_ptp_message(int timeout) {
     memcpy(out_buf, buffer, 512);
     
     if(size > 512) {    // We've already read 512 bytes
-        this->_bulk_read(buffer, size-512, timeout);
+        this->_bulk_read((unsigned char *)buffer, size-512, timeout);
         memcpy(&out_buf[512], buffer, size-512);    // Copy the rest in
     }
     

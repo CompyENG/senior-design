@@ -21,6 +21,13 @@ struct lv_data {
     int x;
 };
 
+struct param_container {
+    unsigned int length;
+    unsigned short type;
+    unsigned short code;
+    unsigned int transaction_id;
+};
+
 class CameraBase {
     private:
         libusb_device_handle *handle;
