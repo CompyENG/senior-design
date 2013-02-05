@@ -4,9 +4,16 @@
 #define LIBPTP2_ALREADY_OPEN    3
 #define LIBPTP2_NOT_OPEN        4
 
+// PTP Stuff -- TODO: enum
+#define PTP_CONTAINER_TYPE_COMMAND  1
+
 // Placeholder structs
 struct ptp_command {
-    int x;
+    uint32_t length;
+    uint16_t type;
+    uint16_t code;
+    uint32_t transaction_id;
+    char * payload;
 };
 
 struct ptp_response {
@@ -35,6 +42,7 @@ class CameraBase {
         struct libusb_interface_descriptor *intf;
         uint8_t ep_in;
         uint8_t ep_out;
+        uint32_t _transaction_id;
         void init();
     protected:
         int _bulk_write(unsigned char * bytestr, int length, int timeout);
@@ -53,7 +61,7 @@ class CameraBase {
         char * recv_ptp_message(int timeout);
         char * recv_ptp_message(void);
         // TODO: Should params be an int?
-        struct ptp_command * new_ptp_command(int op_code, int * params);
+        struct ptp_command * new_ptp_command(int op_code, char * params);
         struct ptp_command * new_ptp_command(int op_code);
         // TODO: Does C++ allow a different way of doing "default" parameter values?
         struct ptp_response * ptp_transaction(struct ptp_command * command, int * params, char * tx_data, bool receiving, int timeout);
