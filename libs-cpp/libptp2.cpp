@@ -94,6 +94,7 @@ char * CameraBase::recv_ptp_message(int timeout) {
         memcpy(&out_buf[512-4], buffer, size-512);    // Copy the rest in
     }
     
+    // TODO: Should probably return this via a point passed in to the function...
     return out_buf;
 }
 
