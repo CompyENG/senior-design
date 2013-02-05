@@ -9,16 +9,11 @@
 
 // Placeholder structs
 struct ptp_command {
-    union {
-        unsigned char * data;
-        struct ptp_command_data {
-            uint32_t length;
-            uint16_t type;
-            uint16_t code;
-            uint32_t transaction_id;
-            char * payload;
-        } d;
-    } p;
+    uint32_t length;
+    uint16_t type;
+    uint16_t code;
+    uint32_t transaction_id;
+    char * payload;
 };
 
 struct ptp_response {
@@ -72,6 +67,7 @@ class CameraBase {
         struct ptp_response * ptp_transaction(struct ptp_command * command, int * params, char * tx_data, bool receiving, int timeout);
         static libusb_device * find_first_camera();
         int get_usb_error();
+        unsigned char * pack_ptp_command(struct ptp_command * cmd);
 };
 
 class PTPCamera : public CameraBase {

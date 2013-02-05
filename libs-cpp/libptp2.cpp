@@ -48,7 +48,7 @@ int CameraBase::_bulk_write(unsigned char * bytestr, int length, int timeout) {
     }
     
     // TODO: Return the amount of data transferred? Check it here? What should we do if not enough was sent?
-    return libusb_bulk_transfer(this->handle, this->ep_in, bytestr, length, &transferred, timeout);
+    return libusb_bulk_transfer(this->handle, this->ep_out, bytestr, length, &transferred, timeout);
 }
 
 int CameraBase::_bulk_write(unsigned char * bytestr, int length) {
@@ -64,7 +64,7 @@ int CameraBase::_bulk_read(unsigned char * data_out, int size, int timeout) {
     }
     
     // TODO: Return the amount of data transferred? We might get less than we ask for, which means we need to tell the calling function?
-    return libusb_bulk_transfer(this->handle, this->ep_out, data_out, size, &transferred, timeout);
+    return libusb_bulk_transfer(this->handle, this->ep_in, data_out, size, &transferred, timeout);
 }
 
 int CameraBase::_bulk_read(unsigned char * data_out, int size) {
@@ -106,13 +106,26 @@ char * CameraBase::recv_ptp_message() {
 struct ptp_command * CameraBase::new_ptp_command(int op_code, char * params, int length) {
     struct ptp_command * cmd = (struct ptp_command *)malloc(sizeof(struct ptp_command));
     
-    cmd->p.d.type = PTP_CONTAINER_TYPE_COMMAND;
-    cmd->p.d.code = op_code;
-    cmd->p.d.transaction_id = this->_transaction_id;
-    cmd->p.d.payload = params;
-    cmd->p.d.length = sizeof(uint32_t)+sizeof(uint16_t)+sizeof(uint16_t)+sizeof(uint32_t)+length;
+    cmd->type = PTP_CONTAINER_TYPE_COMMAND;
+    cmd->code = op_code;
+    cmd->transaction_id = this->_transaction_id;
+    cmd->payload = params;
+    cmd->length = sizeof(uint32_t)+sizeof(uint16_t)+sizeof(uint16_t)+sizeof(uint32_t)+length;
+    
+    this->_transaction_id += 1;
     
     return cmd;
+}
+
+unsigned char * CameraBase::pack_ptp_command(struct ptp_command * cmd) {
+    unsigned char * packed = (unsigned char *)malloc(cmd->length);
+    memcpy(&(packed[0]), &(cmd->length), 4);  // Copy four bytes of length
+    memcpy(&(packed[4]), &(cmd->type), 2);    // Two bytes of type
+    memcpy(&(packed[6]), &(cmd->code), 2);    // Two bytes of code
+    memcpy(&(packed[8]), &(cmd->transaction_id), 4);    // Four bytes of transaction id
+    memcpy(&(packed[12]), cmd->payload, cmd->length-12);    // The rest of payload
+    
+    return packed;
 }
 
 PTPCamera::PTPCamera() {
@@ -163,12 +176,14 @@ bool CameraBase::open(libusb_device * dev) {
         if(this->intf) break;
     }
     
+    
     const struct libusb_endpoint_descriptor * endpoint;
     for(j = 0; j < this->intf->bNumEndpoints; j++) {
         endpoint = &(this->intf->endpoint[j]);
-        if(endpoint->bDescriptorType == LIBUSB_ENDPOINT_IN) {
+        if((endpoint->bEndpointAddress & LIBUSB_ENDPOINT_DIR_MASK == LIBUSB_ENDPOINT_IN) &&
+            (endpoint->bmAttributes & LIBUSB_TRANSFER_TYPE_MASK) == LIBUSB_TRANSFER_TYPE_BULK) {
             this->ep_in = endpoint->bEndpointAddress;
-        } else if(endpoint->bDescriptorType == LIBUSB_ENDPOINT_OUT) {
+        } else if((endpoint->bEndpointAddress & LIBUSB_ENDPOINT_DIR_MASK) == LIBUSB_ENDPOINT_OUT) {
             this->ep_out = endpoint->bEndpointAddress;
         }
     }
