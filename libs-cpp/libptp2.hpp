@@ -9,11 +9,16 @@
 
 // Placeholder structs
 struct ptp_command {
-    uint32_t length;
-    uint16_t type;
-    uint16_t code;
-    uint32_t transaction_id;
-    char * payload;
+    union {
+        unsigned char * data;
+        struct ptp_command_data {
+            uint32_t length;
+            uint16_t type;
+            uint16_t code;
+            uint32_t transaction_id;
+            char * payload;
+        } d;
+    } p;
 };
 
 struct ptp_response {
