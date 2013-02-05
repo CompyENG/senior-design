@@ -103,13 +103,13 @@ char * CameraBase::recv_ptp_message() {
     return this->recv_ptp_message(0);
 }
 
-struct ptp_command * new_ptp_command(int op_code, char * params, int length) {
-    struct ptp_command * cmd = malloc(sizeof(struct ptp_command));
+struct ptp_command * CameraBase::new_ptp_command(int op_code, char * params, int length) {
+    struct ptp_command * cmd = (struct ptp_command *)malloc(sizeof(struct ptp_command));
     
     cmd->type = PTP_CONTAINER_TYPE_COMMAND;
     cmd->code = op_code;
-    cmd->trasnaction_id = this->_transaction_id;
-    cmd->params = params;
+    cmd->transaction_id = this->_transaction_id;
+    cmd->payload = params;
     cmd->length = sizeof(uint32_t)+sizeof(uint16_t)+sizeof(uint16_t)+sizeof(uint32_t)+length;
     
     return cmd;
