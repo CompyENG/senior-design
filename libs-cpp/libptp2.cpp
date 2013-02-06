@@ -7,6 +7,7 @@
 #include <libusb-1.0/libusb.h>
 
 #include "libptp2.hpp"
+#include "live_view.h"
 
 // TODO: Implementation
 void CameraBase::init() {
@@ -272,6 +273,104 @@ uint32_t CHDKCamera::write_script_message(char * message, uint32_t script_id) {
     }
     
     return out;
+}
+
+// TODO: This function will need a *lot* of work.  For now, just a simple funciton to get live view. Other flags
+//  will essentially be ignored.  Eventually, let's write a CHDKLiveData class which can contain the output and
+//  provide useful functions to access it.
+uint8_t * CHDKCamera::get_live_view_data(bool liveview, bool overlay, bool palette) {
+    uint32_t flags = 0;
+    if(liveview) flags |= LV_TFR_VIEWPORT;
+    if(overlay)  flags |= LV_TFR_BITMAP;
+    if(palette)  flags |= LV_TFR_PALETTE;
+    
+    PTPContainer cmd(PTP_CONTAINER_TYPE_COMMAND, 0x9999);
+    cmd.add_param(CHDK_OP_GET_DISPLAY_DATA);
+    cmd.add_param(flags);
+    
+    PTPContainer out_resp, out_data;
+    this->ptp_transaction(&cmd, NULL, true, &out_resp, &out_data);
+    
+    // Live view data parsing test:
+    lv_data_header lv_head;
+    int payload_size;
+    unsigned char * payload = out_resp.get_payload(&payload_size);
+    memcpy(&lv_head, payload, sizeof(lv_data_header));
+    
+    lv_framebuffer_desc vp_head;
+    memcpy(&vp_head, payload + lv_head.vp_desc_start, sizeof(lv_framebuffer_desc));
+    
+    int vp_size;
+    unsigned char * vp_data;
+    vp_size = (vp_head.buffer_width*vp_head.visible_height*6)/4;
+    vp_data = (unsigned char *)malloc(vp_size);
+    memcpy(vp_data, payload + vp_head.data_start, vp_size);
+    
+    // Convert colorspace:
+    //int width = vp_head.visible_width;
+    //int height = vp_head.visible_height;
+    // TODO: Sort out inconsistencies in the width and height
+    // TODO: Probably make a new class to handle live view data
+    int width = 360;
+    int height = 480;
+    int outLen = vp_head.visible_width * vp_head.visible_height;
+    uint8_t * out = (uint8_t *) malloc(outLen*3);
+    
+    this->yuv_live_to_cd_rgb((char *)vp_data, width, height, 0, 0, width, height, 0, out, out+1, out+2);
+    
+    return out;
+}
+
+uint8_t CHDKCamera::clip_yuv(int v) {
+	if (v<0) return 0;
+	if (v>255) return 255;
+	return v;
+}
+
+uint8_t CHDKCamera::yuv_to_r(uint8_t y, int8_t v) {
+	return clip_yuv(((y<<12) +          v*5743 + 2048)>>12);
+	//return r[y][((int)v)+128];
+}
+
+uint8_t CHDKCamera::yuv_to_g(uint8_t y, int8_t u, int8_t v) {
+	return clip_yuv(((y<<12) - u*1411 - v*2925 + 2048)>>12);
+	//return g[y][((int)u)+128][((int)v)+128];
+}
+
+uint8_t CHDKCamera::yuv_to_b(uint8_t y, int8_t u) {
+	return clip_yuv(((y<<12) + u*7258          + 2048)>>12);
+	//return b[y][((int)u)+128];
+}
+
+void CHDKCamera::yuv_live_to_cd_rgb(const char *p_yuv, unsigned buf_width, unsigned buf_height, unsigned x_offset, unsigned y_offset, unsigned width, unsigned height, int skip, uint8_t *r, uint8_t *g, uint8_t *b) {
+    unsigned x,row;
+	unsigned row_inc = (buf_width*12)/8;
+	const char *p;
+	// start at end to flip for CD
+	const char *p_row = p_yuv + (y_offset * row_inc) + ((x_offset*12)/8);
+	for(row=0;row<height;row++,p_row += row_inc) {
+		for(x=0,p=p_row;x<width;x+=4,p+=6) {
+			*r = this->yuv_to_r(p[1],p[2]);
+			*g = this->yuv_to_g(p[1],p[0],p[2]);
+			*b = this->yuv_to_b(p[1],p[0]);
+
+			*r = this->yuv_to_r(p[3],p[2]);
+			*g = this->yuv_to_g(p[3],p[0],p[2]);
+			*b = this->yuv_to_b(p[3],p[0]);
+			r+=3;g+=3;b+=3;
+			if(!skip) {
+				// TODO it might be better to use the next pixels U and V values
+				*r = this->yuv_to_r(p[4],p[2]);
+				*g = this->yuv_to_g(p[4],p[0],p[2]);
+				*b = this->yuv_to_b(p[4],p[0]);
+
+				*r = this->yuv_to_r(p[5],p[2]);
+				*g = this->yuv_to_g(p[5],p[0],p[2]);
+				*b = this->yuv_to_b(p[5],p[0]);
+				r+=3;g+=3;b+=3;
+			}
+		}
+	}
 }
 
 uint32_t CHDKCamera::write_script_message(char * message) {

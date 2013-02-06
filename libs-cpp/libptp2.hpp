@@ -1,3 +1,6 @@
+#include "live_view.h"
+// TODO: Redo methods using default parameters as shown in get_live_view_data
+
 // Error codes
 #define LIBPTP2_CANNOT_CONNECT  1
 #define LIBPTP2_NO_DEVICE       2
@@ -142,6 +145,11 @@ class PTPCamera : public CameraBase {
 };
 
 class CHDKCamera : public CameraBase {
+    void yuv_live_to_cd_rgb(const char *p_yuv, unsigned buf_width, unsigned buf_height, unsigned x_offset, unsigned y_offset, unsigned width, unsigned height, int skip, uint8_t *r, uint8_t *g, uint8_t *b);
+    static uint8_t clip_yuv(int v);
+    static uint8_t yuv_to_r(uint8_t y, int8_t v);
+    static uint8_t yuv_to_g(uint8_t y, int8_t u, int8_t v);
+    static uint8_t yuv_to_b(uint8_t y, int8_t u);
     struct filebuf * _pack_file_for_upload(char * local_filename, char * remote_filename);
     struct filebuf * _pack_file_for_upload(char * local_filename);
     public:
@@ -156,6 +164,6 @@ class CHDKCamera : public CameraBase {
         uint32_t write_script_message(char * message);
         bool upload_file(char * local_filename, char * remote_filename, int timeout);
         char * download_file(char * filename, int timeout);
-        struct lv_data * get_live_view_data(bool liveview, bool overlay, bool palette);
+        uint8_t * get_live_view_data(bool liveview=true, bool overlay=false, bool palette=false);
         char * _wait_for_script_return(int timeout);
 };
