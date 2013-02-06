@@ -32,6 +32,16 @@ int main(int argc, char * argv[]) {
 		
 	try {
 	    CHDKCamera cam(dev);
+	    PTPCommand cmd = PTPCommand(PTP_CONTAINER_TYPE_COMMAND, 0x9999);
+	    cmd.add_param(7);   // CHDK Script command
+	    cmd.add_param(0);   // Lua script
+	    cmd.transaction_id = cam.get_and_increment_transaction_id();
+	    
+	    PTPCommand data = PTPCommand(PTP_CONTAINER_TYPE_DATA, 0x9999);
+	    data.set_payload((unsigned char *)"switch_mode_usb(1)", strlen("switch_mode_usb(1)")+1); // Compiler can take care of this optimization :/
+	    data.transaction_id = cmd.transaction_id;
+	    
+	    /*
 	    struct ptp_command * cmd = cam.new_ptp_command(0x9999, "\x07\x00\x00\x00\x00\x00\x00", 8);
         struct ptp_command * data = (struct ptp_command *)malloc(sizeof(struct ptp_command));
         data->code = cmd->code;
@@ -44,18 +54,22 @@ int main(int argc, char * argv[]) {
         
         unsigned char * send_cmd = cam.pack_ptp_command(cmd);
         unsigned char * send_data = cam.pack_ptp_command(data);
+        */
+        
+        unsigned char * send_cmd = cmd.pack();
+        unsigned char * send_data = data.pack();
         
         int i;
         printf("First char: %x\n", send_cmd[0]);
         printf("First transmission: \n");
-        for(i=0;i<cmd->length;i++) {
+        for(i=0;i<cmd.length;i++) {
             printf("%02x ", *(send_cmd+i));
         }
         printf("\n");
         
-        int a = cam.send_ptp_message(send_cmd, cmd->length);
+        int a = cam.send_ptp_message(send_cmd, cmd.length);
         printf("a = %d\n", a);
-        int b = cam.send_ptp_message(send_data, data->length);
+        int b = cam.send_ptp_message(send_data, data.length);
         
         printf("a = %d ; b = %d\n", a, b);
     } catch(int e) {
