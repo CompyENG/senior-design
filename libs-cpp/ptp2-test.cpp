@@ -47,6 +47,9 @@ int main(int argc, char * argv[]) {
 		
 	try {
 	    CHDKCamera cam(dev);
+		
+		cout << "CHDK Version: " << cam.get_chdk_version() << endl;
+		
 	    PTPContainer cmd(PTP_CONTAINER_TYPE_COMMAND, 0x9999);
 	    cmd.add_param(CHDK_OP_EXECUTE_SCRIPT);   // CHDK Script command
 	    cmd.add_param(CHDK_LANGUAGE_LUA);   // Lua script
@@ -54,7 +57,7 @@ int main(int argc, char * argv[]) {
 	    PTPContainer data(PTP_CONTAINER_TYPE_DATA, 0x9999);
 	    data.set_payload((unsigned char *)"switch_mode_usb(1)", strlen("switch_mode_usb(1)")+1); // Compiler can take care of this optimization :/
         
-	    cam.ptp_transaction(&cmd, &data, false, NULL);
+	    cam.ptp_transaction(&cmd, &data, false, NULL, NULL);
         
         //sleep(5);
         
@@ -64,7 +67,7 @@ int main(int argc, char * argv[]) {
         cmd2.add_param(CHDK_OP_GET_DISPLAY_DATA);
         cmd2.add_param(0x01);
         
-        cam.ptp_transaction(&cmd2, NULL, true, &read);
+        cam.ptp_transaction(&cmd2, NULL, true, NULL, &read);
         
         // Live view data parsing test:
         lv_data_header lv_head;
