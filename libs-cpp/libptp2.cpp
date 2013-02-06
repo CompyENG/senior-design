@@ -88,10 +88,10 @@ char * CameraBase::recv_ptp_message(int timeout) {
     char buffer[512];
     this->_bulk_read((unsigned char *)buffer, 512, timeout); // TODO: Error checking on response
     uint32_t size;
-    size = (buffer[0] >> 24) | (buffer[1] >> 8 & 0x0000FF00) | (buffer[2] << 8 & 0x00FF0000) | (buffer[3] << 24); // TODO: Is this correct...?
+    memcpy(&size, buffer, 4);   // The first four bytes of the buffer are the size
     
     // Copy our first part into the output buffer -- so we can reuse buffer
-    char out_buf[size];
+    char * out_buf = (char *)malloc(size);
     memcpy(out_buf, &(buffer[4]), 512-4);
     
     if(size > 512) {    // We've already read 512 bytes
