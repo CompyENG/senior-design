@@ -106,9 +106,10 @@ void CameraBase::recv_ptp_message(PTPContainer *out, int timeout) {
     // TODO: I think this needs to be a while loop, so we guarantee reading size bytes total
     if(size > 512) {    // We've already read 512 bytes
         printf("Attempting to read %d more bytes\n", size-512);
-        this->_bulk_read((unsigned char *)buffer, size-512, &read, timeout);
-        printf("Read... copying the rest in...\n");
-        memcpy(&out_buf[512], buffer, read);    // Copy the rest in
+        this->_bulk_read(&out_buf[512], size-512, &read, timeout);
+        //this->_bulk_read((unsigned char *)buffer, size-512, &read, timeout);
+        //printf("Read... copying the rest in...\n");
+        //memcpy(&out_buf[512], buffer, read);    // Copy the rest in
     }
     printf("Read an extra %d bytes\n", read);
     
