@@ -173,7 +173,7 @@ float CHDKCamera::get_chdk_version(void) {
 	cmd.add_param(CHDK_OP_VERSION);
 	
 	PTPContainer out_resp;
-	this->ptp_transaction(cmd, NULL, false, &out_resp, NULL);
+	this->ptp_transaction(&cmd, NULL, false, &out_resp, NULL);
 	// param 1 is four bytes of major version
 	// param 2 is four bytes of minor version
 	float out;
