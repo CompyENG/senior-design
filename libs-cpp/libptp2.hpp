@@ -94,6 +94,7 @@ class PTPContainer {
         unsigned char * pack();
         unsigned char * get_payload(int * size_out);  // This might end up being useful...
         uint32_t get_length();  // So we can get, but not set
+        void unpack(unsigned char * data);
 };
 
 class CameraBase {
@@ -123,8 +124,8 @@ class CameraBase {
         int send_ptp_message(PTPContainer cmd);
         int send_ptp_message(PTPContainer * cmd, int timeout);
         int send_ptp_message(PTPContainer * cmd);
-        PTPContainer recv_ptp_message(int timeout);
-        PTPContainer recv_ptp_message(void);
+        void recv_ptp_message(PTPContainer *out, int timeout);
+        void recv_ptp_message(PTPContainer *out);
         // TODO: Does C++ allow a different way of doing "default" parameter values?
         void ptp_transaction(PTPContainer *cmd, PTPContainer *data, bool receiving, PTPContainer *out, int timeout);
         void ptp_transaction(PTPContainer *cmd, PTPContainer *data, bool receiving, PTPContainer *out);

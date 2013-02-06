@@ -87,34 +87,42 @@ int CameraBase::send_ptp_message(PTPContainer * cmd) {
     return this->send_ptp_message(cmd, 0);
 }
 
-PTPContainer CameraBase::recv_ptp_message(int timeout) {
+void CameraBase::recv_ptp_message(PTPContainer *out, int timeout) {
     // Determine size we need to read
     unsigned char buffer[512];
     this->_bulk_read((unsigned char *)buffer, 512, timeout); // TODO: Error checking on response
     uint32_t size;
     memcpy(&size, buffer, 4);   // The first four bytes of the buffer are the size
     
+    printf("Read size: %d\n", size);
+    
     // Copy our first part into the output buffer -- so we can reuse buffer
     unsigned char * out_buf = (unsigned char *)malloc(size);
-    memcpy(out_buf, buffer, 512);
+    memcpy(out_buf, buffer, size);
     
     if(size > 512) {    // We've already read 512 bytes
         this->_bulk_read((unsigned char *)buffer, size-512, timeout);
         memcpy(&out_buf[512], buffer, size-512);    // Copy the rest in
     }
     
-    PTPContainer ret(out_buf);
+    if(out != NULL) {
+        out->unpack(out_buf);
+        printf("Packed in to out\n");
+    } else {
+        printf("Out is null?\n");
+    }
     
     free(out_buf);
-    
-    return ret;
 }
 
-PTPContainer CameraBase::recv_ptp_message() {
-    return this->recv_ptp_message(0);
+void CameraBase::recv_ptp_message(PTPContainer * out) {
+    return this->recv_ptp_message(out, 0);
 }
 
 void CameraBase::ptp_transaction(PTPContainer *cmd, PTPContainer *data, bool receiving, PTPContainer * out, int timeout) {
+    bool received_data = false;
+    bool received_resp = false;
+
     cmd->transaction_id = this->get_and_increment_transaction_id();
     this->send_ptp_message(cmd, timeout);
     
@@ -124,11 +132,20 @@ void CameraBase::ptp_transaction(PTPContainer *cmd, PTPContainer *data, bool rec
     }
     
     if(receiving) {
-        PTPContainer * ret;
-        *ret = this->recv_ptp_message(timeout);
-        if(out != NULL) {
-            *out = *ret;
+        this->recv_ptp_message(out, timeout);
+        if(out->type == PTP_CONTAINER_TYPE_DATA) {
+            received_data = true;
+            printf("Got data\n");
+        } else if(out->type == PTP_CONTAINER_TYPE_RESPONSE) {
+            received_resp = true;
+            printf("Got response\n");
         }
+    }
+    
+    if(!received_resp) {
+        // Read it anyway!
+        // TODO: We should return response AND data...
+        this->recv_ptp_message(NULL, timeout);
     }
 }
 
@@ -252,7 +269,9 @@ int CameraBase::get_usb_error() {
 }
 
 int CameraBase::get_and_increment_transaction_id() {
-    return (this->_transaction_id++);
+    uint32_t ret = this->_transaction_id;
+    this->_transaction_id = this->_transaction_id + 1;
+    return ret;
 }
 
 void PTPContainer::init() {
@@ -273,21 +292,7 @@ PTPContainer::PTPContainer(uint16_t type, uint16_t op_code) {
 
 PTPContainer::PTPContainer(unsigned char * data) {
     // This is essentially a .pack() function, in the form of a constructor
-    
-    // First four bytes are the length
-    memcpy(&this->length, data, 4);
-    // Next, container type
-    memcpy(&this->type, &(data[4]), 2);
-    // Copy over code
-    memcpy(&this->code, &(data[6]), 2);
-    // And transaction ID...
-    memcpy(&this->transaction_id, &(data[8]), 4);
-    
-    // Finally, copy over the payload
-    this->payload = (unsigned char *)malloc(this->length-12);
-    memcpy(this->payload, &(data[12]), this->length-12);
-    
-    // Since we copied all of this data, the data passed in can be free()d
+    this->unpack(data);
 }
 
 PTPContainer::~PTPContainer() {
@@ -354,3 +359,20 @@ uint32_t PTPContainer::get_length() {
     return length;
 }
 
+void PTPContainer::unpack(unsigned char * data) {
+    printf("Unpacking!\n");
+    // First four bytes are the length
+    memcpy(&this->length, data, 4);
+    // Next, container type
+    memcpy(&this->type, &(data[4]), 2);
+    // Copy over code
+    memcpy(&this->code, &(data[6]), 2);
+    // And transaction ID...
+    memcpy(&this->transaction_id, &(data[8]), 4);
+    
+    // Finally, copy over the payload
+    this->payload = (unsigned char *)malloc(this->length-12);
+    memcpy(this->payload, &(data[12]), this->length-12);
+    
+    // Since we copied all of this data, the data passed in can be free()d
+}
