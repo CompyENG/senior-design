@@ -153,7 +153,7 @@ void CameraBase::ptp_transaction(PTPContainer *cmd, PTPContainer *data, bool rec
 }
 
 void CameraBase::ptp_transaction(PTPContainer *cmd, PTPContainer *data, bool receiving, PTPContainer * out_resp, PTPContainer * out_data) {
-    return this->ptp_transaction(cmd, data, receiving, out, 0);
+    return this->ptp_transaction(cmd, data, receiving, out_resp, out_data, 0);
 }
 
 PTPCamera::PTPCamera() {
