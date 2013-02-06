@@ -164,6 +164,17 @@ class CHDKCamera : public CameraBase {
         uint32_t write_script_message(char * message);
         bool upload_file(char * local_filename, char * remote_filename, int timeout);
         char * download_file(char * filename, int timeout);
-        uint8_t * get_live_view_data(int * width, int * height, int * vp_size, bool liveview=true, bool overlay=false, bool palette=false);
+        uint8_t * get_live_view_data(LVData * data_out, bool liveview=true, bool overlay=false, bool palette=false);
         char * _wait_for_script_return(int timeout);
 };
+
+class LVData {
+    lv_data_header * vp_head;
+    lv_framebuffer_desc * fb_desc;
+    uint8_t * payload;
+    void init();
+    public:
+        LVData();
+        LVData(uint8_t * payload, int payload_size);
+        void read(uint8_t * payload, int payload_size);
+}
