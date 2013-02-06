@@ -278,7 +278,7 @@ uint32_t CHDKCamera::write_script_message(char * message, uint32_t script_id) {
 // TODO: This function will need a *lot* of work.  For now, just a simple funciton to get live view. Other flags
 //  will essentially be ignored.  Eventually, let's write a CHDKLiveData class which can contain the output and
 //  provide useful functions to access it.
-uint8_t * CHDKCamera::get_live_view_data(bool liveview, bool overlay, bool palette) {
+uint8_t * CHDKCamera::get_live_view_data(int * width, int * height, int * vp_size, bool liveview, bool overlay, bool palette) {
     uint32_t flags = 0;
     if(liveview) flags |= LV_TFR_VIEWPORT;
     if(overlay)  flags |= LV_TFR_BITMAP;
@@ -300,23 +300,22 @@ uint8_t * CHDKCamera::get_live_view_data(bool liveview, bool overlay, bool palet
     lv_framebuffer_desc vp_head;
     memcpy(&vp_head, payload + lv_head.vp_desc_start, sizeof(lv_framebuffer_desc));
     
-    int vp_size;
     unsigned char * vp_data;
-    vp_size = (vp_head.buffer_width*vp_head.visible_height*6)/4;
-    vp_data = (unsigned char *)malloc(vp_size);
-    memcpy(vp_data, payload + vp_head.data_start, vp_size);
+    *vp_size = (vp_head.buffer_width*vp_head.visible_height*6)/4;
+    vp_data = (unsigned char *)malloc(*vp_size);
+    memcpy(vp_data, payload + vp_head.data_start, *vp_size);
     
     // Convert colorspace:
     //int width = vp_head.visible_width;
     //int height = vp_head.visible_height;
     // TODO: Sort out inconsistencies in the width and height
     // TODO: Probably make a new class to handle live view data
-    int width = 360;
-    int height = 480;
+    *width = 360;
+    *height = 480;
     int outLen = vp_head.visible_width * vp_head.visible_height;
     uint8_t * out = (uint8_t *) malloc(outLen*3);
     
-    this->yuv_live_to_cd_rgb((char *)vp_data, width, height, 0, 0, width, height, 0, out, out+1, out+2);
+    this->yuv_live_to_cd_rgb((char *)vp_data, *width, *height, 0, 0, *width, *height, 0, out, out+1, out+2);
     
     return out;
 }
