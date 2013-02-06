@@ -107,9 +107,6 @@ void CameraBase::recv_ptp_message(PTPContainer *out, int timeout) {
     
     if(out != NULL) {
         out->unpack(out_buf);
-        printf("Packed in to out\n");
-    } else {
-        printf("Out is null?\n");
     }
     
     free(out_buf);
@@ -135,10 +132,8 @@ void CameraBase::ptp_transaction(PTPContainer *cmd, PTPContainer *data, bool rec
         this->recv_ptp_message(out, timeout);
         if(out->type == PTP_CONTAINER_TYPE_DATA) {
             received_data = true;
-            printf("Got data\n");
         } else if(out->type == PTP_CONTAINER_TYPE_RESPONSE) {
             received_resp = true;
-            printf("Got response\n");
         }
     }
     
@@ -360,7 +355,6 @@ uint32_t PTPContainer::get_length() {
 }
 
 void PTPContainer::unpack(unsigned char * data) {
-    printf("Unpacking!\n");
     // First four bytes are the length
     memcpy(&this->length, data, 4);
     // Next, container type
