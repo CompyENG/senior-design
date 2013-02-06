@@ -79,11 +79,11 @@ int CameraBase::send_ptp_message(unsigned char * data, int size) {
     return this->send_ptp_message(data, size, 0);
 }
 
-int CameraBase::send_ptp_message(PTPCommand cmd) {
+int CameraBase::send_ptp_message(PTPContainer cmd) {
     return this->send_ptp_message(cmd.pack(), cmd.get_length(), 0);
 }
 
-PTPCommand CameraBase::recv_ptp_message(int timeout) {
+PTPContainer CameraBase::recv_ptp_message(int timeout) {
     // Determine size we need to read
     unsigned char buffer[512];
     this->_bulk_read((unsigned char *)buffer, 512, timeout); // TODO: Error checking on response
@@ -99,14 +99,14 @@ PTPCommand CameraBase::recv_ptp_message(int timeout) {
         memcpy(&out_buf[512], buffer, size-512);    // Copy the rest in
     }
     
-    PTPCommand ret(out_buf);
+    PTPContainer ret(out_buf);
     
     free(out_buf);
     
     return ret;
 }
 
-PTPCommand CameraBase::recv_ptp_message() {
+PTPContainer CameraBase::recv_ptp_message() {
     return this->recv_ptp_message(0);
 }
 
@@ -229,23 +229,23 @@ int CameraBase::get_and_increment_transaction_id() {
     return (this->_transaction_id++);
 }
 
-void PTPCommand::init() {
+void PTPContainer::init() {
     this->length = this->default_length; // Length is at least the sum of the header parts
     this->payload = NULL;
 }
 
-PTPCommand::PTPCommand() {
+PTPContainer::PTPContainer() {
     // Not sure what I want to do here
     this->init();
 }
 
-PTPCommand::PTPCommand(uint16_t type, uint16_t op_code) {
+PTPContainer::PTPContainer(uint16_t type, uint16_t op_code) {
     this->init();
     this->type = type;
     this->code = op_code;
 }
 
-PTPCommand::PTPCommand(unsigned char * data) {
+PTPContainer::PTPContainer(unsigned char * data) {
     // This is essentially a .pack() function, in the form of a constructor
     
     // First four bytes are the length
@@ -264,11 +264,11 @@ PTPCommand::PTPCommand(unsigned char * data) {
     // Since we copied all of this data, the data passed in can be free()d
 }
 
-PTPCommand::~PTPCommand() {
+PTPContainer::~PTPContainer() {
     free(this->payload);    // Be sure to free up this memory
 }
 
-void PTPCommand::add_param(uint32_t param) {
+void PTPContainer::add_param(uint32_t param) {
     // Allocate new memory for the payload
     uint32_t old_length = (this->length)-(this->default_length);
     uint32_t new_length = this->length + sizeof(uint32_t);
@@ -286,7 +286,7 @@ void PTPCommand::add_param(uint32_t param) {
     this->length = new_length;
 }
 
-void PTPCommand::set_payload(unsigned char * payload, int payload_length) {
+void PTPContainer::set_payload(unsigned char * payload, int payload_length) {
     // Allocate new memory to copy the payload into
     // This way, we can ensure that we always want to free() the memory
     uint32_t new_length = this->default_length + payload_length;
@@ -302,7 +302,7 @@ void PTPCommand::set_payload(unsigned char * payload, int payload_length) {
     this->length = new_length;
 }
 
-unsigned char * PTPCommand::pack() {
+unsigned char * PTPContainer::pack() {
     unsigned char * packed = (unsigned char *)malloc(this->length);
     
     uint32_t header_size = (sizeof this->length)+(sizeof this->type)+(sizeof this->code)+(sizeof this->transaction_id);
@@ -316,12 +316,12 @@ unsigned char * PTPCommand::pack() {
     return packed;
 }
 
-unsigned char * PTPCommand::get_payload(int * size_out) {
+unsigned char * PTPContainer::get_payload(int * size_out) {
     *size_out = this->length - this->default_length;
     return payload;
 }
 
-uint32_t PTPCommand::get_length() {
+uint32_t PTPContainer::get_length() {
     return length;
 }
 

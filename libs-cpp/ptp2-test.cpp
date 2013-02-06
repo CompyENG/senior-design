@@ -32,12 +32,12 @@ int main(int argc, char * argv[]) {
 		
 	try {
 	    CHDKCamera cam(dev);
-	    PTPCommand cmd = PTPCommand(PTP_CONTAINER_TYPE_COMMAND, 0x9999);
-	    cmd.add_param(7);   // CHDK Script command
-	    cmd.add_param(0);   // Lua script
+	    PTPContainer cmd = PTPContainer(PTP_CONTAINER_TYPE_COMMAND, 0x9999);
+	    cmd.add_param(CHDK_OP_EXECUTE_SCRIPT);   // CHDK Script command
+	    cmd.add_param(CHDK_LANGUAGE_LUA);   // Lua script
 	    cmd.transaction_id = cam.get_and_increment_transaction_id();
 	    
-	    PTPCommand data = PTPCommand(PTP_CONTAINER_TYPE_DATA, 0x9999);
+	    PTPContainer data = PTPContainer(PTP_CONTAINER_TYPE_DATA, 0x9999);
 	    data.set_payload((unsigned char *)"switch_mode_usb(1)", strlen("switch_mode_usb(1)")+1); // Compiler can take care of this optimization :/
 	    data.transaction_id = cmd.transaction_id;
 	    

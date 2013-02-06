@@ -75,7 +75,7 @@ struct param_container {
 };
 
 // Have to define the helper class first, or I can't use it in CameraBase
-class PTPCommand {
+class PTPContainer {
     private:
         static const uint32_t default_length = sizeof(uint32_t)+sizeof(uint32_t)+sizeof(uint16_t)+sizeof(uint16_t);
         uint32_t length;
@@ -85,10 +85,10 @@ class PTPCommand {
         uint16_t type;
         uint16_t code;
         uint32_t transaction_id;    // We'll end up setting this externally
-        PTPCommand();
-        PTPCommand(uint16_t type, uint16_t op_code);
-        PTPCommand(unsigned char * data);
-        ~PTPCommand();
+        PTPContainer();
+        PTPContainer(uint16_t type, uint16_t op_code);
+        PTPContainer(unsigned char * data);
+        ~PTPContainer();
         void add_param(uint32_t param);
         void set_payload(unsigned char * payload, int payload_length);
         unsigned char * pack();
@@ -119,11 +119,11 @@ class CameraBase {
         bool reopen();
         int send_ptp_message(unsigned char * bytestr, int size, int timeout);
         int send_ptp_message(unsigned char * bytestr, int size);
-        int send_ptp_message(PTPCommand cmd);
-        PTPCommand recv_ptp_message(int timeout);
-        PTPCommand recv_ptp_message(void);
+        int send_ptp_message(PTPContainer cmd);
+        PTPContainer recv_ptp_message(int timeout);
+        PTPContainer recv_ptp_message(void);
         // TODO: Does C++ allow a different way of doing "default" parameter values?
-        PTPCommand ptp_transaction(PTPCommand cmd, bool receiving, int timeout);
+        PTPContainer ptp_transaction(PTPContainer cmd, bool receiving, int timeout);
         static libusb_device * find_first_camera();
         int get_usb_error();
         unsigned char * pack_ptp_command(struct ptp_command * cmd);
