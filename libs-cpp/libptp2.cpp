@@ -98,7 +98,11 @@ void CameraBase::recv_ptp_message(PTPContainer *out, int timeout) {
     
     // Copy our first part into the output buffer -- so we can reuse buffer
     unsigned char * out_buf = (unsigned char *)malloc(size);
-    memcpy(out_buf, buffer, size);
+    if(size < 512) {
+        memcpy(out_buf, buffer, size);
+    } else {
+        memcpy(out_buf, buffer, 512);
+    }
     
     if(size > 512) {    // We've already read 512 bytes
         this->_bulk_read((unsigned char *)buffer, size-512, timeout);
