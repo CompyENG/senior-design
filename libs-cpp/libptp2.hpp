@@ -121,6 +121,8 @@ class CameraBase {
         int send_ptp_message(unsigned char * bytestr, int size);
         int send_ptp_message(PTPContainer cmd, int timeout);
         int send_ptp_message(PTPContainer cmd);
+        int send_ptp_message(PTPContainer * cmd, int timeout);
+        int send_ptp_message(PTPContainer * cmd);
         PTPContainer recv_ptp_message(int timeout);
         PTPContainer recv_ptp_message(void);
         // TODO: Does C++ allow a different way of doing "default" parameter values?

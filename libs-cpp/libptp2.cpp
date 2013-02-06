@@ -79,11 +79,11 @@ int CameraBase::send_ptp_message(unsigned char * data, int size) {
     return this->send_ptp_message(data, size, 0);
 }
 
-int CameraBase::send_ptp_message(PTPContainer cmd, int timeout) {
-    return this->send_ptp_message(cmd.pack(), cmd.get_length(), timeout);
+int CameraBase::send_ptp_message(PTPContainer * cmd, int timeout) {
+    return this->send_ptp_message(cmd->pack(), cmd->get_length(), timeout);
 }
 
-int CameraBase::send_ptp_message(PTPContainer cmd) {
+int CameraBase::send_ptp_message(PTPContainer * cmd) {
     return this->send_ptp_message(cmd, 0);
 }
 
@@ -114,19 +114,19 @@ PTPContainer CameraBase::recv_ptp_message() {
     return this->recv_ptp_message(0);
 }
 
-void CameraBase::ptp_transaction(PTPContainer * cmd, PTPContainer * data, bool receiving, PTPContainer * out, int timeout) {
-    // Send command
-    this->send_ptp_message(*cmd, timeout);
+void CameraBase::ptp_transaction(PTPContainer *cmd, PTPContainer *data, bool receiving, PTPContainer * out, int timeout) {
+    this->send_ptp_message(cmd, timeout);
     
-    // If we have data
     if(data != NULL) {
-        this->send_ptp_message(*data, timeout);
+        this->send_ptp_message(data, timeout);
     }
     
     if(receiving) {
-        *out = this->recv_ptp_message(timeout);
-    } else {
-        *out = NULL;
+        PTPContainer * ret;
+        *ret = this->recv_ptp_message(timeout);
+        if(out != NULL) {
+            *out = *ret;
+        }
     }
 }
 
@@ -289,7 +289,10 @@ PTPContainer::PTPContainer(unsigned char * data) {
 }
 
 PTPContainer::~PTPContainer() {
-    free(this->payload);    // Be sure to free up this memory
+    if(this->payload != NULL) {
+        free(this->payload);    // Be sure to free up this memory
+        this->payload = NULL;
+    }
 }
 
 void PTPContainer::add_param(uint32_t param) {
