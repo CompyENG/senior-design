@@ -79,6 +79,10 @@ int CameraBase::send_ptp_message(unsigned char * data, int size) {
     return this->send_ptp_message(data, size, 0);
 }
 
+int CameraBase::send_ptp_message(PTPCommand cmd) {
+    return this->send_ptp_message(cmd.pack(), cmd.get_length(), 0);
+}
+
 char * CameraBase::recv_ptp_message(int timeout) {
     // Determine size we need to read
     char buffer[512];

@@ -74,6 +74,27 @@ struct param_container {
     unsigned int transaction_id;
 };
 
+// Have to define the helper class first, or I can't use it in CameraBase
+class PTPCommand {
+    private:
+        static const uint32_t default_length = sizeof(uint32_t)+sizeof(uint32_t)+sizeof(uint16_t)+sizeof(uint16_t);
+        uint32_t length;
+        unsigned char * payload;    // We'll deal with this completely internally
+        void init();
+    public:
+        uint16_t type;
+        uint16_t code;
+        uint32_t transaction_id;    // We'll end up setting this externally
+        PTPCommand();
+        PTPCommand(uint16_t type, uint16_t op_code);
+        ~PTPCommand();
+        void add_param(uint32_t param);
+        void set_payload(unsigned char * payload, int payload_length);
+        unsigned char * pack();
+        unsigned char * get_payload(int * size_out);  // This might end up being useful...
+        uint32_t get_length();  // So we can get, but not set
+};
+
 class CameraBase {
     private:
         libusb_device_handle *handle;
@@ -97,6 +118,7 @@ class CameraBase {
         bool reopen();
         int send_ptp_message(unsigned char * bytestr, int size, int timeout);
         int send_ptp_message(unsigned char * bytestr, int size);
+        int send_ptp_message(PTPCommand cmd);
         char * recv_ptp_message(int timeout);
         char * recv_ptp_message(void);
         // TODO: Should params be an int?
@@ -132,24 +154,4 @@ class CHDKCamera : public CameraBase {
         char * download_file(char * filename, int timeout);
         struct lv_data * get_live_view_data(bool liveview, bool overlay, bool palette);
         char * _wait_for_script_return(int timeout);
-};
-
-class PTPCommand {
-    private:
-        static const uint32_t default_length = sizeof(uint32_t)+sizeof(uint32_t)+sizeof(uint16_t)+sizeof(uint16_t);
-        uint32_t length;
-        unsigned char * payload;    // We'll deal with this completely internally
-        void init();
-    public:
-        uint16_t type;
-        uint16_t code;
-        uint32_t transaction_id;    // We'll end up setting this externally
-        PTPCommand();
-        PTPCommand(uint16_t type, uint16_t op_code);
-        ~PTPCommand();
-        void add_param(uint32_t param);
-        void set_payload(unsigned char * payload, int payload_length);
-        unsigned char * pack();
-        unsigned char * get_payload(int * size_out);  // This might end up being useful...
-        uint32_t get_length();  // So we can get, but not set
 };
