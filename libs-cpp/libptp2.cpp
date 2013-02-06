@@ -115,9 +115,11 @@ PTPContainer CameraBase::recv_ptp_message() {
 }
 
 void CameraBase::ptp_transaction(PTPContainer *cmd, PTPContainer *data, bool receiving, PTPContainer * out, int timeout) {
+    cmd->transaction_id = this->get_and_increment_transaction_id();
     this->send_ptp_message(cmd, timeout);
     
     if(data != NULL) {
+        data->transaction_id = cmd->transaction_id;
         this->send_ptp_message(data, timeout);
     }
     
