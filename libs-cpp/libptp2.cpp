@@ -110,31 +110,6 @@ PTPCommand CameraBase::recv_ptp_message() {
     return this->recv_ptp_message(0);
 }
 
-struct ptp_command * CameraBase::new_ptp_command(int op_code, char * params, int length) {
-    struct ptp_command * cmd = (struct ptp_command *)malloc(sizeof(struct ptp_command));
-    
-    cmd->type = PTP_CONTAINER_TYPE_COMMAND;
-    cmd->code = op_code;
-    cmd->transaction_id = this->_transaction_id;
-    cmd->payload = params;
-    cmd->length = sizeof(uint32_t)+sizeof(uint16_t)+sizeof(uint16_t)+sizeof(uint32_t)+length;
-    
-    this->_transaction_id += 1;
-    
-    return cmd;
-}
-
-unsigned char * CameraBase::pack_ptp_command(struct ptp_command * cmd) {
-    unsigned char * packed = (unsigned char *)malloc(cmd->length);
-    memcpy(&(packed[0]), &(cmd->length), 4);  // Copy four bytes of length
-    memcpy(&(packed[4]), &(cmd->type), 2);    // Two bytes of type
-    memcpy(&(packed[6]), &(cmd->code), 2);    // Two bytes of code
-    memcpy(&(packed[8]), &(cmd->transaction_id), 4);    // Four bytes of transaction id
-    memcpy(&(packed[12]), cmd->payload, cmd->length-12);    // The rest of payload
-    
-    return packed;
-}
-
 PTPCamera::PTPCamera() {
     fprintf(stderr, "This class is not implemented.\n");
 }

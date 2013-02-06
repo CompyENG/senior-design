@@ -122,9 +122,6 @@ class CameraBase {
         int send_ptp_message(PTPCommand cmd);
         PTPCommand recv_ptp_message(int timeout);
         PTPCommand recv_ptp_message(void);
-        // TODO: Should params be an int?
-        struct ptp_command * new_ptp_command(int op_code, char * params, int length);
-        struct ptp_command * new_ptp_command(int op_code);
         // TODO: Does C++ allow a different way of doing "default" parameter values?
         struct ptp_response * ptp_transaction(struct ptp_command * command, int * params, char * tx_data, bool receiving, int timeout);
         static libusb_device * find_first_camera();
