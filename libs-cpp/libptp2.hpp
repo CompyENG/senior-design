@@ -110,8 +110,8 @@ class CameraBase {
     protected:
         int _bulk_write(unsigned char * bytestr, int length, int timeout);
         int _bulk_write(unsigned char * bytestr, int length);
-        int _bulk_read(unsigned char * data_out, int size, int timeout);
-        int _bulk_read(unsigned char * data_out, int size);
+        int _bulk_read(unsigned char * data_out, int size, int * transferred, int timeout);
+        int _bulk_read(unsigned char * data_out, int size, int * transferred);
     public:
         CameraBase();
         CameraBase(libusb_device *dev);

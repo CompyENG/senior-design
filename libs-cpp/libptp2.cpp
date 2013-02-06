@@ -55,20 +55,18 @@ int CameraBase::_bulk_write(unsigned char * bytestr, int length) {
     return this->_bulk_write(bytestr, length, 0);
 }
 
-int CameraBase::_bulk_read(unsigned char * data_out, int size, int timeout) {
-    int transferred;
-    
+int CameraBase::_bulk_read(unsigned char * data_out, int size, int * transferred, int timeout) {
     if(this->handle == NULL) {
         throw LIBPTP2_NOT_OPEN;
         return 0;
     }
     
     // TODO: Return the amount of data transferred? We might get less than we ask for, which means we need to tell the calling function?
-    return libusb_bulk_transfer(this->handle, this->ep_in, data_out, size, &transferred, timeout);
+    return libusb_bulk_transfer(this->handle, this->ep_in, data_out, size, transferred, timeout);
 }
 
-int CameraBase::_bulk_read(unsigned char * data_out, int size) {
-    return this->_bulk_read(data_out, size, 0);
+int CameraBase::_bulk_read(unsigned char * data_out, int size, int * transferred) {
+    return this->_bulk_read(data_out, size, transferred, 0);
 }
 
 int CameraBase::send_ptp_message(unsigned char * data, int size, int timeout) {
@@ -90,7 +88,8 @@ int CameraBase::send_ptp_message(PTPContainer * cmd) {
 void CameraBase::recv_ptp_message(PTPContainer *out, int timeout) {
     // Determine size we need to read
     unsigned char buffer[512];
-    this->_bulk_read((unsigned char *)buffer, 512, timeout); // TODO: Error checking on response
+    int read;
+    this->_bulk_read((unsigned char *)buffer, 512, &read, timeout); // TODO: Error checking on response
     uint32_t size;
     memcpy(&size, buffer, 4);   // The first four bytes of the buffer are the size
     
@@ -104,10 +103,14 @@ void CameraBase::recv_ptp_message(PTPContainer *out, int timeout) {
         memcpy(out_buf, buffer, 512);
     }
     
+    // TODO: I think this needs to be a while loop, so we guarantee reading size bytes total
     if(size > 512) {    // We've already read 512 bytes
-        this->_bulk_read((unsigned char *)buffer, size-512, timeout);
-        memcpy(&out_buf[512], buffer, size-512);    // Copy the rest in
+        printf("Attempting to read %d more bytes\n", size-512);
+        this->_bulk_read((unsigned char *)buffer, size-512, &read, timeout);
+        printf("Read... copying the rest in...\n");
+        memcpy(&out_buf[512], buffer, read);    // Copy the rest in
     }
+    printf("Read an extra %d bytes\n", read);
     
     if(out != NULL) {
         out->unpack(out_buf);
