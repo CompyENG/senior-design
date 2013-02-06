@@ -68,6 +68,7 @@ class CameraBase {
         static libusb_device * find_first_camera();
         int get_usb_error();
         unsigned char * pack_ptp_command(struct ptp_command * cmd);
+        int get_and_increment_transaction_id(); // What a beautiful name for a function
 };
 
 class PTPCamera : public CameraBase {
@@ -92,4 +93,22 @@ class CHDKCamera : public CameraBase {
         char * download_file(char * filename, int timeout);
         struct lv_data * get_live_view_data(bool liveview, bool overlay, bool palette);
         char * _wait_for_script_return(int timeout);
+};
+
+class PTPCommand {
+    private:
+        static const int default_length = sizeof(uint32_t)+sizeof(uint32_t)+sizeof(uint16_t)+sizeof(uint16_t);
+        unsigned char * payload;    // We'll deal with this completely internally
+        void init();
+    public:
+        uint32_t length;
+        uint16_t type;
+        uint16_t code;
+        uint32_t transaction_id;    // We'll end up setting this externally
+        PTPCommand();
+        PTPCommand(uint16_t type, uint16_t op_code);
+        ~PTPCommand();
+        void add_param(uint32_t param);
+        void set_payload(unsigned char * payload, int payload_length);
+        unsigned char * pack();
 };

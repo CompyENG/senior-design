@@ -243,3 +243,75 @@ int CameraBase::get_usb_error() {
     return this->usb_error;
 }
 
+int CameraBase::get_and_increment_transaction_id() {
+    return (this->_transaction_id++);
+}
+
+void PTPCommand::init() {
+    this->length = this->default_length; // Length is at least the sum of the header parts
+    this->payload = NULL;
+}
+
+PTPCommand::PTPCommand() {
+    // Not sure what I want to do here
+    this->init();
+}
+
+PTPCommand::PTPCommand(uint16_t type, uint16_t op_code) {
+    this->init();
+    this->type = type;
+    this->code = op_code;
+}
+
+PTPCommand::~PTPCommand() {
+    free(this->payload);    // Be sure to free up this memory
+}
+
+void PTPCommand::add_param(uint32_t param) {
+    // Allocate new memory for the payload
+    uint32_t old_length = (this->length)-(this->default_length);
+    uint32_t new_length = old_length + sizeof(uint32_t);
+    unsigned char * new_payload = (unsigned char *)malloc(new_length);
+    
+    // Copy old payload into new payload
+    memcpy(new_payload, payload, old_length);
+    // Copy new data into new payload
+    memcpy(&(payload[old_length]), &param, sizeof(uint32_t));
+    // Free up old payload memory
+    free(this->payload);
+    // Change payload pointer to new payload
+    this->payload = new_payload;
+    // Update length
+    this->length = new_length;
+}
+
+void PTPCommand::set_payload(unsigned char * payload, int payload_length) {
+    // Allocate new memory to copy the payload into
+    // This way, we can ensure that we always want to free() the memory
+    uint32_t new_length = this->default_length + payload_length;
+    unsigned char * new_payload = (unsigned char *)malloc(payload_length);
+    
+    // Copy the payload over
+    memcpy(new_payload, payload, payload_length);
+    // Free up the old payload
+    free(this->payload);
+    // Change payload pointer to new payload
+    this->payload = new_payload;
+    // Update length
+    this->length = new_length;
+}
+
+unsigned char * PTPCommand::pack() {
+    unsigned char * packed = (unsigned char *)malloc(this->length);
+    
+    uint32_t header_size = (sizeof this->length)+(sizeof this->type)+(sizeof this->code)+(sizeof this->transaction_id);
+    
+    memcpy(&(packed[0]), &(this->length), sizeof this->length);  // Copy length
+    memcpy(&(packed[4]), &(this->type), sizeof this->type);    // Type
+    memcpy(&(packed[6]), &(this->code), sizeof this->code);    // Two bytes of code
+    memcpy(&(packed[8]), &(this->transaction_id), sizeof this->transaction_id);    // Four bytes of transaction id
+    memcpy(&(packed[12]), this->payload, this->length-header_size);    // The rest of payload
+    
+    return packed;
+}
+
