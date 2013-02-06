@@ -131,13 +131,13 @@ void CameraBase::ptp_transaction(PTPContainer *cmd, PTPContainer *data, bool rec
     if(receiving) {
 		PTPContainer out;
         this->recv_ptp_message(&out, timeout);
-        if(out->type == PTP_CONTAINER_TYPE_DATA) {
+        if(out.type == PTP_CONTAINER_TYPE_DATA) {
             received_data = true;
 			// TODO: It occurs to me that pack() and unpack() might be inefficient. Let's try to find a better way to do this.
 			if(out_data != NULL) {
 				out_data->unpack(out.pack());
 			}
-        } else if(out->type == PTP_CONTAINER_TYPE_RESPONSE) {
+        } else if(out.type == PTP_CONTAINER_TYPE_RESPONSE) {
             received_resp = true;
 			if(out_resp != NULL) {
 				out_resp->unpack(out.pack());
