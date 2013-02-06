@@ -99,10 +99,10 @@ class CHDKCamera : public CameraBase {
 class PTPCommand {
     private:
         static const uint32_t default_length = sizeof(uint32_t)+sizeof(uint32_t)+sizeof(uint16_t)+sizeof(uint16_t);
+        uint32_t length;
         unsigned char * payload;    // We'll deal with this completely internally
         void init();
     public:
-        uint32_t length;
         uint16_t type;
         uint16_t code;
         uint32_t transaction_id;    // We'll end up setting this externally
@@ -112,4 +112,6 @@ class PTPCommand {
         void add_param(uint32_t param);
         void set_payload(unsigned char * payload, int payload_length);
         unsigned char * pack();
+        unsigned char * get_payload(int * size_out);  // This might end up being useful...
+        uint32_t get_length();  // So we can get, but not set
 };

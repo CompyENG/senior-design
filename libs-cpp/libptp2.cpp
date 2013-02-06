@@ -315,3 +315,12 @@ unsigned char * PTPCommand::pack() {
     return packed;
 }
 
+unsigned char * PTPCommand::get_payload(int * size_out) {
+    *size_out = this->length - this->default_length;
+    return payload;
+}
+
+uint32_t PTPCommand::get_length() {
+    return length;
+}
+
