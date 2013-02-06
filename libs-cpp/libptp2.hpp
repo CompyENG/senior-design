@@ -124,8 +124,8 @@ class CameraBase {
         PTPContainer recv_ptp_message(int timeout);
         PTPContainer recv_ptp_message(void);
         // TODO: Does C++ allow a different way of doing "default" parameter values?
-        PTPContainer ptp_transaction(PTPContainer *cmd, PTPContainer *data, bool receiving, int timeout);
-        PTPContainer ptp_transaction(PTPContainer *cmd, PTPContainer *data, bool receiving);
+        void ptp_transaction(PTPContainer *cmd, PTPContainer *data, bool receiving, PTPContainer *out, int timeout);
+        void ptp_transaction(PTPContainer *cmd, PTPContainer *data, bool receiving, PTPContainer *out);
         static libusb_device * find_first_camera();
         int get_usb_error();
         unsigned char * pack_ptp_command(struct ptp_command * cmd);
