@@ -274,9 +274,7 @@ void PTPCommand::add_param(uint32_t param) {
     unsigned char * new_payload = (unsigned char *)malloc(new_length);
     
     // Copy old payload into new payload
-    if(old_length > 0) {
-        memcpy(new_payload, this->payload, old_length);
-    }
+    memcpy(new_payload, this->payload, old_length);
     // Copy new data into new payload
     memcpy(&(new_payload[old_length]), &param, sizeof(uint32_t));
     // Free up old payload memory
