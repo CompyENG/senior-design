@@ -62,14 +62,14 @@ int main(int argc, char * argv[]) {
         int i;
         printf("First char: %x\n", send_cmd[0]);
         printf("First transmission: \n");
-        for(i=0;i<cmd.length;i++) {
+        for(i=0;i<cmd.get_length();i++) {
             printf("%02x ", *(send_cmd+i));
         }
         printf("\n");
         
-        int a = cam.send_ptp_message(send_cmd, cmd.length);
+        int a = cam.send_ptp_message(send_cmd, cmd.get_length());
         printf("a = %d\n", a);
-        int b = cam.send_ptp_message(send_data, data.length);
+        int b = cam.send_ptp_message(send_data, data.get_length());
         
         printf("a = %d ; b = %d\n", a, b);
     } catch(int e) {
