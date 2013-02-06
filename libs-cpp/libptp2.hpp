@@ -148,9 +148,9 @@ class CHDKCamera : public CameraBase {
         CHDKCamera();
         CHDKCamera(libusb_device *dev);
         float get_chdk_version(void);
-        int check_script_status(void);
-        struct script_return * execute_lua(char * script, bool block);
-        struct script_return * execute_lua(char * script);
+        uint32_t check_script_status(void);
+        uint32_t execute_lua(char * script, uint32_t * script_error, bool block);
+        uint32_t execute_lua(char * script, uint32_t * script_error);
         struct ptp_response * read_script_message(void);
         bool write_script_message(char * message, int script_id);
         bool write_script_message(char * message);

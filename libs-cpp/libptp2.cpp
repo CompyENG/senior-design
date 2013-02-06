@@ -185,9 +185,61 @@ float CHDKCamera::get_chdk_version(void) {
 		memcpy(&major, payload, 4);	// Copy first four bytes into major
 		memcpy(&minor, payload+4, 4);	// Copy next four bytes into minor
 	}
-	
-	out = major + minor/10.0;
+    
+	out = major + minor/10.0;   // This assumes that the minor version is one digit long
 	return out;
+}
+
+uint32_t CHDKCamera::check_script_status(void) {
+    PTPContainer cmd(PTP_CONTAINER_TYPE_COMMAND, 0x9999);
+    cmd.add_param(CHDK_OP_SCRIPT_STATUS);
+    
+    PTPContainer out_resp;
+    this->ptp_transaction(&cmd, NULL, false, &out_resp, NULL);
+    
+    uint32_t out = -1;
+    unsigned char * payload;
+    int payload_size;
+    payload = out_resp.get_payload(&payload_size);
+    if(payload_size >= 4) { // Need at least 4 bytes in the payload
+        memcpy(&out, payload, 4);
+    }
+    
+    return out;
+}
+
+uint32_t CHDKCamera::execute_lua(char * script, uint32_t * script_error, bool block) {
+    PTPContainer cmd(PTP_CONTAINER_TYPE_COMMAND, 0x9999);
+    cmd.add_param(CHDK_OP_EXECUTE_SCRIPT);
+    cmd.add_param(CHDK_LANGUAGE_LUA);
+    
+    PTPContainer data(PTP_CONTAINER_TYPE_DATA, 0x9999);
+    data.set_payload((unsigned char *)script, strlen(script)+1);
+    
+    PTPContainer out_resp;
+    this->ptp_transaction(&cmd, &data, false, &out_resp, NULL);
+    
+    uint32_t out = -1;
+    unsigned char * payload;
+    int payload_size;
+    payload = out_resp.get_payload(&payload_size);
+    
+    if(block) {
+        printf("TODO: Blocking code");
+    } else {
+        if(payload_size >= 8) { // Need at least 8 bytes in the payload
+            memcpy(&out, payload, 4);
+            if(script_error != NULL) {
+                memcpy(script_error, payload+4, 4);
+            }
+        }
+    }
+    
+    return out;
+}
+
+uint32_t CHDKCamera::execute_lua(char * script, uint32_t * script_error) {
+    return this->execute_lua(script, script_error, false);
 }
 
 bool CameraBase::open(libusb_device * dev) {
