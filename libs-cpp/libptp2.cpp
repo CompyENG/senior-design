@@ -270,13 +270,15 @@ PTPCommand::~PTPCommand() {
 void PTPCommand::add_param(uint32_t param) {
     // Allocate new memory for the payload
     uint32_t old_length = (this->length)-(this->default_length);
-    uint32_t new_length = old_length + sizeof(uint32_t);
+    uint32_t new_length = this->length + sizeof(uint32_t);
     unsigned char * new_payload = (unsigned char *)malloc(new_length);
     
     // Copy old payload into new payload
-    memcpy(new_payload, payload, old_length);
+    if(old_length > 0) {
+        memcpy(new_payload, this->payload, old_length);
+    }
     // Copy new data into new payload
-    memcpy(&(payload[old_length]), &param, sizeof(uint32_t));
+    memcpy(&(new_payload[old_length]), &param, sizeof(uint32_t));
     // Free up old payload memory
     free(this->payload);
     // Change payload pointer to new payload

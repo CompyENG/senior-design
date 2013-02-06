@@ -6,6 +6,7 @@
 
 // PTP Stuff -- TODO: enum
 #define PTP_CONTAINER_TYPE_COMMAND  1
+#define PTP_CONTAINER_TYPE_DATA     2
 
 // Placeholder structs
 struct ptp_command {
@@ -97,7 +98,7 @@ class CHDKCamera : public CameraBase {
 
 class PTPCommand {
     private:
-        static const int default_length = sizeof(uint32_t)+sizeof(uint32_t)+sizeof(uint16_t)+sizeof(uint16_t);
+        static const uint32_t default_length = sizeof(uint32_t)+sizeof(uint32_t)+sizeof(uint16_t)+sizeof(uint16_t);
         unsigned char * payload;    // We'll deal with this completely internally
         void init();
     public:
