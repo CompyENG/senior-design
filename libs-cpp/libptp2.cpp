@@ -79,8 +79,12 @@ int CameraBase::send_ptp_message(unsigned char * data, int size) {
     return this->send_ptp_message(data, size, 0);
 }
 
+int CameraBase::send_ptp_message(PTPContainer cmd, int timeout) {
+    return this->send_ptp_message(cmd.pack(), cmd.get_length(), timeout);
+}
+
 int CameraBase::send_ptp_message(PTPContainer cmd) {
-    return this->send_ptp_message(cmd.pack(), cmd.get_length(), 0);
+    return this->send_ptp_message(cmd, 0);
 }
 
 PTPContainer CameraBase::recv_ptp_message(int timeout) {
@@ -108,6 +112,26 @@ PTPContainer CameraBase::recv_ptp_message(int timeout) {
 
 PTPContainer CameraBase::recv_ptp_message() {
     return this->recv_ptp_message(0);
+}
+
+PTPContainer CameraBase::ptp_transaction(PTPContainer * cmd, PTPContainer * data, bool receiving, int timeout) {
+    // Send command
+    this->send_ptp_message(*cmd, timeout);
+    
+    // If we have data
+    if(data != NULL) {
+        this->send_ptp_message(*data, timeout);
+    }
+    
+    if(receiving) {
+        return this->recv_ptp_message(timeout);
+    } else {
+        return NULL;
+    }
+}
+
+PTPContainer CameraBase::ptp_transaction(PTPContainer *cmd, PTPContainer *data, bool receiving) {
+    return this->ptp_transaction(cmd, data, receiving, 0);
 }
 
 PTPCamera::PTPCamera() {
