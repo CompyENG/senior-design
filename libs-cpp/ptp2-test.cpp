@@ -50,16 +50,13 @@ int main(int argc, char * argv[]) {
 		
 		cout << "CHDK Version: " << cam.get_chdk_version() << endl;
 		
-	    PTPContainer cmd(PTP_CONTAINER_TYPE_COMMAND, 0x9999);
-	    cmd.add_param(CHDK_OP_EXECUTE_SCRIPT);   // CHDK Script command
-	    cmd.add_param(CHDK_LANGUAGE_LUA);   // Lua script
-	    
-	    PTPContainer data(PTP_CONTAINER_TYPE_DATA, 0x9999);
-	    data.set_payload((unsigned char *)"switch_mode_usb(1)", strlen("switch_mode_usb(1)")+1); // Compiler can take care of this optimization :/
+        cam.execute_lua("switch_mode_usb(1)", NULL);
         
-	    cam.ptp_transaction(&cmd, &data, false, NULL, NULL);
+        sleep(5);
         
-        //sleep(5);
+        cam.execute_lua("shoot()", NULL);
+        
+        sleep(2);
         
         PTPContainer read = PTPContainer();
         
@@ -95,9 +92,9 @@ int main(int argc, char * argv[]) {
         int width = 360;
         int height = 480;
         int outLen = vp_head.visible_width * vp_head.visible_height;
-	    uint8_t * out = (uint8_t *) malloc(outLen*3);
-	    
-	    yuv_live_to_cd_rgb((char *)vp_data, width, height, 0, 0, width, height, 0, out, out+1, out+2);
+        uint8_t * out = (uint8_t *) malloc(outLen*3);
+        
+        yuv_live_to_cd_rgb((char *)vp_data, width, height, 0, 0, width, height, 0, out, out+1, out+2);
         
         ofstream img_file;
         img_file.open("lv-test-cpp.ppm", ios::out | ios::binary);
