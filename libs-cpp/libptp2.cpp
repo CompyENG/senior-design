@@ -186,7 +186,7 @@ float CHDKCamera::get_chdk_version(void) {
 		memcpy(&minor, payload+4, 4);	// Copy next four bytes into minor
 	}
 	
-	out = major + minor/10;
+	out = major + minor/10.0;
 	return out;
 }
 
