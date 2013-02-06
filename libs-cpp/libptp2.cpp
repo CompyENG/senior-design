@@ -242,6 +242,42 @@ uint32_t CHDKCamera::execute_lua(char * script, uint32_t * script_error) {
     return this->execute_lua(script, script_error, false);
 }
 
+void CHDKCamera::read_script_message(PTPContainer * out_resp, PTPContainer * out_data) {
+    PTPContainer cmd(PTP_CONTAINER_TYPE_COMMAND, 0x9999);
+    cmd.add_param(CHDK_OP_READ_SCRIPT_MSG);
+    cmd.add_param(CHDK_LANGUAGE_LUA);
+    
+    this->ptp_transaction(&cmd, NULL, true, out_resp, out_data);
+    // We'll just let the caller deal with the data
+}
+
+uint32_t CHDKCamera::write_script_message(char * message, uint32_t script_id) {
+    PTPContainer cmd(PTP_CONTAINER_TYPE_COMMAND, 0x9999);
+    cmd.add_param(CHDK_OP_WRITE_SCRIPT_MSG);
+    cmd.add_param(script_id);
+    
+    PTPContainer data(PTP_CONTAINER_TYPE_DATA, 0x9999);
+    data.set_payload((unsigned char *)message, strlen(message)+1);
+    
+    PTPContainer out_resp;
+    this->ptp_transaction(&cmd, &data, false, &out_resp, NULL);
+    
+    uint32_t out = -1;
+    unsigned char * payload;
+    int payload_size;
+    payload = out_resp.get_payload(&payload_size);
+    
+    if(payload_size >= 4) { // Need four bytes of uint32_t response
+        memcpy(&out, payload, 4);
+    }
+    
+    return out;
+}
+
+uint32_t CHDKCamera::write_script_message(char * message) {
+    return this->write_script_message(message, 0);
+}
+
 bool CameraBase::open(libusb_device * dev) {
     if(this->handle != NULL) {  // Handle will be non-null if the device is already open
         throw LIBPTP2_ALREADY_OPEN;

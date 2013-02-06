@@ -151,9 +151,9 @@ class CHDKCamera : public CameraBase {
         uint32_t check_script_status(void);
         uint32_t execute_lua(char * script, uint32_t * script_error, bool block);
         uint32_t execute_lua(char * script, uint32_t * script_error);
-        struct ptp_response * read_script_message(void);
-        bool write_script_message(char * message, int script_id);
-        bool write_script_message(char * message);
+        void read_script_message(PTPContainer * out_data, PTPContainer * out_resp);
+        uint32_t write_script_message(char * message, uint32_t script_id);
+        uint32_t write_script_message(char * message);
         bool upload_file(char * local_filename, char * remote_filename, int timeout);
         char * download_file(char * filename, int timeout);
         struct lv_data * get_live_view_data(bool liveview, bool overlay, bool palette);
