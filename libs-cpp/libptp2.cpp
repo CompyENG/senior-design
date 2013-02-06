@@ -294,7 +294,7 @@ uint8_t * CHDKCamera::get_live_view_data(int * width, int * height, int * vp_siz
     // Live view data parsing test:
     lv_data_header lv_head;
     int payload_size;
-    unsigned char * payload = out_resp.get_payload(&payload_size);
+    unsigned char * payload = out_data.get_payload(&payload_size);
     memcpy(&lv_head, payload, sizeof(lv_data_header));
     
     lv_framebuffer_desc vp_head;
