@@ -169,7 +169,7 @@ CHDKCamera::CHDKCamera(libusb_device * dev) : CameraBase(dev) {
 }
 
 float CHDKCamera::get_chdk_version(void) {
-	PTPConatiner cmd(PTP_CONTAINER_TYPE_COMMAND, 0x9999);
+	PTPContainer cmd(PTP_CONTAINER_TYPE_COMMAND, 0x9999);
 	cmd.add_param(CHDK_OP_VERSION);
 	
 	PTPContainer out_resp;
@@ -177,13 +177,13 @@ float CHDKCamera::get_chdk_version(void) {
 	// param 1 is four bytes of major version
 	// param 2 is four bytes of minor version
 	float out;
-	char * payload;
+	unsigned char * payload;
 	int payload_size;
 	uint32_t major = 0, minor = 0;
 	payload = out_resp.get_payload(&payload_size);
 	if(payload_size >= 8) { // Need at least 8 bytes in the payload
-		memcpy(major, payload, 4);	// Copy first four bytes into major
-		memcpy(minor, payload+4, 4);	// Copy next four bytes into minor
+		memcpy(&major, payload, 4);	// Copy first four bytes into major
+		memcpy(&minor, payload+4, 4);	// Copy next four bytes into minor
 	}
 	
 	out = major + minor/10;
