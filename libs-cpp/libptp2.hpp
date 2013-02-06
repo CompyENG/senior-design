@@ -87,6 +87,7 @@ class PTPCommand {
         uint32_t transaction_id;    // We'll end up setting this externally
         PTPCommand();
         PTPCommand(uint16_t type, uint16_t op_code);
+        PTPCommand(unsigned char * data);
         ~PTPCommand();
         void add_param(uint32_t param);
         void set_payload(unsigned char * payload, int payload_length);
@@ -119,8 +120,8 @@ class CameraBase {
         int send_ptp_message(unsigned char * bytestr, int size, int timeout);
         int send_ptp_message(unsigned char * bytestr, int size);
         int send_ptp_message(PTPCommand cmd);
-        char * recv_ptp_message(int timeout);
-        char * recv_ptp_message(void);
+        PTPCommand recv_ptp_message(int timeout);
+        PTPCommand recv_ptp_message(void);
         // TODO: Should params be an int?
         struct ptp_command * new_ptp_command(int op_code, char * params, int length);
         struct ptp_command * new_ptp_command(int op_code);

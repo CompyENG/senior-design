@@ -83,27 +83,30 @@ int CameraBase::send_ptp_message(PTPCommand cmd) {
     return this->send_ptp_message(cmd.pack(), cmd.get_length(), 0);
 }
 
-char * CameraBase::recv_ptp_message(int timeout) {
+PTPCommand CameraBase::recv_ptp_message(int timeout) {
     // Determine size we need to read
-    char buffer[512];
+    unsigned char buffer[512];
     this->_bulk_read((unsigned char *)buffer, 512, timeout); // TODO: Error checking on response
     uint32_t size;
     memcpy(&size, buffer, 4);   // The first four bytes of the buffer are the size
     
     // Copy our first part into the output buffer -- so we can reuse buffer
-    char * out_buf = (char *)malloc(size);
-    memcpy(out_buf, &(buffer[4]), 512-4);
+    unsigned char * out_buf = (unsigned char *)malloc(size);
+    memcpy(out_buf, buffer, 512);
     
     if(size > 512) {    // We've already read 512 bytes
         this->_bulk_read((unsigned char *)buffer, size-512, timeout);
-        memcpy(&out_buf[512-4], buffer, size-512);    // Copy the rest in
+        memcpy(&out_buf[512], buffer, size-512);    // Copy the rest in
     }
     
-    // TODO: Should probably return this via a point passed in to the function...
-    return out_buf;
+    PTPCommand ret(out_buf);
+    
+    free(out_buf);
+    
+    return ret;
 }
 
-char * CameraBase::recv_ptp_message() {
+PTPCommand CameraBase::recv_ptp_message() {
     return this->recv_ptp_message(0);
 }
 
@@ -265,6 +268,25 @@ PTPCommand::PTPCommand(uint16_t type, uint16_t op_code) {
     this->init();
     this->type = type;
     this->code = op_code;
+}
+
+PTPCommand::PTPCommand(unsigned char * data) {
+    // This is essentially a .pack() function, in the form of a constructor
+    
+    // First four bytes are the length
+    memcpy(&this->length, data, 4);
+    // Next, container type
+    memcpy(&this->type, &(data[4]), 2);
+    // Copy over code
+    memcpy(&this->code, &(data[6]), 2);
+    // And transaction ID...
+    memcpy(&this->transaction_id, &(data[8]), 4);
+    
+    // Finally, copy over the payload
+    this->payload = (unsigned char *)malloc(this->length-12);
+    memcpy(this->payload, &(data[12]), this->length-12);
+    
+    // Since we copied all of this data, the data passed in can be free()d
 }
 
 PTPCommand::~PTPCommand() {
