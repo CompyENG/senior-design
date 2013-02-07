@@ -51,34 +51,6 @@ enum CHDK_SCRIPT_LANGAUGE {
     CHDK_LANGUAGE_UBASIC
 };
 
-// Placeholder structs
-struct ptp_command {
-    uint32_t length;
-    uint16_t type;
-    uint16_t code;
-    uint32_t transaction_id;
-    char * payload;
-};
-
-struct ptp_response {
-    int x;
-};
-
-struct script_return {
-    int x;
-};
-
-struct lv_data {
-    int x;
-};
-
-struct param_container {
-    unsigned int length;
-    unsigned short type;
-    unsigned short code;
-    unsigned int transaction_id;
-};
-
 // Have to define the helper class first, or I can't use it in CameraBase
 class PTPContainer {
     private:
