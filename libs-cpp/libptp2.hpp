@@ -114,6 +114,7 @@ class LVData {
         ~LVData();
         void read(uint8_t * payload, int payload_size);
         uint8_t * get_rgb(int * out_size, int * out_width, int * out_height, bool skip=false);    // Some cameras don't require skip
+        float get_lv_version();
 };
 
 class CameraBase {

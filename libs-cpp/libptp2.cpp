@@ -629,3 +629,9 @@ void LVData::yuv_to_rgb(uint8_t **dest, uint8_t y, int8_t u, int8_t v) {
     *((*dest)++) = LVData::clip(((y<<12) - u*1411 - v*2925 + 2048)>>12);
     *((*dest)++) = LVData::clip(((y<<12) + u*7258          + 2048)>>12);
 }
+
+float LVData::get_lv_version() {
+    if(this->vp_head == NULL) return -1;
+    
+    return this->vp_head->version_major + this->vp_head->version_minor / 10.0;
+}
