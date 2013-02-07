@@ -52,10 +52,6 @@ int CameraBase::_bulk_write(unsigned char * bytestr, int length, int timeout) {
     return libusb_bulk_transfer(this->handle, this->ep_out, bytestr, length, &transferred, timeout);
 }
 
-int CameraBase::_bulk_write(unsigned char * bytestr, int length) {
-    return this->_bulk_write(bytestr, length, 0);
-}
-
 int CameraBase::_bulk_read(unsigned char * data_out, int size, int * transferred, int timeout) {
     if(this->handle == NULL) {
         throw LIBPTP2_NOT_OPEN;
@@ -66,24 +62,8 @@ int CameraBase::_bulk_read(unsigned char * data_out, int size, int * transferred
     return libusb_bulk_transfer(this->handle, this->ep_in, data_out, size, transferred, timeout);
 }
 
-int CameraBase::_bulk_read(unsigned char * data_out, int size, int * transferred) {
-    return this->_bulk_read(data_out, size, transferred, 0);
-}
-
-int CameraBase::send_ptp_message(unsigned char * data, int size, int timeout) {
-    return this->_bulk_write(data, size, timeout);
-}
-
-int CameraBase::send_ptp_message(unsigned char * data, int size) {
-    return this->send_ptp_message(data, size, 0);
-}
-
 int CameraBase::send_ptp_message(PTPContainer * cmd, int timeout) {
-    return this->send_ptp_message(cmd->pack(), cmd->get_length(), timeout);
-}
-
-int CameraBase::send_ptp_message(PTPContainer * cmd) {
-    return this->send_ptp_message(cmd, 0);
+    return this->_bulk_write(cmd->pack(), cmd->get_length(), timeout);
 }
 
 void CameraBase::recv_ptp_message(PTPContainer *out, int timeout) {
@@ -115,10 +95,6 @@ void CameraBase::recv_ptp_message(PTPContainer *out, int timeout) {
     }
     
     free(out_buf);
-}
-
-void CameraBase::recv_ptp_message(PTPContainer * out) {
-    return this->recv_ptp_message(out, 0);
 }
 
 void CameraBase::ptp_transaction(PTPContainer *cmd, PTPContainer *data, bool receiving, PTPContainer * out_resp, PTPContainer * out_data, int timeout) {
@@ -155,10 +131,6 @@ void CameraBase::ptp_transaction(PTPContainer *cmd, PTPContainer *data, bool rec
         // TODO: We should return response AND data...
         this->recv_ptp_message(out_resp, timeout);
     }
-}
-
-void CameraBase::ptp_transaction(PTPContainer *cmd, PTPContainer *data, bool receiving, PTPContainer * out_resp, PTPContainer * out_data) {
-    return this->ptp_transaction(cmd, data, receiving, out_resp, out_data, 0);
 }
 
 PTPCamera::PTPCamera() {
@@ -243,10 +215,6 @@ uint32_t CHDKCamera::execute_lua(char * script, uint32_t * script_error, bool bl
     return out;
 }
 
-uint32_t CHDKCamera::execute_lua(char * script, uint32_t * script_error) {
-    return this->execute_lua(script, script_error, false);
-}
-
 void CHDKCamera::read_script_message(PTPContainer * out_resp, PTPContainer * out_data) {
     PTPContainer cmd(PTP_CONTAINER_TYPE_COMMAND, 0x9999);
     cmd.add_param(CHDK_OP_READ_SCRIPT_MSG);
@@ -279,9 +247,6 @@ uint32_t CHDKCamera::write_script_message(char * message, uint32_t script_id) {
     return out;
 }
 
-// TODO: This function will need a *lot* of work.  For now, just a simple funciton to get live view. Other flags
-//  will essentially be ignored.  Eventually, let's write a CHDKLiveData class which can contain the output and
-//  provide useful functions to access it.
 void CHDKCamera::get_live_view_data(LVData * data_out, bool liveview, bool overlay, bool palette) {
     uint32_t flags = 0;
     if(liveview) flags |= LV_TFR_VIEWPORT;
@@ -299,40 +264,6 @@ void CHDKCamera::get_live_view_data(LVData * data_out, bool liveview, bool overl
     unsigned char * payload = out_data.get_payload(&payload_size);
     
     data_out->read(payload, payload_size);    // The LVData class will completely handle the LV data
-    
-    /*
-    // Live view data parsing test:
-    lv_data_header lv_head;
-    int payload_size;
-    unsigned char * payload = out_data.get_payload(&payload_size);
-    memcpy(&lv_head, payload, sizeof(lv_data_header));
-    
-    lv_framebuffer_desc vp_head;
-    memcpy(&vp_head, payload + lv_head.vp_desc_start, sizeof(lv_framebuffer_desc));
-    
-    unsigned char * vp_data;
-    *vp_size = (vp_head.buffer_width*vp_head.visible_height*6)/4;
-    vp_data = (unsigned char *)malloc(*vp_size);
-    memcpy(vp_data, payload + vp_head.data_start, *vp_size);
-    
-    
-    
-    // Convert colorspace:
-    //int width = vp_head.visible_width;
-    //int height = vp_head.visible_height;
-    // TODO: Sort out inconsistencies in the width and height
-    // TODO: Probably make a new class to handle live view data
-    *width = 360;
-    *height = 480;
-    int outLen = vp_head.visible_width * vp_head.visible_height;
-    uint8_t * out = (uint8_t *) malloc(outLen*3);
-    
-    return out;
-    */
-}
-
-uint32_t CHDKCamera::write_script_message(char * message) {
-    return this->write_script_message(message, 0);
 }
 
 bool CameraBase::open(libusb_device * dev) {

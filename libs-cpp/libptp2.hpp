@@ -100,10 +100,8 @@ class CameraBase {
         uint32_t _transaction_id;
         void init();
     protected:
-        int _bulk_write(unsigned char * bytestr, int length, int timeout);
-        int _bulk_write(unsigned char * bytestr, int length);
-        int _bulk_read(unsigned char * data_out, int size, int * transferred, int timeout);
-        int _bulk_read(unsigned char * data_out, int size, int * transferred);
+        int _bulk_write(unsigned char * bytestr, int length, int timeout=0);
+        int _bulk_read(unsigned char * data_out, int size, int * transferred, int timeout=0);
     public:
         CameraBase();
         CameraBase(libusb_device *dev);
@@ -111,17 +109,9 @@ class CameraBase {
         bool open(libusb_device *dev);
         bool close();
         bool reopen();
-        int send_ptp_message(unsigned char * bytestr, int size, int timeout);
-        int send_ptp_message(unsigned char * bytestr, int size);
-        int send_ptp_message(PTPContainer cmd, int timeout);
-        int send_ptp_message(PTPContainer cmd);
-        int send_ptp_message(PTPContainer * cmd, int timeout);
-        int send_ptp_message(PTPContainer * cmd);
-        void recv_ptp_message(PTPContainer *out, int timeout);
-        void recv_ptp_message(PTPContainer *out);
-        // TODO: Does C++ allow a different way of doing "default" parameter values?
-        void ptp_transaction(PTPContainer *cmd, PTPContainer *data, bool receiving, PTPContainer *out_resp, PTPContainer *out_data, int timeout);
-        void ptp_transaction(PTPContainer *cmd, PTPContainer *data, bool receiving, PTPContainer *out_resp, PTPContainer *out_data);
+        int send_ptp_message(PTPContainer * cmd, int timeout=0);
+        void recv_ptp_message(PTPContainer *out, int timeout=0);
+        void ptp_transaction(PTPContainer *cmd, PTPContainer *data, bool receiving, PTPContainer *out_resp, PTPContainer *out_data, int timeout=0);
         static libusb_device * find_first_camera();
         int get_usb_error();
         int get_and_increment_transaction_id(); // What a beautiful name for a function
@@ -133,11 +123,6 @@ class PTPCamera : public CameraBase {
 };
 
 class CHDKCamera : public CameraBase {
-    void yuv_live_to_cd_rgb(const char *p_yuv, unsigned buf_width, unsigned buf_height, unsigned x_offset, unsigned y_offset, unsigned width, unsigned height, int skip, uint8_t *r, uint8_t *g, uint8_t *b);
-    static uint8_t clip_yuv(int v);
-    static uint8_t yuv_to_r(uint8_t y, int8_t v);
-    static uint8_t yuv_to_g(uint8_t y, int8_t u, int8_t v);
-    static uint8_t yuv_to_b(uint8_t y, int8_t u);
     struct filebuf * _pack_file_for_upload(char * local_filename, char * remote_filename);
     struct filebuf * _pack_file_for_upload(char * local_filename);
     public:
@@ -145,11 +130,9 @@ class CHDKCamera : public CameraBase {
         CHDKCamera(libusb_device *dev);
         float get_chdk_version(void);
         uint32_t check_script_status(void);
-        uint32_t execute_lua(char * script, uint32_t * script_error, bool block);
-        uint32_t execute_lua(char * script, uint32_t * script_error);
+        uint32_t execute_lua(char * script, uint32_t * script_error, bool block=false);
         void read_script_message(PTPContainer * out_data, PTPContainer * out_resp);
-        uint32_t write_script_message(char * message, uint32_t script_id);
-        uint32_t write_script_message(char * message);
+        uint32_t write_script_message(char * message, uint32_t script_id=0);
         bool upload_file(char * local_filename, char * remote_filename, int timeout);
         char * download_file(char * filename, int timeout);
         void get_live_view_data(LVData * data_out, bool liveview=true, bool overlay=false, bool palette=false);
