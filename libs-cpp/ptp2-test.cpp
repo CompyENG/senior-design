@@ -26,21 +26,21 @@ int main(int argc, char * argv[]) {
     }
     
     struct libusb_device_descriptor desc;
-	r = libusb_get_device_descriptor(dev, &desc);
-	if (r < 0) {
-		fprintf(stderr, "failed to get device descriptor");
-		return -1;
-	}
+    r = libusb_get_device_descriptor(dev, &desc);
+    if (r < 0) {
+        fprintf(stderr, "failed to get device descriptor");
+        return -1;
+    }
 
-	printf("%04x:%04x (bus %d, device %d)\n",
-		desc.idVendor, desc.idProduct,
-		libusb_get_bus_number(dev), libusb_get_device_address(dev));
-		
-	try {
-	    CHDKCamera cam(dev);
-		
-		cout << "CHDK Version: " << cam.get_chdk_version() << endl;
-		
+    printf("%04x:%04x (bus %d, device %d)\n",
+        desc.idVendor, desc.idProduct,
+        libusb_get_bus_number(dev), libusb_get_device_address(dev));
+        
+    try {
+        CHDKCamera cam(dev);
+        
+        cout << "CHDK Version: " << cam.get_chdk_version() << endl;
+        
         cam.execute_lua("switch_mode_usb(1)", NULL);
         
         sleep(1);
@@ -71,7 +71,7 @@ int main(int argc, char * argv[]) {
         return -1;
     }
     
-	libusb_exit(NULL);
-	
-	return 0;
+    libusb_exit(NULL);
+    
+    return 0;
 }

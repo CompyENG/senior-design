@@ -130,19 +130,19 @@ void CameraBase::ptp_transaction(PTPContainer *cmd, PTPContainer *data, bool rec
     }
     
     if(receiving) {
-		PTPContainer out;
+        PTPContainer out;
         this->recv_ptp_message(&out, timeout);
         if(out.type == PTP_CONTAINER_TYPE_DATA) {
             received_data = true;
-			// TODO: It occurs to me that pack() and unpack() might be inefficient. Let's try to find a better way to do this.
-			if(out_data != NULL) {
-				out_data->unpack(out.pack());
-			}
+            // TODO: It occurs to me that pack() and unpack() might be inefficient. Let's try to find a better way to do this.
+            if(out_data != NULL) {
+                out_data->unpack(out.pack());
+            }
         } else if(out.type == PTP_CONTAINER_TYPE_RESPONSE) {
             received_resp = true;
-			if(out_resp != NULL) {
-				out_resp->unpack(out.pack());
-			}
+            if(out_resp != NULL) {
+                out_resp->unpack(out.pack());
+            }
         }
     }
     
@@ -170,25 +170,25 @@ CHDKCamera::CHDKCamera(libusb_device * dev) : CameraBase(dev) {
 }
 
 float CHDKCamera::get_chdk_version(void) {
-	PTPContainer cmd(PTP_CONTAINER_TYPE_COMMAND, 0x9999);
-	cmd.add_param(CHDK_OP_VERSION);
-	
-	PTPContainer out_resp;
-	this->ptp_transaction(&cmd, NULL, false, &out_resp, NULL);
-	// param 1 is four bytes of major version
-	// param 2 is four bytes of minor version
-	float out;
-	unsigned char * payload;
-	int payload_size;
-	uint32_t major = 0, minor = 0;
-	payload = out_resp.get_payload(&payload_size);
-	if(payload_size >= 8) { // Need at least 8 bytes in the payload
-		memcpy(&major, payload, 4);	// Copy first four bytes into major
-		memcpy(&minor, payload+4, 4);	// Copy next four bytes into minor
-	}
+    PTPContainer cmd(PTP_CONTAINER_TYPE_COMMAND, 0x9999);
+    cmd.add_param(CHDK_OP_VERSION);
     
-	out = major + minor/10.0;   // This assumes that the minor version is one digit long
-	return out;
+    PTPContainer out_resp;
+    this->ptp_transaction(&cmd, NULL, false, &out_resp, NULL);
+    // param 1 is four bytes of major version
+    // param 2 is four bytes of minor version
+    float out;
+    unsigned char * payload;
+    int payload_size;
+    uint32_t major = 0, minor = 0;
+    payload = out_resp.get_payload(&payload_size);
+    if(payload_size >= 8) { // Need at least 8 bytes in the payload
+        memcpy(&major, payload, 4);    // Copy first four bytes into major
+        memcpy(&minor, payload+4, 4);    // Copy next four bytes into minor
+    }
+    
+    out = major + minor/10.0;   // This assumes that the minor version is one digit long
+    return out;
 }
 
 uint32_t CHDKCamera::check_script_status(void) {
