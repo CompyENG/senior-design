@@ -89,9 +89,15 @@ int CameraBase::send_ptp_message(PTPContainer * cmd) {
 void CameraBase::recv_ptp_message(PTPContainer *out, int timeout) {
     // Determine size we need to read
     unsigned char buffer[512];
-    int read;
+    int read = 0;
     this->_bulk_read((unsigned char *)buffer, 512, &read, timeout); // TODO: Error checking on response
-    uint32_t size;
+    uint32_t size = 0;
+    if(read < 4) {
+        // If we actually read less than four bytes, we can't copy four bytes out of the buffer.
+        // Also, something went very, very wrong
+        throw LIBPTP2_CANNOT_RECV;
+        return;
+    }
     memcpy(&size, buffer, 4);   // The first four bytes of the buffer are the size
     
     // Copy our first part into the output buffer -- so we can reuse buffer
@@ -100,9 +106,7 @@ void CameraBase::recv_ptp_message(PTPContainer *out, int timeout) {
         memcpy(out_buf, buffer, size);
     } else {
         memcpy(out_buf, buffer, 512);
-    }
-    
-    if(size > 512) {    // We've already read 512 bytes
+        // We've already read 512 bytes... read the rest!
         this->_bulk_read(&out_buf[512], size-512, &read, timeout);
     }
     

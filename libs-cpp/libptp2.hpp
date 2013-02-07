@@ -6,6 +6,7 @@
 #define LIBPTP2_NO_DEVICE       2
 #define LIBPTP2_ALREADY_OPEN    3
 #define LIBPTP2_NOT_OPEN        4
+#define LIBPTP2_CANNOT_RECV     5
 
 // PTP Stuff
 enum PTP_CONTAINER_TYPE {
