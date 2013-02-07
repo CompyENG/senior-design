@@ -124,7 +124,6 @@ class CameraBase {
         void ptp_transaction(PTPContainer *cmd, PTPContainer *data, bool receiving, PTPContainer *out_resp, PTPContainer *out_data);
         static libusb_device * find_first_camera();
         int get_usb_error();
-        unsigned char * pack_ptp_command(struct ptp_command * cmd);
         int get_and_increment_transaction_id(); // What a beautiful name for a function
 };
 
