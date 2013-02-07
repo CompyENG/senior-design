@@ -1,5 +1,4 @@
 #include "live_view.h"
-// TODO: Redo methods using default parameters as shown in get_live_view_data
 
 // Error codes
 #define LIBPTP2_CANNOT_CONNECT  1
@@ -86,6 +85,7 @@ class LVData {
         LVData(uint8_t * payload, int payload_size);
         ~LVData();
         void read(uint8_t * payload, int payload_size);
+        void read(PTPContainer * container);    // Could this make life easier?
         uint8_t * get_rgb(int * out_size, int * out_width, int * out_height, bool skip=false);    // Some cameras don't require skip
         float get_lv_version();
 };

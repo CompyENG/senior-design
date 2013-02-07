@@ -513,6 +513,17 @@ void LVData::read(uint8_t * payload, int payload_size) {
     memcpy(this->fb_desc, this->payload+this->vp_head->vp_desc_start, sizeof(lv_framebuffer_desc));
 }
 
+void LVData::read(PTPContainer * container) {
+    int payload_size;
+    unsigned char * payload;
+    
+    payload = container->get_payload(&payload_size);
+    
+    this->read(payload, payload_size);
+    
+    free(payload);
+}
+
 // TODO: get_rgb function
 uint8_t * LVData::get_rgb(int * out_size, int * out_width, int * out_height, bool skip) {
     uint8_t * vp_data;
