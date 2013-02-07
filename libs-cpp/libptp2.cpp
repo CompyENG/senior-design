@@ -551,6 +551,12 @@ LVData::LVData(uint8_t * payload, int payload_size) {
     this->read(payload, payload_size);
 }
 
+LVData::~LVData() {
+    free(this->vp_head);
+    free(this->fb_desc);
+    free(this->payload);
+}
+
 void LVData::init() {
     this->vp_head = (lv_data_header *)malloc(sizeof(lv_data_header));
     this->fb_desc = (lv_framebuffer_desc *)malloc(sizeof(lv_framebuffer_desc));
@@ -573,4 +579,53 @@ void LVData::read(uint8_t * payload, int payload_size) {
 }
 
 // TODO: get_rgb function
+uint8_t * LVData::get_rgb(int * out_size, int * out_width, int * out_height, bool skip) {
+    uint8_t * vp_data;
+    int vp_size;
+    vp_size = (this->fb_desc->buffer_width * this->fb_desc->visible_height * 12) / 8; // 12 bpp
+    vp_data = (uint8_t *)malloc(vp_size);   // Allocate memory for YUV data
+    memcpy(vp_data, this->payload + this->fb_desc->data_start, vp_size);    // Copy YUV data into vp_data
     
+    int par = skip?2:1; // If skip, par = 2 ; else, par = 1
+    
+    *out_width = this->fb_desc->visible_width / par;           // Vertical width of output
+    unsigned int dispsize = *out_width * (this->fb_desc->visible_height);   // Size of output
+    *out_size = dispsize*3;                                             // RGB output size
+    
+    uint8_t * out = (uint8_t *)malloc(*out_size);  // Allocate space for RGB output
+    
+    uint8_t * prgb_data = out; // Pointer we can manipulate to transverse RGB output memory
+    uint8_t * p_yuv = vp_data; // Pointer we can manipulate to transverse YUV input memory
+    
+    int i;
+    // Transverse input and output. For each four RGB pixels, we increment 6 YUV bytes
+    //  See: http://chdk.wikia.com/wiki/Frame_buffers#Viewport
+    // This magical code borrowed from http://trac.assembla.com/chdk/browser/trunk/tools/yuvconvert.c
+    for(i = 0; i < (this->fb_desc->buffer_width * this->fb_desc->visible_height); i += 4, p_yuv += 6) {
+        this->yuv_to_rgb(&prgb_data, p_yuv[1], p_yuv[0], p_yuv[2]);
+        this->yuv_to_rgb(&prgb_data, p_yuv[3], p_yuv[0], p_yuv[2]);
+        
+        if(skip) continue;  // If we skip two, go to the next iteration
+        
+        this->yuv_to_rgb(&prgb_data, p_yuv[4], p_yuv[0], p_yuv[2]);
+        this->yuv_to_rgb(&prgb_data, p_yuv[5], p_yuv[0], p_yuv[2]);
+    }
+    
+    *out_height = this->fb_desc->visible_height;
+    
+    free(vp_data);  // We don't need this anymore
+    
+    return out;     // It's up to the caller to free() this when done
+}
+
+uint8_t LVData::clip(int v) {
+    if (v<0) return 0;
+    if (v>255) return 255;
+    return v;
+}
+
+void LVData::yuv_to_rgb(uint8_t **dest, uint8_t y, int8_t u, int8_t v) {
+    *((*dest)++) = LVData::clip(((y<<12) +          v*5743 + 2048)>>12);
+    *((*dest)++) = LVData::clip(((y<<12) - u*1411 - v*2925 + 2048)>>12);
+    *((*dest)++) = LVData::clip(((y<<12) + u*7258          + 2048)>>12);
+}
