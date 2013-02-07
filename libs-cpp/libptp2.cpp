@@ -63,7 +63,11 @@ int CameraBase::_bulk_read(unsigned char * data_out, int size, int * transferred
 }
 
 int CameraBase::send_ptp_message(PTPContainer * cmd, int timeout) {
-    return this->_bulk_write(cmd->pack(), cmd->get_length(), timeout);
+    unsigned char * packed = cmd->pack();
+    int ret = this->_bulk_write(packed, cmd->get_length(), timeout);
+    free(packed);
+    
+    return ret;
 }
 
 void CameraBase::recv_ptp_message(PTPContainer *out, int timeout) {
