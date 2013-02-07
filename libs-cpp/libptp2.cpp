@@ -35,8 +35,8 @@ CameraBase::CameraBase(libusb_device * dev) {
 
 CameraBase::~CameraBase() {
     if(this->handle != NULL) {
-        libusb_close(this->handle);
         libusb_release_interface(this->handle, this->intf->bInterfaceNumber);
+        libusb_close(this->handle);
     }
 }
 
@@ -560,9 +560,15 @@ uint8_t LVData::clip(int v) {
 }
 
 void LVData::yuv_to_rgb(uint8_t **dest, uint8_t y, int8_t u, int8_t v) {
+    /*
     *((*dest)++) = LVData::clip(((y<<12) +          v*5743 + 2048)>>12);
     *((*dest)++) = LVData::clip(((y<<12) - u*1411 - v*2925 + 2048)>>12);
     *((*dest)++) = LVData::clip(((y<<12) + u*7258          + 2048)>>12);
+    */
+    // Testing alternative formula:
+    *((*dest)++) = LVData::clip(y                     + 1.402   * v);
+    *((*dest)++) = LVData::clip(y - 0.34414 * u - 0.71414 * v);
+    *((*dest)++) = LVData::clip(y + 1.772   * u);
 }
 
 float LVData::get_lv_version() {
