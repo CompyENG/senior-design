@@ -467,7 +467,6 @@ void CHDKCamera::get_live_view_data(LVData * data_out, bool liveview, bool overl
  *
  * @todo This is one of the places where we expose the fact that PTP uses libusb as a backend.
  *       It would be nice if we could let the caller completely ignore the underlying protocol.
- * @todo Make the return value actually work correctly.
  * @param[in] dev The \c libusb_device which specifies which device to connect to.
  * @exception LIBPTP2_ALREADY_OPEN if this \c CameraBase already has an open device.
  * @exception LIBPTP2_CANNOT_CONNECT if we cannot connect to the camera specified.
@@ -522,6 +521,9 @@ bool CameraBase::open(libusb_device * dev) {
     }
     
     libusb_free_config_descriptor(desc);
+    
+    // If we haven't detected an error by now, assume that this worked.
+    return true;
 }
 
 /**
