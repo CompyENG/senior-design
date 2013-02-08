@@ -867,12 +867,16 @@ void LVData::init() {
  * for later use in retrieving data.  This way, we only spend CPU time on the
  * data retrieval we NEED to make.
  *
- * @todo Make sure that payload_size is large enough to actually contain
- *       live view data.
  * @param[in] payload The address of the first byte of a PTP payload
  * @param[in] payload_size The number of bytes in the payload
+ * @exception LVDATA_NOT_ENOUGH_DATA If payload_size given cannot possibly be large
+ *              enough to actually contain live view data.
  */
 void LVData::read(uint8_t * payload, int payload_size) {
+    if(payload_size < (sizeof(lv_data_header) + sizeof(lv_framebuffer_desc))) {
+        throw LVDATA_NOT_ENOUGH_DATA;
+    }
+    
     if(this->payload != NULL) {
         free(this->payload); // Free up the payload if we're overwriting this object
         this->payload = NULL;
