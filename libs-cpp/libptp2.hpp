@@ -7,6 +7,9 @@
 #define LIBPTP2_NOT_OPEN        4
 #define LIBPTP2_CANNOT_RECV     5
 
+#define PTPCONTAINER_NO_PAYLOAD     1
+#define PTPCONTAINER_INVALID_PARAM  2
+
 // PTP Stuff
 enum PTP_CONTAINER_TYPE {
     PTP_CONTAINER_TYPE_COMMAND  = 1,
@@ -71,6 +74,7 @@ class PTPContainer {
         unsigned char * get_payload(int * size_out);  // This might end up being useful...
         uint32_t get_length();  // So we can get, but not set
         void unpack(unsigned char * data);
+        uint32_t get_param_n(uint32_t n);
 };
 
 class LVData {

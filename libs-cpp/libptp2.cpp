@@ -653,6 +653,38 @@ void PTPContainer::unpack(unsigned char * data) {
     // Since we copied all of this data, the data passed in can be free()d
 }
 
+/**
+ * @brief Convenience function to retrieve parameter #\a{n} from \c PTPContainer.
+ *
+ * @param[in] n Parameter number to extract.
+ * @return Value stored in parameter \n.
+ * @exception PTPCONTAINER_NO_PAYLOAD If this \c PTPContainer has no payload.
+ * @exception PTPCONTAINER_INVALID_PARAM If this \c PTPContainer is too short to have a parameter \a n.
+ */
+uint32_t PTPContainer::get_param_n(uint32_t n) {
+    uint32_t out;
+    uint32_t first_byte;
+    
+    if(this->payload == NULL) {
+        throw PTPCONTAINER_NO_PAYLOAD;
+        return 0;
+    }
+    
+    first_byte = 4*n;   // First byte of parameter n is 4*n bytes into container
+    
+    // 4*n = first bit of parameter n
+    //  Add an extra four to ensure we have a parameter n
+    // Subtract 12 bytes (header) from length
+    if((this->length-12) < 4+4*n) {
+        throw PTPCONTAINER_INVALID_PARAM;
+        return 0;
+    }
+    
+    memcpy(&out, payload+first_byte, 4); // Copy parameter into out
+    
+    return out; // Return parameter
+}
+
 LVData::LVData() {
     this->init();
 }
