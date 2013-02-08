@@ -290,7 +290,6 @@ CHDKCamera::CHDKCamera(libusb_device * dev) : CameraBase(dev) {
  * 
  * @note Assumes the minor version is one digit long.
  * @return The CHDK version number.
- * @todo Fix up the memory leak by free()ing payload after memcpy.
  */
 float CHDKCamera::get_chdk_version(void) {
     PTPContainer cmd(PTP_CONTAINER_TYPE_COMMAND, 0x9999);
