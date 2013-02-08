@@ -380,6 +380,14 @@ uint32_t CHDKCamera::execute_lua(char * script, uint32_t * script_error, bool bl
     return out;
 }
 
+/**
+ * @brief Read the current script message from CHDK
+ *
+ * Simply returns the \c PTPContainer for handling by the caller.
+ *
+ * @param[out] out_resp \c PTPContainer containing the response from the PTP transaction.
+ * @param[out] out_data \c PTPContainer containing the data from the PTP transaction.
+ */
 void CHDKCamera::read_script_message(PTPContainer * out_resp, PTPContainer * out_data) {
     PTPContainer cmd(PTP_CONTAINER_TYPE_COMMAND, 0x9999);
     cmd.add_param(CHDK_OP_READ_SCRIPT_MSG);
