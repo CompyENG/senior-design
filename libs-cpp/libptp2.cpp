@@ -654,7 +654,7 @@ void PTPContainer::unpack(unsigned char * data) {
 }
 
 /**
- * @brief Convenience function to retrieve parameter #\a{n} from \c PTPContainer.
+ * @brief Convenience function to retrieve parameter #\a n from \c PTPContainer.
  *
  * @param[in] n Parameter number to extract.
  * @return Value stored in parameter \n.
