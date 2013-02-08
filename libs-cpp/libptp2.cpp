@@ -309,6 +309,7 @@ float CHDKCamera::get_chdk_version(void) {
         memcpy(&major, payload, 4);    // Copy first four bytes into major
         memcpy(&minor, payload+4, 4);    // Copy next four bytes into minor
     }
+    free(payload);
     
     out = major + minor/10.0;   // This assumes that the minor version is one digit long
     return out;
@@ -335,6 +336,7 @@ uint32_t CHDKCamera::check_script_status(void) {
     if(payload_size >= 4) { // Need at least 4 bytes in the payload
         memcpy(&out, payload, 4);
     }
+    free(payload);
     
     return out;
 }
@@ -374,6 +376,7 @@ uint32_t CHDKCamera::execute_lua(char * script, uint32_t * script_error, bool bl
             }
         }
     }
+    free(payload);
     
     return out;
 }
@@ -406,6 +409,7 @@ uint32_t CHDKCamera::write_script_message(char * message, uint32_t script_id) {
     if(payload_size >= 4) { // Need four bytes of uint32_t response
         memcpy(&out, payload, 4);
     }
+    free(payload);
     
     return out;
 }
@@ -427,6 +431,8 @@ void CHDKCamera::get_live_view_data(LVData * data_out, bool liveview, bool overl
     unsigned char * payload = out_data.get_payload(&payload_size);
     
     data_out->read(payload, payload_size);    // The LVData class will completely handle the LV data
+    
+    free(payload);
 }
 
 bool CameraBase::open(libusb_device * dev) {
