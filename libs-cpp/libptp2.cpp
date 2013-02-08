@@ -601,27 +601,50 @@ int CameraBase::get_and_increment_transaction_id() {
     return ret;
 }
 
+/**
+ * @brief Initialize the variables in a \c PTPContainer
+ */
 void PTPContainer::init() {
     this->length = this->default_length; // Length is at least the sum of the header parts
     this->payload = NULL;
 }
 
+/**
+ * @brief Create a new, empty \c PTPContainer
+ *
+ * @see PTPContainer::PTPContainer(uint16_t type, uint16_t op_code)
+ */
 PTPContainer::PTPContainer() {
     // Not sure what I want to do here
     this->init();
 }
 
+/**
+ * @brief Create a new \c PTPContainer with \a type and \a op_code
+ *
+ * @param[in] type A \c PTP_CONTAINER_TYPE for this \c PTPContainer
+ * @param[in] op_code The operation for this \c PTPContainer
+ */
 PTPContainer::PTPContainer(uint16_t type, uint16_t op_code) {
     this->init();
     this->type = type;
     this->code = op_code;
 }
 
+/**
+ * @brief Create a new \c PTPContainer of the message contained in \c data
+ *
+ * @param[in] data A received PTP message
+ * @see PTPContainer::unpack
+ */
 PTPContainer::PTPContainer(unsigned char * data) {
-    // This is essentially lv_framebuffer_desca .pack() function, in the form of a constructor
+    // This is essentially lv_framebuffer_desc .unpack() function, in the form of a constructor
     this->unpack(data);
 }
 
+/**
+ * @brief Frees up memory malloc()ed by \c PTPContainer
+ */
 PTPContainer::~PTPContainer() {
     if(this->payload != NULL) {
         free(this->payload);    // Be sure to free up this memory
@@ -629,6 +652,16 @@ PTPContainer::~PTPContainer() {
     }
 }
 
+/**
+ * @brief Add a parameter to a \c PTPContainer
+ *
+ * This function can add any \c uint32_t as a parameter, but is most useful for
+ * adding a member of \c CHDK_OPERATIONS or a parameter to that operation.  But,
+ * the function is generic enough that any type of data could be added, so this
+ * can help create any generic PTP command.
+ *
+ * @param[in] param The parameter to be added
+ */
 void PTPContainer::add_param(uint32_t param) {
     // Allocate new memory for the payload
     uint32_t old_length = (this->length)-(this->default_length);
@@ -647,6 +680,17 @@ void PTPContainer::add_param(uint32_t param) {
     this->length = new_length;
 }
 
+/**
+ * @brief Store a payload in a \c PTPContainer
+ *
+ * Useful for dumping large amounts of data into a \c PTPContainer for a 
+ * data operation.  However, this could be used to set up a \c PTPContainer
+ * for any operation.  Usually, \c PTPContainer::add_param is more useful
+ * for adding individual parameters, though.
+ *
+ * @param[in] payload The data to dump into the \c PTPContainer
+ * @param[in] payload_length The amount of data to read from \a payload
+ */
 void PTPContainer::set_payload(unsigned char * payload, int payload_length) {
     // Allocate new memory to copy the payload into
     // This way, we can ensure that we always want to free() the memory
@@ -663,6 +707,19 @@ void PTPContainer::set_payload(unsigned char * payload, int payload_length) {
     this->length = new_length;
 }
 
+/**
+ * @brief Pack \c PTPContainer data into a byte stream for sending
+ *
+ * Packs the data currently stored in the \c PTPContainer into a array of
+ * unsigned characters which can be sent through USB, etc. to the device.
+ * The length of this data can be found with \c PTPContainer::get_length
+ *
+ * @warning Since this method malloc()s space for the packed data, the caller
+ *          must make sure to avoid memory leaks by free()ing this data.
+ * @return A pointer to the first unsigned character which makes up the data
+ *         in the container.
+ * @see PTPContainer::get_length
+ */
 unsigned char * PTPContainer::pack() {
     unsigned char * packed = (unsigned char *)malloc(this->length);
     
@@ -677,15 +734,45 @@ unsigned char * PTPContainer::pack() {
     return packed;
 }
 
+/**
+ * @brief Retrieve the payload stored in this \c PTPContainer
+ *
+ * @todo Make this function malloc() new space for the returned data.
+ *       Currently, the internal pointer is returned, so data could be
+ *       modified, which isn't ideal.
+ * @param[out] size_out The size of the payload returned
+ * @return The payload contained in this \c PTPContainer
+ */
 unsigned char * PTPContainer::get_payload(int * size_out) {
     *size_out = this->length - this->default_length;
     return payload;
 }
 
+/**
+ * @brief Retrieve the size of all data stored in the payload
+ *
+ * @return The total length of data contained in this \c PTPContainer
+ */
 uint32_t PTPContainer::get_length() {
     return length;
 }
 
+/**
+ * @brief Unpack data from a byte stream into a \c PTPContainer
+ *
+ * This function will overwrite any data currently stored in this
+ * \c PTPContainer with the new data from \a data.  \a data is parsed
+ * for each part of the PTP message, and individual items are stored
+ * appropriately.
+ *
+ * @warning \a data must be at least 12 bytes in length, or this could
+ *          segfault.
+ *
+ * @todo free() the current payload before malloc()ing more space
+ * @param[in] data The address of the first unsigned character of
+ *                 the new container data.  Must be at least 12 bytes
+ *                 in length.
+ */
 void PTPContainer::unpack(unsigned char * data) {
     // First four bytes are the length
     memcpy(&this->length, data, 4);
@@ -735,27 +822,56 @@ uint32_t PTPContainer::get_param_n(uint32_t n) {
     return out; // Return parameter
 }
 
+/**
+ * @brief Initialize a blank live view data container
+ */
 LVData::LVData() {
     this->init();
 }
 
+/**
+ * @brief Initialize a live view data container with the data from \a payload
+ *
+ * @param[in] payload The address of the first byte of a PTP payload
+ * @param[in] payload_size The number of bytes in \a payload
+ * @see LVData::read
+ */
 LVData::LVData(uint8_t * payload, int payload_size) {
     this->init();
     this->read(payload, payload_size);
 }
 
+/**
+ * @brief Frees up memory malloc()ed by \c LVData
+ */
 LVData::~LVData() {
     free(this->vp_head);
     free(this->fb_desc);
     free(this->payload);
 }
 
+/**
+ * @brief Initializes \c LVData variables by malloc()ing space of \c LVData::vp_head and \c LVData::fb_desc
+ */
 void LVData::init() {
     this->vp_head = (lv_data_header *)malloc(sizeof(lv_data_header));
     this->fb_desc = (lv_framebuffer_desc *)malloc(sizeof(lv_framebuffer_desc));
     this->payload = NULL;
 }
 
+/**
+ * @brief Read data from \a payload into the live view data structures
+ *
+ * Parases \a payload for the necessary parts of the payload and places them
+ * in our internal structures.  Also stores a copy of the complete payload
+ * for later use in retrieving data.  This way, we only spend CPU time on the
+ * data retrieval we NEED to make.
+ *
+ * @todo Make sure that payload_size is large enough to actually contain
+ *       live view data.
+ * @param[in] payload The address of the first byte of a PTP payload
+ * @param[in] payload_size The number of bytes in the payload
+ */
 void LVData::read(uint8_t * payload, int payload_size) {
     if(this->payload != NULL) {
         free(this->payload); // Free up the payload if we're overwriting this object
@@ -771,6 +887,17 @@ void LVData::read(uint8_t * payload, int payload_size) {
     memcpy(this->fb_desc, this->payload+this->vp_head->vp_desc_start, sizeof(lv_framebuffer_desc));
 }
 
+/**
+ * @brief Read live view data directly from a \c PTPContainer
+ *
+ * This function exists so that we can hide the actual payload data from
+ * calling functions, and just pass \c PTPContainer s around.  In a
+ * perfect data-hiding world, \c PTPContainer and \c LVData might be friend
+ * classes, so that methods to access the payload could be kept protected.
+ *
+ * @param[in] container The \c PTPContainer to read live view data from
+ * @see LVData::read(uint8_t * payload, int payload_size)
+ */
 void LVData::read(PTPContainer * container) {
     int payload_size;
     unsigned char * payload;
@@ -782,7 +909,24 @@ void LVData::read(PTPContainer * container) {
     free(payload);
 }
 
-// TODO: get_rgb function
+/**
+ * @brief Get live view data in RGB format
+ *
+ * This function is quite a doozy, and likely to be the most CPU-intense task
+ * an \c LVData can perform.  This method takes the live view data (in YUV format)
+ * from the payload and converts it to RGB so that it can actually be used.  The
+ * \a skip parameter will depend on which camera is used.  Size, width, and height
+ * are calculated from properties of the live view data, to hide the underlying structure.
+ *
+ * @warning This function malloc()s space for the resulting data. Be sure to free() it!
+ *
+ * @param[out] out_size The size of the resulting RGB data
+ * @param[out] out_width The width of the resulting RGB image
+ * @param[out] out_height The height of the resulting RGB image
+ * @param[in]  skip If true, skips two pixels of every four (required on some cameras)
+ * @return The address of the first byte of the resulting RGB image
+ * @see http://chdk.wikia.com/wiki/Frame_buffers#Viewport, http://trac.assembla.com/chdk/browser/trunk/tools/yuvconvert.c
+ */
 uint8_t * LVData::get_rgb(int * out_size, int * out_width, int * out_height, bool skip) {
     uint8_t * vp_data;
     int vp_size;
@@ -822,12 +966,28 @@ uint8_t * LVData::get_rgb(int * out_size, int * out_width, int * out_height, boo
     return out;     // It's up to the caller to free() this when done
 }
 
+/**
+ * @brief A helper function to clip an int to a uint8_t
+ *
+ * @param[in] v The integer to clip
+ * @return A 8-bit unsigned integer between 0 and 255
+ */
 uint8_t LVData::clip(int v) {
     if (v<0) return 0;
     if (v>255) return 255;
     return v;
 }
 
+/**
+ * @brief Convert a YUV triplet to RGB values.
+ *
+ * @note This modifies the \a dest pointer passed in.
+ * @param[in] dest A pointer to the address of the first byte of the resulting data
+ * @param[in] y The Y value to convert
+ * @param[in] u The U value to convert
+ * @param[in] v The V value to convert
+ * @see http://www.fourcc.org/fccyvrgb.php
+ */
 void LVData::yuv_to_rgb(uint8_t **dest, uint8_t y, int8_t u, int8_t v) {
     /*
     *((*dest)++) = LVData::clip(((y<<12) +          v*5743 + 2048)>>12);
@@ -840,6 +1000,13 @@ void LVData::yuv_to_rgb(uint8_t **dest, uint8_t y, int8_t u, int8_t v) {
     *((*dest)++) = LVData::clip(y + 1.772   * u);
 }
 
+/**
+ * @brief Retrieve the live view version from the header data
+ *
+ * @note Expects the minor version number to be one digit.
+ *
+ * @return The version of this live view data
+ */
 float LVData::get_lv_version() {
     if(this->vp_head == NULL) return -1;
     
