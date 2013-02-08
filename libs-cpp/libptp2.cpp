@@ -397,6 +397,13 @@ void CHDKCamera::read_script_message(PTPContainer * out_resp, PTPContainer * out
     // We'll just let the caller deal with the data
 }
 
+/**
+ * @brief Write a message to the script running on CHDK
+ *
+ * @param[in] message The message to send to the script.
+ * @param[in] script_id (optional) The ID of the script to send the message to.
+ * @return The first parameter from the PTP response.
+ */
 uint32_t CHDKCamera::write_script_message(char * message, uint32_t script_id) {
     PTPContainer cmd(PTP_CONTAINER_TYPE_COMMAND, 0x9999);
     cmd.add_param(CHDK_OP_WRITE_SCRIPT_MSG);
@@ -421,6 +428,19 @@ uint32_t CHDKCamera::write_script_message(char * message, uint32_t script_id) {
     return out;
 }
 
+/**
+ * @brief Retrieve live view data from CHDK
+ *
+ * Returns selected frame buffers from CHDK in an \c LVData object.  By default, only live view data
+ * is returned, but overlay and palette can optionally be returned, also.  The \c LVData object can
+ * then be used to retrieve and manipulate the live view data.
+ *
+ * @param[out] data_out The address of an LVData object which will be populated with the requested data
+ * @param[in]  liveview True to return the live view frame buffer
+ * @param[in]  overlay  True to return the overlay frame buffer
+ * @param[in]  palette  True to return the palette for the overlay
+ * @see LVData, http://chdk.wikia.com/wiki/Frame_buffers
+ */
 void CHDKCamera::get_live_view_data(LVData * data_out, bool liveview, bool overlay, bool palette) {
     uint32_t flags = 0;
     if(liveview) flags |= LV_TFR_VIEWPORT;
@@ -442,6 +462,17 @@ void CHDKCamera::get_live_view_data(LVData * data_out, bool liveview, bool overl
     free(payload);
 }
 
+/**
+ * @brief Opens the camera specified by \a dev.
+ *
+ * @todo This is one of the places where we expose the fact that PTP uses libusb as a backend.
+ *       It would be nice if we could let the caller completely ignore the underlying protocol.
+ * @todo Make the return value actually work correctly.
+ * @param[in] dev The \c libusb_device which specifies which device to connect to.
+ * @exception LIBPTP2_ALREADY_OPEN if this \c CameraBase already has an open device.
+ * @exception LIBPTP2_CANNOT_CONNECT if we cannot connect to the camera specified.
+ * @return true if we successfully connect, false otherwise.
+ */
 bool CameraBase::open(libusb_device * dev) {
     if(this->handle != NULL) {  // Handle will be non-null if the device is already open
         throw LIBPTP2_ALREADY_OPEN;
@@ -493,7 +524,15 @@ bool CameraBase::open(libusb_device * dev) {
     libusb_free_config_descriptor(desc);
 }
 
-
+/**
+ * @brief Find the first camera which is connected.
+ *
+ * Asks libusb for all the devices connected to the computer, and returns
+ * the first PTP device it can find.  
+ * 
+ * @todo Exposes the fact that we actually use libusb. Hide this fact in the future.
+ * @return A pointer to a \c libusb_device which represents the camera found, or NULL if none found.
+ */
 libusb_device * CameraBase::find_first_camera() {
     // discover devices
     libusb_device **list;
@@ -541,10 +580,21 @@ libusb_device * CameraBase::find_first_camera() {
     return found;
 }
 
+/**
+ * @brief Returns the last USB error we encountered.
+ *
+ * @return The \c libusb error we last received.
+ */
 int CameraBase::get_usb_error() {
     return this->usb_error;
 }
 
+/**
+ * @brief Retrieves our current transaction ID and increments it
+ *
+ * @return The current transaction id (starting at 0)
+ * @see CameraBase::ptp_transaction
+ */
 int CameraBase::get_and_increment_transaction_id() {
     uint32_t ret = this->_transaction_id;
     this->_transaction_id = this->_transaction_id + 1;
