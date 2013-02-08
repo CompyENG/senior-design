@@ -1,5 +1,28 @@
-// A conversion of pyptp2 and all that comes with it
-//  Targeted at libusb version 1.0, since that's recommended
+/**
+ * @file libptp2.cpp
+ * 
+ * @brief A conversion of pyptp2 and all that comes with it to C++
+ * 
+ * libptp2 is nice, but appears to be tightly bound to ptpcam.  There
+ * are a few other CHDK-specific programs to communicate with a camera
+ * through PTP, but all contain source code that is tightly integrated
+ * and difficult to read.
+ * 
+ * While this library should be able to communicate with any PTP camera
+ * through the \c PTPCamera interface, it's primary purpose is to allow
+ * easy communication with cameras running CHDK through \c CHDKCamera.
+ * 
+ * This library has two goals:
+ *  -# Provide all functionality of pyptp2 through a C++ interface.
+ *  -# Be easy to use, and well-documented.
+ *  
+ * @author Bobby Graese <bobby.graese@gmail.com>
+ * 
+ * @see http://code.google.com/p/pyptp2/
+ * @see http://libptp.sourceforge.net/
+ * 
+ * @version 0.1
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,7 +32,9 @@
 #include "libptp2.hpp"
 #include "live_view.h"
 
-// TODO: Implementation
+/**
+ * Initialize private and public \c CameraBase variables.
+ */
 void CameraBase::init() {
     this->handle = NULL;
     this->usb_error = 0;
@@ -19,10 +44,23 @@ void CameraBase::init() {
     this->_transaction_id = 0;
 }
 
+/**
+ * Creates a new, empty \c CameraBase object.  Can then call
+ * \c CameraBase::open to connect to a camera.
+ */
 CameraBase::CameraBase() {
     this->init();
 }
 
+/**
+ * Creates a new \c CameraBase object and connects to the camera
+ * described by \a dev.
+ *
+ * @param[in] dev  The \c libusb_device to connect to.
+ * @exception LIBPTP2_NO_DEVICE thrown if \a dev is a NULL pointer.
+ * @see CameraBase::find_first_camera
+ * @see CameraBase::open
+ */
 CameraBase::CameraBase(libusb_device * dev) {
     this->init();
     
@@ -33,6 +71,10 @@ CameraBase::CameraBase(libusb_device * dev) {
     this->open(dev);
 }
 
+/**
+ * Destructor for a \c CameraBase object.  If connected to a camera, this
+ * will release the interface, and close the handle.
+ */
 CameraBase::~CameraBase() {
     if(this->handle != NULL) {
         libusb_release_interface(this->handle, this->intf->bInterfaceNumber);
@@ -40,6 +82,17 @@ CameraBase::~CameraBase() {
     }
 }
 
+/**
+ * Perform a \c libusb_bulk_transfer to the "out" endpoint of the connected camera.
+ *
+ * @warning Make sure \a bytestr is at least \a length bytes in length.
+ * @param[in] bytestr Bytes to write through USB.
+ * @param[in] length  Number of bytes to read from \a bytestr.
+ * @param[in] timeout The maximum number of seconds to attempt to send for.
+ * @return 0 on success, libusb error code otherwise.
+ * @exception LIBPTP2_NOT_OPEN if not connected to a camera.
+ * @see CameraBase::_bulk_read
+ */
 int CameraBase::_bulk_write(unsigned char * bytestr, int length, int timeout) {
     int transferred;
     
@@ -52,6 +105,18 @@ int CameraBase::_bulk_write(unsigned char * bytestr, int length, int timeout) {
     return libusb_bulk_transfer(this->handle, this->ep_out, bytestr, length, &transferred, timeout);
 }
 
+/**
+ * Perform a \c libusb_bulk_transfer to the "in" endpoint of the connected camera.
+ *
+ * @warning Make sure \a data_out has enough memory allocated to read at least \a size bytes.
+ * @param[out] data_out    The data read from the camera.
+ * @param[in]  size        The number of bytes to attempt to read.
+ * @param[out] transferred The number of bytes actually read.
+ * @param[in]  timeout     The maximum number of seconds to attempt to read for.
+ * @return 0 on success, libusb error code otherwise.
+ * @exception LIBPTP2_NOT_OPEN if not connected to a camera.
+ * @see CameraBase::_bulk_read
+ */
 int CameraBase::_bulk_read(unsigned char * data_out, int size, int * transferred, int timeout) {
     if(this->handle == NULL) {
         throw LIBPTP2_NOT_OPEN;
@@ -62,6 +127,14 @@ int CameraBase::_bulk_read(unsigned char * data_out, int size, int * transferred
     return libusb_bulk_transfer(this->handle, this->ep_in, data_out, size, transferred, timeout);
 }
 
+/**
+ * Send the data contained in \a cmd to the connected camera.
+ *
+ * @param[in] cmd The \c PTPContainer containing the command/data to send.
+ * @param[in] timeout The maximum number of seconds to attempt to send for.
+ * @return 0 on success, libusb error code otherwise.
+ * @see CameraBase::_bulk_write, CameraBase::recv_ptp_message
+ */
 int CameraBase::send_ptp_message(PTPContainer * cmd, int timeout) {
     unsigned char * packed = cmd->pack();
     int ret = this->_bulk_write(packed, cmd->get_length(), timeout);
@@ -70,6 +143,21 @@ int CameraBase::send_ptp_message(PTPContainer * cmd, int timeout) {
     return ret;
 }
 
+/**
+ * @brief Recives a \c PTPContainer from the camera and returns it.
+ *
+ * This function works by first reading in a buffer of 512 bytes from the camera
+ * to determine the length of the PTP message it will receive.  If necessary, it
+ * then makes another \c CameraBase::_bulk_read call to read in the rest of the
+ * data.  Finally, \c PTPContainer::unpack is called to place the data in \a out.
+ *
+ * @warning \a timeout is passed to each call to \c CameraBase::_bulk_read.  Therefore,
+ *          this function could take up to 2 * \a timeout seconds to return.
+ *
+ * @param[out] out A pointer to a PTPContainer that will store the read PTP message.
+ * @param[in]  timeout The maximum number of seconds to wait to read each time.
+ * @see CameraBase::_bulk_read, CameraBase::send_ptp_message
+ */
 void CameraBase::recv_ptp_message(PTPContainer *out, int timeout) {
     // Determine size we need to read
     unsigned char buffer[512];
@@ -101,6 +189,35 @@ void CameraBase::recv_ptp_message(PTPContainer *out, int timeout) {
     free(out_buf);
 }
 
+/**
+ * @brief Perform a complete write, and optionally read, PTP transaction.
+ * 
+ * At minimum, it is required that \a cmd is not \c NULL.  All other containers
+ * are checked for NULL values before reading/writing.  Note that this function
+ * will also modify \a cmd and \a data to place a generated transaction ID in them,
+ * required by the PTP protocol.
+ *
+ * Although not enforced by this function, \a cmd should be a \c PTPContainer containing
+ * a command, and \a data (if given) should be a \c PTPContainer containing data.
+ *
+ * Note that even if \a receiving is false, PTP requires that we receive a response.
+ * If provided, \a out_resp will be populated with the command response, even if
+ * \a receiving is false.
+ *
+ * @warning \c CameraBase::_bulk_read and \c CameraBase::_bulk_write are called multiple
+ *          times during the execution of this function, and \a timeout is passed to each
+ *          of them individually.  Therefore, this function could take much more than
+ *          \a timeout seconds to return.
+ *
+ * @param[in]  cmd       A \c PTPContainer containing the command to send to the camera.
+ * @param[in]  data      (optional) A \c PTPContainer containing the data to be sent with the command.
+ * @param[in]  receiving Whether or not to receive data in addition to a response from the camera.
+ * @param[out] out_resp  (optional) A \c PTPContainer where the camera's response will be placed.
+ * @param[out] out_data  (optional) A \c PTPContainer where the camera's data response will be placed.
+ * @param[in]  timeout   The maximum number of seconds each \c CameraBase::_bulk_read or \c CameraBase::_bulk_write
+ *                       should attempt to communicate for.
+ * @see CameraBase::send_ptp_message, CameraBase::recv_ptp_message
+ */
 void CameraBase::ptp_transaction(PTPContainer *cmd, PTPContainer *data, bool receiving, PTPContainer * out_resp, PTPContainer * out_data, int timeout) {
     bool received_data = false;
     bool received_resp = false;
@@ -141,18 +258,40 @@ void CameraBase::ptp_transaction(PTPContainer *cmd, PTPContainer *data, bool rec
     }
 }
 
+/**
+ * @brief Creates an empty \c PTPCamera.
+ *
+ * @warning This class is not yet implemented. Creating an object of type
+ *          \c PTPCamera will only result in a warning printed to \c stderr.
+ */
 PTPCamera::PTPCamera() {
     fprintf(stderr, "This class is not implemented.\n");
 }
 
+/**
+ * Creates an empty \c CHDKCamera, without connecting to a camera.
+ */
 CHDKCamera::CHDKCamera() : CameraBase() {
     ;
 }
 
+/**
+ * Creates a \c CHDKCamera and connects to the \c libusb_device \a dev.
+ *
+ * @param[in] dev The \c libusb_device to connect to.
+ * @see CameraBase::CameraBase(libusb_device * dev)
+ */
 CHDKCamera::CHDKCamera(libusb_device * dev) : CameraBase(dev) {
     ;
 }
 
+/**
+ * Retrieve the version of CHDK that this \c CHDKCamera is connected to.
+ * 
+ * @note Assumes the minor version is one digit long.
+ * @return The CHDK version number.
+ * @todo Fix up the memory leak by free()ing payload after memcpy.
+ */
 float CHDKCamera::get_chdk_version(void) {
     PTPContainer cmd(PTP_CONTAINER_TYPE_COMMAND, 0x9999);
     cmd.add_param(CHDK_OP_VERSION);
@@ -175,6 +314,13 @@ float CHDKCamera::get_chdk_version(void) {
     return out;
 }
 
+/**
+ * Checks the status of the currently running script.
+ *
+ * @return The current script status.
+ * @todo Determine return values for various camera states,
+ *       provide an enum for checking states.
+ */
 uint32_t CHDKCamera::check_script_status(void) {
     PTPContainer cmd(PTP_CONTAINER_TYPE_COMMAND, 0x9999);
     cmd.add_param(CHDK_OP_SCRIPT_STATUS);
@@ -193,6 +339,15 @@ uint32_t CHDKCamera::check_script_status(void) {
     return out;
 }
 
+/**
+ * Asks CHDK to execute the lua script given by \c script.
+ *
+ * @param[in] script The LUA script to execute.
+ * @param[out] script_error The error code returned by the script, if blocking.
+ * @param[in] block Whether or not to block execution until the script has returned.
+ * @return The first parameter in the PTP response (?)
+ * @todo Blocking code.
+ */
 uint32_t CHDKCamera::execute_lua(char * script, uint32_t * script_error, bool block) {
     PTPContainer cmd(PTP_CONTAINER_TYPE_COMMAND, 0x9999);
     cmd.add_param(CHDK_OP_EXECUTE_SCRIPT);
