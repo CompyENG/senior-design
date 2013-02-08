@@ -737,14 +737,17 @@ unsigned char * PTPContainer::pack() {
 /**
  * @brief Retrieve the payload stored in this \c PTPContainer
  *
- * @todo Make this function malloc() new space for the returned data.
- *       Currently, the internal pointer is returned, so data could be
- *       modified, which isn't ideal.
  * @param[out] size_out The size of the payload returned
- * @return The payload contained in this \c PTPContainer
+ * @return A new copy of the payload contained in this \c PTPContainer
  */
 unsigned char * PTPContainer::get_payload(int * size_out) {
+    unsigned char * out;
+    
     *size_out = this->length - this->default_length;
+    
+    out = (unsigned char *)malloc(*size_out);
+    memcpy(out, this->payload, *size_out);
+    
     return payload;
 }
 
