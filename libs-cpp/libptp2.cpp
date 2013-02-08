@@ -766,14 +766,17 @@ uint32_t PTPContainer::get_length() {
  * appropriately.
  *
  * @warning \a data must be at least 12 bytes in length, or this could
- *          segfault.
+ *           segfault.
  *
- * @todo free() the current payload before malloc()ing more space
  * @param[in] data The address of the first unsigned character of
  *                 the new container data.  Must be at least 12 bytes
  *                 in length.
  */
 void PTPContainer::unpack(unsigned char * data) {
+    // Free up our current payload
+    free(this->payload);
+    this->payload = NULL;
+    
     // First four bytes are the length
     memcpy(&this->length, data, 4);
     // Next, container type
