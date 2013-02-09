@@ -1,3 +1,7 @@
+#ifndef _LIBPTP++_H
+#define _LIBPTP++_H
+
+#include <libusb-1.0/libusb.h>
 #include "live_view.h"
 
 // Error codes
@@ -152,3 +156,5 @@ class CHDKCamera : public CameraBase {
         void get_live_view_data(LVData * data_out, bool liveview=true, bool overlay=false, bool palette=false);
         char * _wait_for_script_return(int timeout);
 };
+
+#endif /* _LIBPTP++_H */
