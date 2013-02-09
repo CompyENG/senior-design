@@ -6,6 +6,8 @@
 #define LIBPTP2_ALREADY_OPEN    3
 #define LIBPTP2_NOT_OPEN        4
 #define LIBPTP2_CANNOT_RECV     5
+#define LIBPTP2_TIMEOUT         6
+#define LIBPTP2_INVALID_RESPONSE 7
 
 #define PTPCONTAINER_NO_PAYLOAD     1
 #define PTPCONTAINER_INVALID_PARAM  2
@@ -53,6 +55,12 @@ enum CHDK_TEMP_DATA {
 enum CHDK_SCRIPT_LANGAUGE {
     CHDK_LANGUAGE_LUA   = 0,
     CHDK_LANGUAGE_UBASIC
+};
+
+enum CHDK_SCRIPT_STATUS {
+    CHDK_SCRIPT_STATUS_NONE = 0,    // No script running
+    CHDK_SCRIPT_STATUS_RUN,         // Script running
+    CHDK_SCRIPT_STATUS_MSG          // Messages waiting
 };
 
 // Have to define the helper class first, or I can't use it in CameraBase

@@ -22,10 +22,15 @@
  * @see http://libptp.sourceforge.net/
  * 
  * @version 0.1
+ *
+ * @todo Rearrange the functions in this file to be in a logical order
+ * @todo Obey the right margin
  */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/time.h>
+#include <unistd.h>
 
 #include <libusb-1.0/libusb.h>
 
@@ -317,27 +322,16 @@ float CHDKCamera::get_chdk_version(void) {
 /**
  * Checks the status of the currently running script.
  *
- * @return The current script status.
- * @todo Determine return values for various camera states,
- *       provide an enum for checking states.
+ * @return The current script status, a member of CHDK_SCRIPT_STATUS
  */
 uint32_t CHDKCamera::check_script_status(void) {
     PTPContainer cmd(PTP_CONTAINER_TYPE_COMMAND, 0x9999);
     cmd.add_param(CHDK_OP_SCRIPT_STATUS);
     
     PTPContainer out_resp;
-    this->ptp_transaction(&cmd, NULL, false, &out_resp, NULL);
+    this->ptp_transaction(&cmd, NULL, true, &out_resp, NULL);
     
-    uint32_t out = -1;
-    unsigned char * payload;
-    int payload_size;
-    payload = out_resp.get_payload(&payload_size);
-    if(payload_size >= 4) { // Need at least 4 bytes in the payload
-        memcpy(&out, payload, 4);
-    }
-    free(payload);
-    
-    return out;
+    return out_resp.get_param_n(0);
 }
 
 /**
@@ -1023,4 +1017,49 @@ float LVData::get_lv_version() {
     if(this->vp_head == NULL) return -1;
     
     return this->vp_head->version_major + this->vp_head->version_minor / 10.0;
+}
+
+/**
+ * @brief Block until the currently running script returns a value
+ *
+ * This function will poll the camera every 50 ms for script messages.  If a
+ * script is currently still running, it will continue to poll until all scripts
+ * are done running.  All read messages are returned when all scripts are done
+ * running.
+ *
+ * @param[in] timeout The maximum amount of time to let this function run for
+ * @return All read script messages.
+ */
+char * CHDKCamera::_wait_for_script_return(int timeout) {
+    int msg_count = 1;
+    char * msgs;
+    struct timeval time;
+    long t_start;
+    long t_end;
+    uint32_t status;
+    
+    gettimeofday(&time, NULL);
+    t_start = (time.tv_sec * 1000) + (time.tv_usec / 1000);
+    
+    while(1) {
+        status = this->check_script_status();
+        
+        if(status & CHDK_SCRIPT_STATUS_RUN) { // If a script is running
+            // Sleep for 50 ms
+            usleep(50 * 1000);
+            gettimeofday(&time, NULL);
+            t_end = (time.tv_sec * 1000) + (time.tv_usec / 1000);
+            if(timeout > 0 && timeout > (t_end - t_start)) {
+                throw LIBPTP2_TIMEOUT;
+            }
+        } else if(status & CHDK_SCRIPT_STATUS_MSG) {
+            // TODO: Read script message, determine how to return
+        } else if(status == CHDK_SCRIPT_STATUS_NONE) {
+            break;
+        } else {
+            throw LIBPTP2_INVALID_RESPONSE;
+        }
+    }
+    
+    return msgs;
 }
