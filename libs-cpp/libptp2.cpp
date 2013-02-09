@@ -1027,6 +1027,8 @@ float LVData::get_lv_version() {
  * are done running.  All read messages are returned when all scripts are done
  * running.
  *
+ * @todo Determine a method for returning the messages
+ *
  * @param[in] timeout The maximum amount of time to let this function run for
  * @return All read script messages.
  */
