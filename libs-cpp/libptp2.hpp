@@ -108,6 +108,7 @@ class CameraBase {
     protected:
         int _bulk_write(unsigned char * bytestr, int length, int timeout=0);
         int _bulk_read(unsigned char * data_out, int size, int * transferred, int timeout=0);
+        int get_and_increment_transaction_id(); // What a beautiful name for a function
     public:
         CameraBase();
         CameraBase(libusb_device *dev);
@@ -120,7 +121,6 @@ class CameraBase {
         void ptp_transaction(PTPContainer *cmd, PTPContainer *data, bool receiving, PTPContainer *out_resp, PTPContainer *out_data, int timeout=0);
         static libusb_device * find_first_camera();
         int get_usb_error();
-        int get_and_increment_transaction_id(); // What a beautiful name for a function
 };
 
 class PTPCamera : public CameraBase {
