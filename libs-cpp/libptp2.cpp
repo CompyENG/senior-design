@@ -1134,5 +1134,7 @@ bool CHDKCamera::upload_file(char * local_filename, char * remote_filename, int 
     
     this->ptp_transaction(&cmd, &data, false, &resp, NULL);
     
+    free(packed);
+    
     return (resp.get_param_n(0) == CHDK_PTP_RC_OK);
 }
