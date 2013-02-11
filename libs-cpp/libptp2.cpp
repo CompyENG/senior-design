@@ -747,7 +747,7 @@ unsigned char * PTPContainer::get_payload(int * size_out) {
     out = (unsigned char *)malloc(*size_out);
     memcpy(out, this->payload, *size_out);
     
-    return payload;
+    return out;
 }
 
 /**
