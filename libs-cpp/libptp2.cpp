@@ -343,7 +343,7 @@ uint32_t CHDKCamera::check_script_status(void) {
  * @param[out] script_error The error code returned by the script, if blocking.
  * @param[in] block Whether or not to block execution until the script has returned.
  * @return The first parameter in the PTP response (?)
- * @todo Blocking code.
+ * @todo Finish blocking code, allow timeout input
  */
 uint32_t CHDKCamera::execute_lua(char * script, uint32_t * script_error, bool block) {
     PTPContainer cmd(PTP_CONTAINER_TYPE_COMMAND, 0x9999);
@@ -363,6 +363,7 @@ uint32_t CHDKCamera::execute_lua(char * script, uint32_t * script_error, bool bl
     
     if(block) {
         printf("TODO: Blocking code");
+        this->_wait_for_script_return(5);
     } else {
         if(payload_size >= 8) { // Need at least 8 bytes in the payload
             memcpy(&out, payload, 4);
