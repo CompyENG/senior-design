@@ -1,5 +1,5 @@
-#ifndef _LIBPTP++_H
-#define _LIBPTP++_H
+#ifndef _LIBPTPPP_H
+#define _LIBPTPPP_H
 
 #include <libusb-1.0/libusb.h>
 #include "live_view.h"
@@ -141,8 +141,7 @@ class PTPCamera : public CameraBase {
 };
 
 class CHDKCamera : public CameraBase {
-    struct filebuf * _pack_file_for_upload(char * local_filename, char * remote_filename);
-    struct filebuf * _pack_file_for_upload(char * local_filename);
+    uint8_t * _pack_file_for_upload(uint32_t * out_size, char * local_filename, char * remote_filename=NULL);
     public:
         CHDKCamera();
         CHDKCamera(libusb_device *dev);

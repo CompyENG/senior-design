@@ -31,6 +31,8 @@
 #include <string.h>
 #include <sys/time.h>
 #include <unistd.h>
+#include <iostream>
+#include <fstream>
 
 #include <libusb-1.0/libusb.h>
 
@@ -1064,4 +1066,45 @@ char * CHDKCamera::_wait_for_script_return(int timeout) {
     }
     
     return msgs;
+}
+
+/**
+ * @brief Reads in a file and packs data for uploading.
+ * 
+ * From CHDK source code, the correct format for the uploaded file is:
+ *  -# Four bytes of length of filename
+ *  -# Filename
+ *  -# Contents of file
+ * 
+ * @warning The caller is responsible for free()ing the memory allocated by this
+ *          function.
+ * 
+ * @param[out] out_size The size of the resulting data structure
+ * @param[in] local_filename The path and name of the local file to be read
+ * @param[in] remote_filename The path and name of the location on the camera to place the file
+ * @return A pointer to the first byte of the resulting data
+ */
+uint8_t * CHDKCamera::_pack_file_for_upload(uint32_t * out_size, char * local_filename, char * remote_filename) {
+    uint32_t file_size;
+    uint8_t * out;
+    int name_length;
+    
+    name_length = strlen(remote_filename);
+    
+    std::ifstream stream_local(local_filename, std::ios::in | std::ios::binary | std::ios::ate);
+    // Open file for reading, binary type of file, place pointer at end of file
+    
+    file_size = stream_local.tellg(); // Retrives the position of the input stream
+    // Since we asked to open the file at the end, this is the length of the file
+    stream_local.seekg(0, std::ios::beg);
+    
+    out = (uint8_t *)malloc(4 + name_length + file_size);   // Allocate memory for the packed file
+    
+    memcpy(out, &file_size, 4); // Copy four bytes of file size to output
+    memcpy(out+4, remote_filename, name_length); // Copy the file name in
+    stream_local.read((char *)(out+4+name_length), file_size);    // Copy the file contents in
+    
+    stream_local.close(); // Close the opened file stream
+    
+    return out; // Return the packed file. Caller is responsible for free()ing this
 }
