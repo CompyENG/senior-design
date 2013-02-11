@@ -1083,6 +1083,7 @@ char * CHDKCamera::_wait_for_script_return(int timeout) {
  * @param[in] local_filename The path and name of the local file to be read
  * @param[in] remote_filename The path and name of the location on the camera to place the file
  * @return A pointer to the first byte of the resulting data
+ * @see CHDKCamera::upload_file
  */
 uint8_t * CHDKCamera::_pack_file_for_upload(uint32_t * out_size, char * local_filename, char * remote_filename) {
     uint32_t file_size;
@@ -1106,5 +1107,32 @@ uint8_t * CHDKCamera::_pack_file_for_upload(uint32_t * out_size, char * local_fi
     
     stream_local.close(); // Close the opened file stream
     
+    *out_size = 4 + name_length + file_size; // Output the size of the result
+    
     return out; // Return the packed file. Caller is responsible for free()ing this
+}
+
+/**
+ * @brief Public method to upload a local file to the camera.
+ * 
+ * @param[in] local_filename The local path and filename to send
+ * @param[in] remote_filename The path and filename to store the file on the camera
+ * @param[in] timeout (optional) The timeout for each PTP call
+ * @return True on success
+ */
+bool CHDKCamera::upload_file(char * local_filename, char * remote_filename, int timeout) {
+    uint8_t * packed;
+    uint32_t packed_size;
+    PTPContainer cmd(PTP_CONTAINER_TYPE_COMMAND, 0x9999);
+    PTPContainer data(PTP_CONTAINER_TYPE_DATA, 0x9999);
+    PTPContainer resp;
+    
+    packed = CHDKCamera::_pack_file_for_upload(&packed_size, local_filename, remote_filename);
+    
+    cmd.add_param(CHDK_OP_UPLOAD_FILE);
+    data.set_payload((unsigned char *)packed, packed_size);
+    
+    this->ptp_transaction(&cmd, &data, false, &resp, NULL);
+    
+    return (resp.get_param_n(0) == CHDK_PTP_RC_OK);
 }

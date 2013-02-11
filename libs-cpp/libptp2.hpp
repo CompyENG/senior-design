@@ -67,6 +67,13 @@ enum CHDK_SCRIPT_STATUS {
     CHDK_SCRIPT_STATUS_MSG          // Messages waiting
 };
 
+enum CHDK_PTP_RESP {
+    CHDK_PTP_RC_OK = 0x2001,
+    CHDK_PTP_RC_GeneralError = 0x2002,
+    CHDK_PTP_RC_ParameterNotSupported = 0x2006,
+    CHDK_PTP_RC_InvalidParameter = 0x201D
+};
+
 // Have to define the helper class first, or I can't use it in CameraBase
 class PTPContainer {
     private:
@@ -150,7 +157,7 @@ class CHDKCamera : public CameraBase {
         uint32_t execute_lua(char * script, uint32_t * script_error, bool block=false);
         void read_script_message(PTPContainer * out_data, PTPContainer * out_resp);
         uint32_t write_script_message(char * message, uint32_t script_id=0);
-        bool upload_file(char * local_filename, char * remote_filename, int timeout);
+        bool upload_file(char * local_filename, char * remote_filename, int timeout=0);
         char * download_file(char * filename, int timeout);
         void get_live_view_data(LVData * data_out, bool liveview=true, bool overlay=false, bool palette=false);
         char * _wait_for_script_return(int timeout);
