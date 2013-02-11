@@ -148,7 +148,7 @@ class PTPCamera : public CameraBase {
 };
 
 class CHDKCamera : public CameraBase {
-    uint8_t * _pack_file_for_upload(uint32_t * out_size, char * local_filename, char * remote_filename=NULL);
+    static uint8_t * _pack_file_for_upload(uint32_t * out_size, char * local_filename, char * remote_filename=NULL);
     public:
         CHDKCamera();
         CHDKCamera(libusb_device *dev);
