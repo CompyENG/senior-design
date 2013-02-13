@@ -40,6 +40,66 @@
 #include "live_view.h"
 
 /**
+ * \mainpage libptp++ API Reference
+ * 
+ * \section intro Introduction
+ *
+ * libptp++ is an open-source C++ library for communicating with PTP devices in
+ * the easiest way possible.  It is a port and extension of the pyptp2 API to
+ * C++.  This API was chosen to avoid designing an API from the ground up, and
+ * because it seems to be fairly stable and useful.  However, the pyptp2 library
+ * was able to use some Python conveniences that aren't available in C++, so
+ * some additions have been made to this API.
+ *
+ * This library does not assume that the developer knows anyting about PTP, or
+ * how it handles its transactions over USB.  Instead, all these functions are
+ * abstracted out to library functions, and these library functions attempt to
+ * hide the underlying USB interface as much as possible.  In some cases, it is
+ * simply not feasibly to hide this interface, so it is exposed to the
+ * developer.
+ *
+ * \section gettingstarted Getting Started
+ *
+ * If you learn best by reading documentation, head over to the "Classes" page,
+ * and you can read an overview of what classes are available, as well as what
+ * functionality each of their methods provide.
+ *
+ * However, most likely, the "Examples" page will be more useful.  This library
+ * is designed so that a lot can be accomplished in as few calls as possible, so
+ * the examples should help get you a quick start to using libptp++.
+ */
+ 
+/**
+ * \page examples Examples
+ *
+ * Note: this page is mostly incomplete. More examples coming in the future.
+ *
+ * \section simple A Simple Example
+ *
+ * This example simply finds the first PTP camera available, connects to it,
+ * and asks CHDK to put the camera in "record" mode.
+\code
+libusb_init(NULL);  // Make sure to initialize libusb first!
+
+libusb_device * dev = CHDKCamera::find_first_camera();
+
+CHDKCamera cam; 
+cam.open(dev);
+
+// Execute a lua script to switch the camera to "Record" mode.
+//  Second parameter, error_code, is NULL, because we don't care if an error
+//  occurs, and we aren't blocking to wait for one.
+cam.execute_lua("switch_mode_usb(1)", NULL);
+
+// The camera is closed automatically when the cam object is destroyed
+
+// Be sure to exit libusb
+libusb_exit(NULL);
+\endcode
+ *
+ */
+
+/**
  * Initialize private and public \c CameraBase variables.
  */
 void CameraBase::init() {
