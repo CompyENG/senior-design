@@ -23,20 +23,20 @@ fi
 
 echo "Getting device information"
 # pull in useful variables from vol_id, quote everything Just In Case
-eval `/sbin/vol_id /dev/${DEVICE} | sed 's/^/export /; s/=/="/; s/$/"/'`
+eval `/sbin/blkid /dev/${DEVICE} | sed 's/^/export /; s/=/="/; s/$/"/'`
 
-if [ -z "$ID_FS_LABEL" ] || [ -z "$ID_FS_TYPE" ]; then
-   echo "error: ID_FS_LABEL is empty! did vol_id break? tried /dev/${DEVICE}"
+if [ -z "$LABEL" ] || [ -z "$TYPE" ]; then
+   echo "error: LABEL is empty! did blkid break? tried /dev/${DEVICE}"
    exit 1
 fi
 
 echo "Testing mountpoint"
 # test mountpoint - it shouldn't exist
-if [ ! -e "/media/${ID_FS_LABEL}" ]; then
+if [ ! -e "/media/${LABEL}" ]; then
     
     echo "Making mountpoint"
     # make the mountpoint
-    mkdir "/media/${ID_FS_LABEL}"
+    mkdir "/media/${LABEL}"
     
     echo "Mounting"
     # mount the device
@@ -50,17 +50,17 @@ if [ ! -e "/media/${ID_FS_LABEL}" ]; then
     #      mount -t auto -o uid=1000,gid=1000 [...]
     # 
     # 
-    case "$ID_FS_TYPE" in
+    case "$TYPE" in
 
-        vfat)   mount -t vfat -o sync,noatime,uid=1000 /dev/${DEVICE} "/media/${ID_FS_LABEL}"
+        vfat)   mount -t vfat -o sync,noatime,uid=1000 /dev/${DEVICE} "/media/${LABEL}"
                 ;;
 
                 # I like the locale setting for ntfs
-        ntfs)   mount -t auto -o sync,noatime,uid=1000,locale=en_US.UTF-8 /dev/${DEVICE} "/media/${ID_FS_LABEL}"
+        ntfs)   mount -t auto -o sync,noatime,uid=1000,locale=en_US.UTF-8 /dev/${DEVICE} "/media/${LABEL}"
                 ;;
 
                 # ext2/3/4 don't like uid option
-        ext*)   mount -t auto -o sync,noatime /dev/${DEVICE} "/media/${ID_FS_LABEL}"
+        ext*)   mount -t auto -o sync,noatime /dev/${DEVICE} "/media/${LABEL}"
                 ;;
     esac
    
@@ -70,13 +70,13 @@ if [ ! -e "/media/${ID_FS_LABEL}" ]; then
     DATE=`date "+%Y%m%d"`
     
     echo "Checking for update file"
-    if [ -f "/media/${ID_FS_LABEL}/update-${DATE}.tar.gz" ]; then
+    if [ -f "/media/${LABEL}/update-${DATE}.tar.gz" ]; then
         # Our update file exists. Let's make a new directory and copy it
         echo "Found update file. Extracting"
         mkdir /tmp/update-${DATE}
-        cp /media/${ID_FS_LABEL}/update-${DATE}.tar.gz
+        cp /media/${LABEL}/update-${DATE}.tar.gz
         
-        tar xvf /media/${ID_FS_LABEL}/update-${DATE}.tar.gz
+        tar xvf /media/${LABEL}/update-${DATE}.tar.gz
         
         echo "Checking for update script"
         if [ -f "/tmp/update-${DATE}/update.sh" ]; then
@@ -95,13 +95,13 @@ if [ ! -e "/media/${ID_FS_LABEL}" ]; then
     
     # Unmount the device and remove mountpoint
     # test mountpoint - it should exist
-    if [ -e "/media/${ID_FS_LABEL}" ]; then
+    if [ -e "/media/${LABEL}" ]; then
         
         echo "Unmounting drive"
         # very naive; just run and pray
-        umount -l "/media/${ID_FS_LABEL}" && rmdir "/media/${ID_FS_LABEL}" && exit 0
+        umount -l "/media/${LABEL}" && rmdir "/media/${LABEL}" && exit 0
         
-        echo "error: /media/${ID_FS_LABEL} failed to unmount."
+        echo "error: /media/${LABEL} failed to unmount."
         exit 1
     fi
 fi
