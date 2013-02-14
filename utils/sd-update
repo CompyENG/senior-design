@@ -23,7 +23,7 @@ fi
 
 echo "Getting device information"
 # pull in useful variables from vol_id, quote everything Just In Case
-eval `/sbin/blkid /dev/${DEVICE} | sed 's/^/export /; s/=/="/; s/$/"/'`
+eval `/sbin/blkid -o export /dev/${DEVICE} | sed 's/^/export /; s/=/="/; s/$/"/'`
 
 if [ -z "$LABEL" ] || [ -z "$TYPE" ]; then
    echo "error: LABEL is empty! did blkid break? tried /dev/${DEVICE}"
@@ -65,18 +65,18 @@ if [ ! -e "/media/${LABEL}" ]; then
     esac
    
     # Check for the presense of an update file
-    # TODO: No reason to limit this to today's date. Let's check for all dates,
-    #  sort and select the newest
-    DATE=`date "+%Y%m%d"`
+    UPDATE_FILE=`ls -Cr /media/${LABEL}/update-*.tar.gz | head -n 1`
     
     echo "Checking for update file"
-    if [ -f "/media/${LABEL}/update-${DATE}.tar.gz" ]; then
+    
+    if [ ! -z "$UPDATE_FILE" -a -f "${UPDATE_FILE}" ]; then
         # Our update file exists. Let's make a new directory and copy it
         echo "Found update file. Extracting"
         mkdir /tmp/update-${DATE}
-        cp /media/${LABEL}/update-${DATE}.tar.gz
+        #cp ${UPDATE_FILE} /tmp/update-${DATE}
         
-        tar xvf /media/${LABEL}/update-${DATE}.tar.gz
+        # We don't need to use a wildcard here, but it doesn't hurt
+        tar -C /tmp/update-${DATE} -xf ${UPDATE_FILE}
         
         echo "Checking for update script"
         if [ -f "/tmp/update-${DATE}/update.sh" ]; then
@@ -91,6 +91,8 @@ if [ ! -e "/media/${LABEL}" ]; then
             # Move back to old directory
             cd ${WD}
         fi
+        
+        rm -Rf /tmp/update-${DATE}
     fi
     
     # Unmount the device and remove mountpoint
