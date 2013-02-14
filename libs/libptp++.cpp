@@ -1,5 +1,5 @@
 /**
- * @file libptp2.cpp
+ * @file libptp++.cpp
  * 
  * @brief A conversion of pyptp2 and all that comes with it to C++
  * 
@@ -36,7 +36,7 @@
 
 #include <libusb-1.0/libusb.h>
 
-#include "libptp2.hpp"
+#include "libptp++.hpp"
 #include "live_view.h"
 
 /**
