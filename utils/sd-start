@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# This file is responsible for detecting which Pi we're on by querying the
+# hostname, then running the sd-submarine or sd-surface script.  This will be
+# called by our init.d script.
+

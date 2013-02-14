@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# This is an init.d file responsible for running sd-start on start, and sd-stop
+# on stop.
+

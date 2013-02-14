@@ -1,0 +1,5 @@
+# This is a udev rules file responsible for running sd-update on thumb drive
+# insert on the Pi.  sd-update will be responsible for mounting the thumb drive
+# to a reasonable location, checking for an update file, and running the update
+# file if necessary.
+

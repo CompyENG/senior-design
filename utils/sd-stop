@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# This file is responsible for stopping, in as graceful a way as possible, the
+# running executable so that we can finish shutting down.  Ideally, we should
+# attempt to shutdown gracefully, then only force if we haven't stopped the
+# process within x seconds.
+
