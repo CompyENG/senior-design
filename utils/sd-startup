@@ -1,5 +1,35 @@
 #!/bin/bash
+# /etc/init.d/sd-startup
+
+### BEGIN INIT INFO
+# Provides:          sd-startup
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Senior design submarine startup script
+# Description:       Runs a start or stop script which starts/stops the
+#                    submarine or surface executable, depending on the hostname
+### END INIT INFO
 
 # This is an init.d file responsible for running sd-start on start, and sd-stop
 # on stop.
 
+# Carry out specific functions when asked to by the system
+case "$1" in
+  start)
+    echo "Starting sd-startup"
+    /usr/sbin/sd-start
+    ;;
+  stop)
+    echo "Stopping sd-startup"
+    # kill application you want to stop
+    /usr/sbin/sd-stop
+    ;;
+  *)
+    echo "Usage: /etc/init.d/sd-startup {start|stop}"
+    exit 1
+    ;;
+esac
+
+exit 0
