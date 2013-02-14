@@ -4,3 +4,7 @@
 # temp folder, and builds an update package.  The result is an
 # update-YYYYMMDD.tar.gz file placed in the same directory as this script.
 
+DATE=`date "+%Y%m%d"`
+
+tar cvf update-${DATE}.tar.gz update.sh libs/* sd-submarine/* sd-surface/* utils/*
+
