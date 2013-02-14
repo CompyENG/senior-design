@@ -3,3 +3,6 @@
 # to a reasonable location, checking for an update file, and running the update
 # file if necessary.
 
+# ADD rule: if we have a valid ID_FS_LABEL_ENC, and it's USB, mkdir and mount
+ENV{ID_FS_LABEL_ENC}=="?*", ACTION=="add", SUBSYSTEMS=="usb", \
+         RUN+="/usr/sbin/sd-update %k"
