@@ -4,4 +4,4 @@
 # executable.  This will only be run on the Pi, so we can perform whatever build
 # optimizations we want.
 
-g++ -o sd-surface sd-surface.cpp -lSDL
+g++ -o sd-surface surface.cpp -lSDL
