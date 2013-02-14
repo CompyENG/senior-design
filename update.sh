@@ -42,3 +42,18 @@ fi
 # TODO: SFTP. An SFTP batch file will simply run SFTP commands.
 # I will also need to set up public key authentication so that we can SFTP
 # without providing credentials
+# TODO: I'll need to SFTP into root to have permissions to copy into the right
+#  locations, won't I?
+#  Alternatively, let's copy these to /tmp, then run a script to move them
+#  to the right place :/
+sftp pi@${OTHER_HOSTNAME} << EOF
+put /usr/lib/libptp++.so /usr/include/
+put /usr/include/libptp++.hpp /usr/include/
+put /usr/bin/sd-submarine /usr/bin/
+put /usr/bin/sd-surface /usr/bin/
+put /etc/udev/rules.d/90-senior-design.rules /etc/udev/rules.d/
+put /usr/sbin/sd-start /usr/sbin/
+put /usr/sbin/sd-stop /usr/sbin/
+put /usr/sbin/sd-update /usr/sbin/
+put /etc/init.d/sd-startup /etc/init.d/
+EOF
