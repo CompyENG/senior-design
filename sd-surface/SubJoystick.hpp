@@ -1,3 +1,6 @@
+#ifndef SUBJOYSTICK
+#define SUBJOYSTICK
+
 #include "SDL/SDL.h"
 #include <stdint.h>
 
@@ -14,3 +17,5 @@ class SubJoystick
 	void handle_input(SDL_Event myevent); //Handles joystick
 
 };
+
+#endif /* SUBJOYSTICK */
