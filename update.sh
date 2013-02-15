@@ -5,16 +5,23 @@
 # files into their correct locations.  Additionally, this script can communicate
 # with the other Pi to copy files to it over SFTP.
 
+echo "Running update script"
+
 # Build all necessary files
-bash ./libs/build-lib.sh
-bash ./sd-submarine/build-submarine.sh
+cd ./libs/
+bash ./build-lib.sh
+# Copy these files first, as they're necessary for later builds
+cp ./libptp++.so /usr/lib/
+cp ./libptp++.hpp /usr/include/
+cp ./live_view.h /usr/include/
+
+cd ../sd-submarine/
+bash ./build-submarine.sh
+cd ../sd-surface/
 bash ./sd-surface/build-surface.sh
+cd ../
 
 # Copy files to correct locations
-# Library files
-cp ./libs/libptp++.so /usr/lib/
-ldconfig # Run ldconfig to update the library cache
-cp ./libs/libptp++.hpp /usr/include/
 # Submarine file
 cp ./sd-submarine/sd-submarine /usr/bin/
 # Surface file
@@ -37,7 +44,7 @@ update-rc.d sd-startup defaults
 /etc/init.d/sd-startup start
 
 MY_HOSTNAME=`hostname -s`
-if [ $MY_HOSTNAME -eq "pi-surface" ]; then
+if [ "${MY_HOSTNAME}" = "pi-surface" ]; then
     OTHER_HOSTNAME="pi-submarine"
 else
     OTHER_HOSTNAME="pi-surface"
