@@ -1,0 +1,21 @@
+# Compiled Object files
+*.slo
+*.lo
+*.o
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+
+# Gedit files
+*~
+
+# Our project files
+sd-submarine/sd-submarine
+sd-surface/sd-surface
+update-*.tar.gz
