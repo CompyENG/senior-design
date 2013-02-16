@@ -5,3 +5,5 @@
 # optimizations we want.
 
 g++ -o sd-submarine submarine.cpp -lusb-1.0 -lptp++ 
+
+echo "g++ status: $?"

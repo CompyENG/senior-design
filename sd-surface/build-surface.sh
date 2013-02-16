@@ -5,3 +5,5 @@
 # optimizations we want.
 
 g++ -o sd-surface surface.cpp SubJoystick.cpp -lSDL
+
+echo "g++ status: $?"
