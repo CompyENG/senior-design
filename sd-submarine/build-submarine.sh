@@ -4,6 +4,7 @@
 # executable.  This will only be run on the Pi, so we can perform whatever build
 # optimizations we want.
 
+pwd
 g++ -o sd-submarine submarine.cpp -lusb-1.0 -lptp++ 
 
 echo "g++ status: $?"

@@ -6,6 +6,7 @@
 # with the other Pi to copy files to it over SFTP.
 
 echo "Running update script"
+pwd
 
 # Build all necessary files
 echo "Building and copying library"
