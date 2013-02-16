@@ -6,7 +6,11 @@
 # with the other Pi to copy files to it over SFTP.
 
 echo "Running update script"
-pwd
+
+# "Update light" -- Set GPIO 4 to output and turn on
+echo "4" | sudo tee /sys/class/gpio/export
+echo "output" | sudo tee /sys/class/gpio/gpio4/direction
+echo "1" | sudo tee /sys/class/gpio/gpio4/value
 
 # Build all necessary files
 echo "Building and copying library"
@@ -102,5 +106,9 @@ sudo cp -r /tmp/update/* /
 sudo /etc/init.d/sd-startup stop
 sudo /etc/init.d/sd-startup start
 EOF
+
+# "Update light" -- turn off and clean up
+echo "0" | sudo tee /sys/class/gpio/gpio4/value
+echo "4" | sudo tee /sys/class/gpio/unexport
 
 exit 0
