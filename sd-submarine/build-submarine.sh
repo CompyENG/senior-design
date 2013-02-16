@@ -5,6 +5,6 @@
 # optimizations we want.
 
 pwd
-g++ -o sd-submarine submarine.cpp -lusb-1.0 -lptp++ 
+g++ -o sd-submarine submarine.cpp Motor.cpp -lusb-1.0 -lptp++
 
 echo "g++ status: $?"
