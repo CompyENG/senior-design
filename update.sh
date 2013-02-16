@@ -60,7 +60,9 @@ fi
 echo "Detected that I am: ${MY_HOSTNAME}, other Pi is: ${OTHER_HOSTNAME}"
 
 echo "SSHing to make directories"
-ssh pi@${OTHER_HOSTNAME} << EOF
+# Run the rest of the script as user pi
+su - pi << EOSCRIPT
+ssh pi@$OTHER_HOSTNAME << EOF
 mkdir -p /tmp/update/usr/lib/
 mkdir -p /tmp/update/usr/include/
 mkdir -p /tmp/update/usr/bin/
@@ -76,7 +78,7 @@ EOF
 #  Alternatively, let's copy these to /tmp, then run a script to move them
 #  to the right place :/
 echo "Copying files"
-sftp pi@${OTHER_HOSTNAME} << EOF
+sftp pi@$OTHER_HOSTNAME << EOF
 put /usr/lib/libptp++.so /tmp/update/usr/lib/
 put /usr/include/libptp++.hpp /tmp/update/usr/include/
 put /usr/bin/sd-submarine /tmp/update/usr/bin/
@@ -95,8 +97,9 @@ EOF
 # This copy line might not be ideal, but it's fine as long as we set things up
 # correctly above.  We can always reimage the SD card if something goes wrong.
 echo "SSH to move files and restart UI"
-ssh pi@${OTHER_HOSTNAME} << EOF
+ssh pi@$OTHER_HOSTNAME << EOF
 sudo cp -r /tmp/update/* /
 sudo /etc/init.d/sd-startup stop
 sudo /etc/init.d/sd-startup start
 EOF
+EOSCRIPT
