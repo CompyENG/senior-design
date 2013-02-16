@@ -13,9 +13,9 @@ echo "Building and copying library"
 cd ./libs/
 bash ./build-lib.sh >> /tmp/update-log 2>&1
 # Copy these files first, as they're necessary for later builds
-cp ./libptp++.so /usr/lib/
-cp ./libptp++.hpp /usr/include/
-cp ./live_view.h /usr/include/
+sudo cp ./libptp++.so /usr/lib/
+sudo cp ./libptp++.hpp /usr/include/
+sudo cp ./live_view.h /usr/include/
 
 echo "Building submarine executable"
 cd ../sd-submarine/
@@ -23,7 +23,7 @@ bash ./build-submarine.sh >> /tmp/update-log 2>&1
 
 echo "Building surface executable"
 cd ../sd-surface/
-bash ./sd-surface/build-surface.sh >> /tmp/update-log 2>&1
+bash ./build-surface.sh >> /tmp/update-log 2>&1
 cd ../
 
 # Copy files to correct locations
