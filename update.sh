@@ -101,3 +101,5 @@ sudo cp -r /tmp/update/* /
 sudo /etc/init.d/sd-startup stop
 sudo /etc/init.d/sd-startup start
 EOF
+
+exit 0
