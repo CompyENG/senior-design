@@ -45,7 +45,8 @@ sudo update-rc.d sd-startup defaults
 
 # Restart udev to pickup new rules
 echo "Reloading udev"
-sudo /etc/init.d/udev restart
+#sudo /etc/init.d/udev restart
+sudo udevadm control --reload-rules
 
 # Restart the UI
 echo "Restarting UI"
