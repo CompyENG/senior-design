@@ -102,9 +102,9 @@ if [ ! -e "/media/${LABEL}" ]; then
     # test mountpoint - it should exist
     if [ -e "/media/${LABEL}" ]; then
         
-        echo "Unmounting drive"
+        echo "Unmounting drive" >> /tmp/update-log
         # very naive; just run and pray
-        umount "/media/${LABEL}" && rmdir "/media/${LABEL}" && exit 0
+        umount "/media/${LABEL}" && rmdir "/media/${LABEL}" && exit 0 >> /tmp/update-log 2>&1
         
         echo "error: /media/${LABEL} failed to unmount."
         exit 1
