@@ -55,6 +55,7 @@ int main(int argv, char * argc[]) {
             for(int8_t i=0;i<10;i++) {
                 cout << "nav_data[" << (int) i << "] = " << (int) nav_data[i] << endl;
             }
+            delete[] nav_data;
             
             // TODO: RECEIVE DATA, PROCESS, DISPLAY
 
