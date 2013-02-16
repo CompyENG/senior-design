@@ -8,6 +8,7 @@
 echo "Running update script"
 
 # Build all necessary files
+echo "Building and copying library"
 cd ./libs/
 bash ./build-lib.sh
 # Copy these files first, as they're necessary for later builds
@@ -15,13 +16,17 @@ cp ./libptp++.so /usr/lib/
 cp ./libptp++.hpp /usr/include/
 cp ./live_view.h /usr/include/
 
+echo "Building submarine executable"
 cd ../sd-submarine/
 bash ./build-submarine.sh
+
+echo "Building surface executable"
 cd ../sd-surface/
 bash ./sd-surface/build-surface.sh
 cd ../
 
 # Copy files to correct locations
+echo "Copying files locally"
 # Submarine file
 cp ./sd-submarine/sd-submarine /usr/bin/
 # Surface file
@@ -34,12 +39,15 @@ cp ./utils/sd-update /usr/sbin/
 cp ./utils/sd-startup /etc/init.d/
 
 # Update init.d files
+echo "Reloading init.d rules"
 update-rc.d sd-startup defaults
 
 # Restart udev to pickup new rules
+echo "Reloading udev"
 /etc/init.d/udev restart
 
 # Restart the UI
+echo "Restarting UI"
 /etc/init.d/sd-startup stop
 /etc/init.d/sd-startup start
 
@@ -49,7 +57,9 @@ if [ "${MY_HOSTNAME}" = "pi-surface" ]; then
 else
     OTHER_HOSTNAME="pi-surface"
 fi
+echo "Detected that I am: ${MY_HOSTNAME}, other Pi is: ${OTHER_HOSTNAME}"
 
+echo "SSHing to make directories"
 ssh pi@${OTHER_HOSTNAME} << EOF
 mkdir -p /tmp/update/usr/lib/
 mkdir -p /tmp/update/usr/include/
@@ -65,6 +75,7 @@ EOF
 #  locations, won't I?
 #  Alternatively, let's copy these to /tmp, then run a script to move them
 #  to the right place :/
+echo "Copying files"
 sftp pi@${OTHER_HOSTNAME} << EOF
 put /usr/lib/libptp++.so /tmp/update/usr/lib/
 put /usr/include/libptp++.hpp /tmp/update/usr/include/
@@ -83,6 +94,7 @@ EOF
 
 # This copy line might not be ideal, but it's fine as long as we set things up
 # correctly above.  We can always reimage the SD card if something goes wrong.
+echo "SSH to move files and restart UI"
 ssh pi@${OTHER_HOSTNAME} << EOF
 sudo cp -r /tmp/update/* /
 sudo /etc/init.d/sd-startup stop
