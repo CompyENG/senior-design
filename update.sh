@@ -9,7 +9,7 @@ echo "Running update script"
 
 # "Update light" -- Set GPIO 4 to output and turn on
 echo "4" | sudo tee /sys/class/gpio/export
-echo "output" | sudo tee /sys/class/gpio/gpio4/direction
+echo "out" | sudo tee /sys/class/gpio/gpio4/direction
 echo "1" | sudo tee /sys/class/gpio/gpio4/value
 
 # Build all necessary files
