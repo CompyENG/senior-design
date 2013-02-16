@@ -6,5 +6,7 @@
 
 DATE=`date "+%Y%m%d"`
 
-tar cvf update-${DATE}.tar.gz update.sh libs/* sd-submarine/* sd-surface/* utils/*
-
+# The git archive will contain some files we don't care about (build-update.sh,
+#  README.md, .gitattributes, .gitignore), but that's OK. Our update script will
+#  only deal with the ones we want, and the added files aren't much overhead
+git archive --format=tar.gz -o update-${DATE}.tar.gz master
