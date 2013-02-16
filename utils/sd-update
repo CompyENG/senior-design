@@ -73,11 +73,11 @@ if [ ! -e "/media/${LABEL}" ]; then
     if [ ! -z "$UPDATE_FILE" -a -f "${UPDATE_FILE}" ]; then
         # Our update file exists. Let's make a new directory and copy it
         echo "Found update file. Extracting"
-        mkdir /tmp/update-${DATE}
+        su - pi mkdir /tmp/update-${DATE}
         #cp ${UPDATE_FILE} /tmp/update-${DATE}
         
         # We don't need to use a wildcard here, but it doesn't hurt
-        tar -C /tmp/update-${DATE} -xf ${UPDATE_FILE}
+        su - pi tar -C /tmp/update-${DATE} -xf ${UPDATE_FILE}
         
         echo "Checking for update script"
         if [ -f "/tmp/update-${DATE}/update.sh" ]; then
@@ -88,7 +88,9 @@ if [ ! -e "/media/${LABEL}" ]; then
             
             echo "Running update script"
             # Run the update script
-            bash ./update.sh > /tmp/update-log 2>&1
+            # TODO: Allow the script to run as Pi, and sudo commands that need it
+            # (Currently not possible because we extract the tar.gz file as root w/o shell)
+            su - pi bash ./update.sh > /tmp/update-log 2>&1
             # Move back to old directory
             cd ${WD}
         fi
@@ -102,7 +104,7 @@ if [ ! -e "/media/${LABEL}" ]; then
         
         echo "Unmounting drive"
         # very naive; just run and pray
-        umount -l "/media/${LABEL}" && rmdir "/media/${LABEL}" && exit 0
+        umount "/media/${LABEL}" && rmdir "/media/${LABEL}" && exit 0
         
         echo "error: /media/${LABEL} failed to unmount."
         exit 1

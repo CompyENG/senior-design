@@ -29,28 +29,28 @@ cd ../
 # Copy files to correct locations
 echo "Copying files locally"
 # Submarine file
-cp ./sd-submarine/sd-submarine /usr/bin/
+sudo cp ./sd-submarine/sd-submarine /usr/bin/
 # Surface file
-cp ./sd-surface/sd-surface /usr/bin/
+sudo cp ./sd-surface/sd-surface /usr/bin/
 # util files
-cp ./utils/90-senior-design.rules /etc/udev/rules.d/
-cp ./utils/sd-start /usr/sbin/
-cp ./utils/sd-stop /usr/sbin/
-cp ./utils/sd-update /usr/sbin/
-cp ./utils/sd-startup /etc/init.d/
+sudo cp ./utils/90-senior-design.rules /etc/udev/rules.d/
+sudo cp ./utils/sd-start /usr/sbin/
+sudo cp ./utils/sd-stop /usr/sbin/
+sudo cp ./utils/sd-update /usr/sbin/
+sudo cp ./utils/sd-startup /etc/init.d/
 
 # Update init.d files
 echo "Reloading init.d rules"
-update-rc.d sd-startup defaults
+sudo update-rc.d sd-startup defaults
 
 # Restart udev to pickup new rules
 echo "Reloading udev"
-/etc/init.d/udev restart
+sudo /etc/init.d/udev restart
 
 # Restart the UI
 echo "Restarting UI"
-/etc/init.d/sd-startup stop
-/etc/init.d/sd-startup start
+sudo /etc/init.d/sd-startup stop
+sudo /etc/init.d/sd-startup start
 
 MY_HOSTNAME=`hostname -s`
 if [ "${MY_HOSTNAME}" = "pi-surface" ]; then
@@ -61,8 +61,6 @@ fi
 echo "Detected that I am: ${MY_HOSTNAME}, other Pi is: ${OTHER_HOSTNAME}"
 
 echo "SSHing to make directories"
-# Run the rest of the script as user pi
-su - pi << EOSCRIPT
 ssh pi@$OTHER_HOSTNAME << EOF
 mkdir -p /tmp/update/usr/lib/
 mkdir -p /tmp/update/usr/include/
@@ -103,4 +101,3 @@ sudo cp -r /tmp/update/* /
 sudo /etc/init.d/sd-startup stop
 sudo /etc/init.d/sd-startup start
 EOF
-EOSCRIPT
