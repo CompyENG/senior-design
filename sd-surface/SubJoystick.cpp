@@ -28,7 +28,7 @@ void SubJoystick::handle_input(SDL_Event event)
                 //If the F/R axis is neutral
                 if( ( event.jaxis.value > -8000 ) && ( event.jaxis.value < 8000 ) )
                 {
-                    commands[0] = 0;
+                    commands[FORWARD] = 0; 
                 }
                 //If not
                 else
@@ -36,11 +36,11 @@ void SubJoystick::handle_input(SDL_Event event)
                     //Change Direction
                     if( event.jaxis.value < 0 )
                     {
-                        commands[0] = -1;
+                        commands[FORWARD] = -1; //backward
                     }
                     else
                     {
-                        commands[0] = 1;
+                        commands[FORWARD] = 1; //forward
                     }
                 }
             }
@@ -50,7 +50,7 @@ void SubJoystick::handle_input(SDL_Event event)
                 //If the X axis is neutral
                 if( ( event.jaxis.value > -8000 ) && ( event.jaxis.value < 8000 ) )
                 {
-                    commands[1] = 0;
+                    commands[LEFT] = 0;
                 }
                 //If not
                 else
@@ -58,11 +58,11 @@ void SubJoystick::handle_input(SDL_Event event)
                     //Change Direction
                     if( event.jaxis.value < 0 )
                     {
-                        commands[1] = -1;
+                        commands[LEFT] = -1; //turn right
                     }
                     else
                     {
-                        commands[1] = 1;
+                        commands[LEFT] = 1;
                     }
                 }
             }
@@ -72,8 +72,7 @@ void SubJoystick::handle_input(SDL_Event event)
                 //If the axis is neutral
                 if( ( event.jaxis.value > -8000 ) && ( event.jaxis.value < 8000 ) )
                 {
-                    //stop pitch
-                    commands[2] = 0;
+                    commands[PITCH] = 0; //stop pitch
                 }
                 //If not
                 else
@@ -81,40 +80,38 @@ void SubJoystick::handle_input(SDL_Event event)
                     //change direction
                     if( event.jaxis.value < 0 )
                     {
-                        commands[2] = -1;
+                        commands[PITCH] = -1; //pitch down
                     }
                     else
                     {
-                        commands[2] = 1;
+                        commands[PITCH] = 1; //pitch up
                     }
                 }
             }
             //zoom in (commands[4)
             else if( event.jaxis.axis == 2 )
             {
-                //If the zoom in axis is neutral
-                if( event.jaxis.value < 8000 )
+                //If the zoom in axis is neutral and we're not zoooming out
+                if( event.jaxis.value < 8000 && commands[ZOOM] !=-1)
                 {
-                    commands[4] = 0;
+                    commands[ZOOM] = 0; 
                 }
-                //If not we're zooming in
                 else
                 {
-                    commands[4] = 1;
+                    commands[ZOOM] = 1; //Zoom In
                 }
             }
             //zoom out (commands[3])
             else if( event.jaxis.axis == 5 )
             {
                 //If the zoom out axis is neutral
-                if(  event.jaxis.value < 8000  )
+                if(  event.jaxis.value < 8000)
                 {
-                    commands[3] = 0;
+                    commands[ZOOM] = 0; 
                 }
-                //If not we're zooming out
                 else
                 {
-                    commands[3] = 1;
+                    commands[ZOOM] = -1; //Zoom out
                 }
             }
         }
@@ -125,47 +122,42 @@ void SubJoystick::handle_input(SDL_Event event)
         //taking a picture has priority
         if ( event.jbutton.button == 5 ) 
         {
-            commands[7] = 1;
+            commands[SHOOT] = 1; //Take Picture
         }
         //lights (toggle on button down)
         else if(event.jbutton.button == 4)
         {
-            if(commands[8] == 1) 
+            if(commands[LIGHTS] == 1) 
             {
-                commands[8] = 0;
+                commands[LIGHTS] = 0; //light off
             } 
             else
             {
-                commands[8] = 1;
+                commands[LIGHTS] = 1; //Light on
             }
         }
-        //ascend
         else if (event.jbutton.button == 3) 
         {
-            commands[6] = 1;
+            commands[ASCEND] = 1; //ascend
         }
-        //decend
         else if (event.jbutton.button == 0) {
-            commands[5] = 1;
+            commands[ASCEND] = -1; //decend
         }
     }
     //buttons released
     if(event.type == SDL_JOYBUTTONUP) {
-        
         //taking a picture has priority
         if ( event.jbutton.button == 5 ) 
         {
-            commands[7] = 0;
+            commands[SHOOT] = 0; //Take Picture
         }
-        //lights only change on button down
-        //ascend
+        //lights only change on button down 
         else if (event.jbutton.button == 3) 
         {
-            commands[6] = 0;
+            commands[ASCEND] = 0; //ascend
         }
-        //decend
         else if (event.jbutton.button == 0) {
-            commands[5] = 0;
+            commands[ASCEND] = 0; //decend
         }
     }
 }
