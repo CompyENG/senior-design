@@ -66,7 +66,7 @@ if [ ! -e "/media/${LABEL}" ]; then
    
     # Check for the presense of an update file
     UPDATE_FILE=`ls -Cr /media/${LABEL}/update-*.tar.gz | head -n 1`
-    DATE=`date "+%Y%m%d"`
+    DATE=`expr match "$UPDATE_FILE" '.*/update-\([0-9]\{8\}\).tar.gz'`
     
     echo "Checking for update file"
     
