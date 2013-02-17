@@ -60,7 +60,7 @@ int main(int argv, char * argc[]) {
             int8_t *nav_data = mySubJoystick.get_data();
             
             // TODO: SEND DATA HERE
-            for(int8_t i=0;i<10;i++) {
+            for(int8_t i=0;i<7;i++) {
                 cout << "nav_data[" << (int) i << "] = " << (int) nav_data[i] << endl;
             }
             delete[] nav_data;
