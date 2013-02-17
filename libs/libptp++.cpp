@@ -152,6 +152,8 @@ CameraBase::~CameraBase() {
 
 /**
  * Closes the opened camera object.
+ * @return true if successful
+ * @todo Check for errors in the calls
  */
 bool CameraBase::close() {
     if(this->handle != NULL) {
@@ -159,6 +161,7 @@ bool CameraBase::close() {
         libusb_close(this->handle);
         this->handle = NULL;
     }
+    return true;
 }
 
 /**
