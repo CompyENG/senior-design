@@ -1,12 +1,12 @@
 class Motor {
-    int pins[2];
-    static bool gpio_setup;
-    
     public:
-        const static int OFF = 0;
-        const static int FORWARD = 1;
-        const static int REVERSE = 2;
-        const static int BACKWARD = 3;
+        enum MotorDirection {
+            OFF = 0,
+            FORWARD = 1,
+            REVERSE = 2,
+            BACKWARD = 2,
+            UNKNOWN
+        };
         static bool setup_gpio();
         Motor();
         Motor(int * GPIO);
@@ -15,5 +15,11 @@ class Motor {
         bool spinBackward();
         bool spinReverse();
         bool stop();
-        bool spin(int direction);
+        bool spin(MotorDirection direction);
+        Motor::MotorDirection getState();
+        
+    private:
+        int pins[2];
+        static bool gpio_setup;
+        enum MotorDirection state;
 };

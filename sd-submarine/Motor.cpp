@@ -5,6 +5,7 @@
 bool Motor::gpio_setup = false;
 
 Motor::Motor(int * GPIO) {
+    this->state = UNKNOWN;
     // Set up GPIO (if it hasn't been already)
     this->setup_gpio();
     // Set up the pins we received
@@ -12,6 +13,7 @@ Motor::Motor(int * GPIO) {
 }
 
 Motor::Motor() {
+    this->state = UNKNOWN;
     // Set up GPIO (if it hasn't been already)
     this->setup_gpio();
 }
@@ -36,16 +38,19 @@ bool Motor::setup(int * GPIO) {
     bcm2835_gpio_fsel(pins[0], BCM2835_GPIO_FSEL_OUTP);
     bcm2835_gpio_fsel(pins[1], BCM2835_GPIO_FSEL_OUTP);
     
+    // Make sure the motor is stopped when we set it up
+    //  This will also set up our state
+    this->stop();
+    
     return true;
 }
 
-bool Motor::spin(int direction) {
+bool Motor::spin(MotorDirection direction) {
     switch(direction) {
         case Motor::FORWARD:
             return this->spinForward();
             break;
-        case Motor::BACKWARD:
-        case Motor::REVERSE:
+        case Motor::BACKWARD:   // Will also catch reverse, since they have the same value
             return this->spinReverse();
             break;
         case Motor::OFF:
@@ -64,6 +69,8 @@ bool Motor::spinForward() {
     
     bcm2835_gpio_write(pins[0], LOW);
     bcm2835_gpio_write(pins[1], HIGH);
+    
+    this->state = FORWARD;
     // It seems the bcm2835 library doesn't let us detect if this works.  This
     //  class was designed with bools in the hopes that I could. Oh well... :/
     return true;
@@ -74,6 +81,8 @@ bool Motor::spinReverse() {
     
     bcm2835_gpio_write(pins[0], LOW); // Always set low first
     bcm2835_gpio_write(pins[1], HIGH);
+    
+    this->state = REVERSE;
     return true;
 }
 
@@ -87,6 +96,10 @@ bool Motor::stop() {
     bcm2835_gpio_write(pins[0], LOW);
     bcm2835_gpio_write(pins[1], LOW);
     
+    this->state = OFF;
     return true;
 }
-    
+
+Motor::MotorDirection Motor::getState() {
+    return this->state;
+}
