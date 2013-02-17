@@ -146,6 +146,18 @@ CameraBase::~CameraBase() {
     if(this->handle != NULL) {
         libusb_release_interface(this->handle, this->intf->bInterfaceNumber);
         libusb_close(this->handle);
+        this->handle = NULL;
+    }
+}
+
+/**
+ * Closes the opened camera object.
+ */
+bool CameraBase::close() {
+    if(this->handle != NULL) {
+        libusb_release_interface(this->handle, this->intf->bInterfaceNumber);
+        libusb_close(this->handle);
+        this->handle = NULL;
     }
 }
 

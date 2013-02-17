@@ -61,8 +61,7 @@ int main(int argv, char * argc[]) {
         free(lv_rgb);
     }
     
-    // I... DON'T need to do this...? My destructor does it anyway :/
-    //cam.close();
+    cam.close();
     
     libusb_exit(NULL);
     
