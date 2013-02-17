@@ -99,6 +99,8 @@ bool setup_camera(CHDKCamera * cam, int * error) {
     usleep(500 * 10^3);   // Sleep for half a second -- TODO: Block instead?
     cam->execute_lua("set_prop(143, 2)", NULL); // Set flash mode to off
     usleep(500 * 10^3);
+    
+    return true;
 }
 
 void setup_motors(Motor * subMotors) {
