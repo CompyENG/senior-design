@@ -5,5 +5,12 @@ int MOTOR_PINS[4][2] = {
     {17, 27}
 };
 
+enum Submarine_Motors {
+    MOTOR_LEFT,
+    MOTOR_RIGHT,
+    MOTOR_TOP_FRONT,
+    MOTOR_TOP_REAR
+};
+
 bool setup_camera(CHDKCamera * cam, int * error);
 void setup_motors(Motor * subMotors);
