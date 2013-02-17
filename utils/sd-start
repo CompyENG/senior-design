@@ -4,3 +4,10 @@
 # hostname, then running the sd-submarine or sd-surface script.  This will be
 # called by our init.d script.
 
+MY_HOSTNAME=`hostname -s`
+
+if [ $MY_HOSTNAME = "pi-surface" ]; then
+    /usr/bin/sd-surface > /tmp/surface-log &
+else
+    /usr/bin/sd-submarine > /tmp/submarine-log &
+fi

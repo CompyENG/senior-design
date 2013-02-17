@@ -5,3 +5,6 @@
 # attempt to shutdown gracefully, then only force if we haven't stopped the
 # process within x seconds.
 
+# Attempt to shut down
+killall -2 /usr/bin/sd-surface
+killall -2 /usr/bin/sd-submarine
