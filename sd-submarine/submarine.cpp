@@ -6,21 +6,34 @@
 // We need the sub joystick class so we can reuse our data struct
 #include "../sd-surface/SubJoystick.hpp"
 #include "Motor.hpp"
+#include "../common/SignalHandler.hpp"
 #include "submarine.hpp"
 
 int main(int argv, char * argc[]) {
     int error;
     CHDKCamera cam;
     Motor subMotors[4]; // We need to control 4 motors
-    bool quit = false;
+    SignalHandler signalHandler;
+    LVData lv;
+    uint8_t * lv_rgb;
+    uint32_t size, width, height;
+    uint16_t send_width, send_height;
+    
+    // Set up our signal handler(s)
+    try {
+        signalHandler.setupSignalHandlers();
+    } catch(int e) {
+        cout << "Fatal error: Unable to setup signal handler. Exception: " << e << endl;
+        return 1;
+    }
     
     // Keep trying to set up the camera until something tells us to stop
-    while(setup_camera(&cam, &error) == false && quit == false) {
+    while(setup_camera(&cam, &error) == false && signalHandler.gotExitSignal() == false) {
         cout << "Error setting up camera: " << error << " -- Trying again" << endl;
     }
-    if(quit == true) {
-        cout << "Failed to set up camera. Quitting. Last error: " << error << endl;
-        return 1;
+    if(signalHandler.gotExitSignal() == true) {
+        cout << "Fatal error: Failed to set up camera. Quitting. Last error: " << error << endl;
+        return 2;
     }
     
     cout << "Camera is ready" << endl;
@@ -31,16 +44,12 @@ int main(int argv, char * argc[]) {
     cout << "Motors are ready" << endl;
     
     // TODO: Signal handler to allow us to quit loop when we receive SIGUSR1
-    while(1) {
+    while(signalHandler.gotExitSignal() == false) {
         // TODO: Receive data
         
         // TODO: Motor control
         
-        LVData lv;
         cam.get_live_view_data(&lv, true);
-        uint8_t * lv_rgb;
-        uint32_t size, width, height;
-        uint16_t send_width, send_height;
         lv_rgb = lv.get_rgb((int *)&size, (int *)&width, (int *)&height, true);
         
         send_width = 0xFFFF & width; // Just chop off the higher bytes
@@ -49,11 +58,11 @@ int main(int argv, char * argc[]) {
         //  Protocol: send size as four bytes, then width and height as two bytes
         //   then, send live view data
         
-        
         free(lv_rgb);
     }
     
-    cam.close();
+    // I... DON'T need to do this...? My destructor does it anyway :/
+    //cam.close();
     
     libusb_exit(NULL);
     
