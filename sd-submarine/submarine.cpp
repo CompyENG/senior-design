@@ -16,7 +16,7 @@ int main(int argv, char * argc[]) {
     SignalHandler signalHandler;
     LVData lv;
     uint8_t * lv_rgb;
-    uint32_t size, width, height;
+    uint32_t size, width, height, send_dimensions;
     uint16_t send_width, send_height;
     int8_t * joy_data;
     uint32_t joy_data_len;
@@ -190,8 +190,8 @@ int main(int argv, char * argc[]) {
         cam.get_live_view_data(&lv, true);
         lv_rgb = lv.get_rgb((int *)&size, (int *)&width, (int *)&height, true);
         
-        send_width = 0xFFFF & width; // Just chop off the higher bytes
-        send_height = 0xFFFF & height;
+        // Manipulate dimensions to send as one 32-bit data piece
+        send_dimensions = ((0xFFFF & send_width) << 16) | (0xFFFF & send_height);
         // TODO: Send live view data
         //  Protocol: send size as four bytes, then width and height as two bytes
         //   then, send live view data
