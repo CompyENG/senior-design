@@ -248,7 +248,7 @@ void setup_motors(Motor * subMotors) {
     }
 }
 
-bool compare_states(int * sub_state, int * joy_data) {
+bool compare_states(int8_t * sub_state, int8_t * joy_data) {
     // Returns true if the states are the same, false otherwise
     for(int i=0; i < 7; i++) {
         if(*(sub_state+i) != *(joy_data+i)) return false;

@@ -14,4 +14,4 @@ enum Submarine_Motors {
 
 bool setup_camera(CHDKCamera * cam, int * error);
 void setup_motors(Motor * subMotors);
-bool compare_states(int * sub_state, int * joy_data);
+bool compare_states(int8_t * sub_state, int8_t * joy_data);
