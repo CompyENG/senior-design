@@ -9,7 +9,7 @@ using namespace std;
 class SubJoystick
 {
     private:
-    int8_t commands[9]; //The commands to send
+    int8_t commands[6]; //The commands to send
 	
 	enum SubCommand {
 		FORWARD = 0, // 1 for forward, -1 for backward, 0 for neither 
