@@ -2,12 +2,20 @@
 #include <iostream>
 #include <string>
 
+#include "../common/SignalHandler.hpp"
 #include "surface.hpp"
 #include "SubJoystick.hpp"
 
 int main(int argv, char * argc[]) {
-    //Quit flag
-    bool quit = false;
+    bool quit = false; // Optional SDL_QUIT handler -- We can also use this as a shutdown from the joystick
+    // Set up signal handler
+    SignalHandler signalHandler;
+    try {
+        signalHandler.setupSignalHandlers();
+    } catch(int e) {
+        cout << "Fatal error: Unable to setup signal handler. Exception: " << e << endl;
+        return 1;
+    }
 
     //The event structure
     SDL_Event event;
@@ -16,14 +24,14 @@ int main(int argv, char * argc[]) {
     if( init() == false )
     {
         cout << "init() failed" << endl;
-        return 1;
+        return 2;
     }
     
     //Check if there's any joysticks
     if( SDL_NumJoysticks() < 1 )
     {
         cout << "No Joysticks Found" << endl;
-        return false;
+        return 3;
     }
 
     //Open the joystick
@@ -33,7 +41,7 @@ int main(int argv, char * argc[]) {
     if( stick == NULL )
     {
         cout << "Could not open Joystick" << endl;
-        return false;
+        return 4;
     }
 
     //Make the Sub
@@ -41,7 +49,7 @@ int main(int argv, char * argc[]) {
 
 
     //While the user hasn't quit
-    while( quit == false )
+    while( signalHandler.gotExitSignal() == false && quit == false )
     {
         //While there's events to handle
         while( SDL_PollEvent( &event ) )
