@@ -72,7 +72,12 @@ if [ ! -e "/media/${LABEL}" ]; then
     
     if [ ! -z "$UPDATE_FILE" -a -f "${UPDATE_FILE}" ]; then
         # Our update file exists. Let's make a new directory and copy it
-        echo "Found update file. Extracting"
+        echo "Found update file. Setting date and extracting"
+        # Changing the date prevents warnings when we extract the tar file
+        #  Also, some scripts may error out if the last modified date is greater
+        #  than the current date. This gets around that.
+        LAST_MOD=`state -c %Y ${UPDATE_FILE}`
+        sudo date -s "@`expr $LAST_MOD + 1`"
         sudo -u pi mkdir /tmp/update-${DATE}
         #cp ${UPDATE_FILE} /tmp/update-${DATE}
         
