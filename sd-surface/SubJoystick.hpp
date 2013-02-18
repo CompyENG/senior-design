@@ -10,8 +10,12 @@ class SubJoystick
 {
     private:
     int8_t commands[6]; //The commands to send
-	
-	enum SubCommand {
+    
+    public:
+    SubJoystick(); //Initializes
+    int8_t * get_data(); //gets data to send
+    void handle_input(SDL_Event myevent); //Handles joystick
+    enum SubCommand {
 		FORWARD = 0, // 1 for forward, -1 for backward, 0 for neither 
 		LEFT, // 1 for left, -1 for right, 0 for neither
 		PITCH, // 1 for up, -1 for down, 0 for neither
@@ -20,11 +24,6 @@ class SubJoystick
 		SHOOT, // 1 for "take a picture", 0 for don't
 		LIGHTS // 1 when lights should be on, 0 when lights should be off
 	};
-
-    public:
-    SubJoystick(); //Initializes
-    int8_t * get_data(); //gets data to send
-    void handle_input(SDL_Event myevent); //Handles joystick
 
 };
 
