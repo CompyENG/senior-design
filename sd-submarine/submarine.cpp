@@ -2,12 +2,18 @@
 #include <unistd.h>
 #include <libptp++.hpp>
 #include <libusb-1.0/libusb.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 // We need the sub joystick class so we can reuse our data struct
 #include "../sd-surface/SubJoystick.hpp"
 #include "Motor.hpp"
 #include "../common/SignalHandler.hpp"
 #include "submarine.hpp"
+
+#define BUFFER_SIZE 2048
 
 int main(int argv, char * argc[]) {
     int error;
@@ -47,9 +53,40 @@ int main(int argv, char * argc[]) {
     setup_motors(subMotors);
     cout << "Motors are ready" << endl;
     
+    // Set up network connection
+    char recv_data[1024];
+    int sock, connected, bytes_received;
+    struct sockaddr_in server_addr,client_addr;
+    socklen_t sin_size;
+    
+    sock = socket(AF_INET, SOCK_STREAM, 0);
+    
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(50000);
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    bzero(&(server_addr.sin_zero), 8);
+    
+    bind(sock, (struct sockaddr *)&server_addr, sizeof(struct sockaddr));
+    
+    listen(sock, 5);
+    
+    //int count = 0;
+    
+    // We only need one connection, so let's accept it here
+    sin_size = sizeof(struct sockaddr_in);
+    
+    connected = accept(sock, (struct sockaddr *)&client_addr, &sin_size);
+    
+    printf("\n I got a connection from (%s , %d)", inet_ntoa(client_addr.sin_addr),ntohs(client_addr.sin_port));
+    
+    uint32_t recv_size;
+    
     // TODO: Signal handler to allow us to quit loop when we receive SIGUSR1
     while(signalHandler.gotExitSignal() == false) {
-        // TODO: Receive data
+        // Get joystick size, then data
+        recv(connected, &recv_size, 4, 0);
+        int8_t * joy_data = (int8_t *)malloc(recv_size);
+        bytes_received = recv(connected, joy_data, recv_size, 0); // Read joystick data
         
         // TODO: Motor control
         // NOTE: This is what I imagine receiving will be like. We might need
@@ -195,6 +232,19 @@ int main(int argv, char * argc[]) {
         // TODO: Send live view data
         //  Protocol: send size as four bytes, then width and height as two bytes
         //   then, send live view data
+        send(connected, &size, 4, 0); // Send four bytes of size
+        send(connected, &send_dimensions, 4, 0);
+        
+        cout << "Sending data of size: " << size << endl;
+        
+        int sent = 0;
+        while(sent < size) {
+            if(size - sent < BUFFER_SIZE) {
+                sent += send(connected, lv_rgb+sent, size-sent, 0);
+            } else {
+                sent += send(connected, lv_rgb+sent, BUFFER_SIZE, 0);
+            }
+        }
         
         free(lv_rgb);
     }
