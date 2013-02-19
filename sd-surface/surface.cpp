@@ -42,7 +42,7 @@ int main(int argv, char * argc[]) {
     }
     
     // Set up screen
-    SDL_VideoInfo* videoInfo = SDL_GetVideoInfo();
+    const SDL_VideoInfo* videoInfo = SDL_GetVideoInfo();
     screen = SDL_SetVideoMode( videoInfo->current_w, videoInfo->current_h, videoInfo->vfmt->BitsPerPixel, SDL_FULLSCREEN | SDL_SWSURFACE );
     
     //Check if there's any joysticks
