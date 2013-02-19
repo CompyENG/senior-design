@@ -46,7 +46,7 @@ int main(int argv, char * argc[]) {
     //cout << "Width: " << videoInfo->current_w << endl;
     //cout << "Height: " << videoInfo->current_h << endl;
     //cout << "BPP: " << videoInfo->vfmt->BitsPerPixel << endl;
-    screen = SDL_SetVideoMode( 640, 480, 32, SDL_FULLSCREEN | SDL_SWSURFACE );
+    screen = SDL_SetVideoMode( 640, 480, 16, SDL_FULLSCREEN | SDL_SWSURFACE );
     
     //Check if there's any joysticks
     if( SDL_NumJoysticks() < 1 )
