@@ -9,7 +9,7 @@ using namespace std;
 class SubJoystick
 {
     private:
-    int8_t commands[6]; //The commands to send
+    int8_t commands[7]; //The commands to send
     
     public:
     SubJoystick(); //Initializes

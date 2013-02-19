@@ -1,6 +1,10 @@
 #include <SDL/SDL.h>
 #include <iostream>
 #include <string>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 #include "../common/SignalHandler.hpp"
 #include "surface.hpp"
@@ -60,7 +64,7 @@ int main(int argv, char * argc[]) {
             int8_t *nav_data = mySubJoystick.get_data();
             
             // TODO: SEND DATA HERE
-            for(int8_t i=0;i<7;i++) {
+            for(int8_t i=0;i<8;i++) {
                 cout << "nav_data[" << (int) i << "] = " << (int) nav_data[i] << endl;
             }
             delete[] nav_data;

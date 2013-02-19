@@ -9,7 +9,7 @@ using namespace std;
 SubJoystick::SubJoystick()
 {
     //Initialize the commands (and make sure they all start at 0)
-    bzero(commands, 9);
+    bzero(commands, 7);
     //forward/back||left/right||pitch up/down||zoom out||zoom in||descend||ascend||take picture//lights
     
 }
@@ -166,9 +166,9 @@ void SubJoystick::handle_input(SDL_Event event)
 int8_t *SubJoystick::get_data() {
     
     int8_t data_length = sizeof(commands);
-    int8_t *to_send = new int8_t[7];
+    int8_t *to_send = new int8_t[8];
     to_send[0] = data_length;
-    for(int8_t i=0;i<6;i++) 
+    for(int8_t i=0;i<7;i++) 
     {
         to_send[i+1] = commands[i];
     }
