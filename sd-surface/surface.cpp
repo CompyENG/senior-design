@@ -14,6 +14,7 @@
 
 int main(int argv, char * argc[]) {
     SDL_Surface *screen = NULL;
+    SDL_Surface *surf_lv = NULL;
     bool quit = false; // Optional SDL_QUIT handler -- We can also use this as a shutdown from the joystick
     // Set up signal handler
     SignalHandler signalHandler;
