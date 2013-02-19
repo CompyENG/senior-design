@@ -13,6 +13,7 @@
 #define BUFFER_SIZE 2048
 
 int main(int argv, char * argc[]) {
+    SDL_Surface *screen = NULL;
     bool quit = false; // Optional SDL_QUIT handler -- We can also use this as a shutdown from the joystick
     // Set up signal handler
     SignalHandler signalHandler;
@@ -32,6 +33,9 @@ int main(int argv, char * argc[]) {
         cout << "init() failed" << endl;
         return 2;
     }
+    
+    // Set up screen
+    screen = SDL_SetVideoMode( 640, 480, 32, SDL_SWSURFACE );
     
     //Check if there's any joysticks
     if( SDL_NumJoysticks() < 1 )
@@ -117,6 +121,17 @@ int main(int argv, char * argc[]) {
                 recvd += recv(sock, lv_data+recvd, BUFFER_SIZE, 0);
             }
         }
+        // Put in a surface
+        surf_lv = SDL_CreateRGBSurfaceFrom(lv_data, width, height, 24, width*3, 0x0000ff, 0x00ff00, 0xff0000, 0);
+        
+        //Apply image to screen
+        SDL_BlitSurface( surf_lv, NULL, screen, NULL );
+        
+        SDL_Flip( screen );
+        
+        //SDL_Delay(10);
+        
+        SDL_FreeSurface( surf_lv );
         free(lv_data);
 
         
