@@ -294,7 +294,10 @@ void setup_motors(Motor * subMotors) {
     int i;
     
     for(i=0;i<4;i++) {
-        subMotors[i].setup(MOTOR_PINS[i]);
+        cout << "Setting up motor #" << i << endl;
+        bool m;
+        m = subMotors[i].setup(MOTOR_PINS[i]);
+        cout << "Success? " << m << endl;
     }
 }
 
