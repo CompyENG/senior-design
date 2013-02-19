@@ -92,6 +92,9 @@ if [ ! -e "/media/${LABEL}" ]; then
             cd /tmp/update-${DATE}
             
             echo "Running update script"
+            # Need to create update log and chmod it first, so Pi can write to it
+            touch /tmp/update-log
+            chmod 777 /tmp/update-log
             # Run the update script
             # TODO: Allow the script to run as Pi, and sudo commands that need it
             # (Currently not possible because we extract the tar.gz file as root w/o shell)
