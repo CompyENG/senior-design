@@ -42,11 +42,11 @@ int main(int argv, char * argc[]) {
     }
     
     // Set up screen
-    const SDL_VideoInfo* videoInfo = SDL_GetVideoInfo();
-    cout << "Width: " << videoInfo->current_w << endl;
-    cout << "Height: " << videoInfo->current_h << endl;
-    cout << "BPP: " << videoInfo->vfmt->BitsPerPixel << endl;
-    screen = SDL_SetVideoMode( videoInfo->current_w, videoInfo->current_h, videoInfo->vfmt->BitsPerPixel, SDL_FULLSCREEN | SDL_SWSURFACE );
+    //const SDL_VideoInfo* videoInfo = SDL_GetVideoInfo();
+    //cout << "Width: " << videoInfo->current_w << endl;
+    //cout << "Height: " << videoInfo->current_h << endl;
+    //cout << "BPP: " << videoInfo->vfmt->BitsPerPixel << endl;
+    screen = SDL_SetVideoMode( 640, 480, SDL_FULLSCREEN | SDL_SWSURFACE );
     
     //Check if there's any joysticks
     if( SDL_NumJoysticks() < 1 )
@@ -135,16 +135,18 @@ int main(int argv, char * argc[]) {
             }
         }
         // Put in a surface
-        surf_lv = SDL_CreateRGBSurfaceFrom(lv_data, width, height, 24, width*3, 0x0000ff, 0x00ff00, 0xff0000, 0);
-        
-        //Apply image to screen
-        SDL_BlitSurface( surf_lv, NULL, screen, NULL );
-        
-        SDL_Flip( screen );
-        
-        //SDL_Delay(10);
-        
-        SDL_FreeSurface( surf_lv );
+        if(recv_size > 0) {
+            surf_lv = SDL_CreateRGBSurfaceFrom(lv_data, width, height, 24, width*3, 0x0000ff, 0x00ff00, 0xff0000, 0);
+            
+            //Apply image to screen
+            SDL_BlitSurface( surf_lv, NULL, screen, NULL );
+            
+            SDL_Flip( screen );
+            
+            //SDL_Delay(10);
+            
+            SDL_FreeSurface( surf_lv );
+        }
         free(lv_data);
 
         
