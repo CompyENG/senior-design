@@ -25,7 +25,7 @@ int main(int argv, char * argc[]) {
         return 1;
     }
     
-    if(argc < 2) {
+    if(argv < 2) {
         // Really lame way of doing this
         // Prevent us from running...
         return 1;
