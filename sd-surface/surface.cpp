@@ -42,6 +42,7 @@ int main(int argv, char * argc[]) {
     if( SDL_NumJoysticks() < 1 )
     {
         cout << "No Joysticks Found" << endl;
+        clean_up(NULL);
         return 3;
     }
 
@@ -52,6 +53,7 @@ int main(int argv, char * argc[]) {
     if( stick == NULL )
     {
         cout << "Could not open Joystick" << endl;
+        clean_up(NULL);
         return 4;
     }
 
@@ -158,8 +160,10 @@ bool init()
 
 void clean_up(SDL_Joystick *stick)
 {
-    //Close the joystick
-    SDL_JoystickClose( stick );
+    if(stick != NULL) {
+        //Close the joystick
+        SDL_JoystickClose( stick );
+    }
 
     //Quit SDL
     SDL_Quit();
