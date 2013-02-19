@@ -84,11 +84,12 @@ int main(int argv, char * argc[]) {
             for(int8_t i=0;i<8;i++) {
                 cout << "nav_data[" << (int) i << "] = " << (int) nav_data[i] << endl;
             }
-            delete[] nav_data;
+            //delete[] nav_data;
             
             uint32_t send_size = (uint32_t)nav_data[0];
             send(sock, &send_size, 4, 0);
             send(sock, nav_data, send_size, 0);
+            delete[] nav_data;
             // Get live view data
             // Receive size
             uint32_t recv_size = 0;
