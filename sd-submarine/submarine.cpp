@@ -228,7 +228,7 @@ int main(int argv, char * argc[]) {
         lv_rgb = lv.get_rgb((int *)&size, (int *)&width, (int *)&height, true);
         
         // Manipulate dimensions to send as one 32-bit data piece
-        send_dimensions = ((0xFFFF & send_width) << 16) | (0xFFFF & send_height);
+        send_dimensions = ((0xFFFF & width) << 16) | (0xFFFF & height);
         // TODO: Send live view data
         //  Protocol: send size as four bytes, then width and height as two bytes
         //   then, send live view data
