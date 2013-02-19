@@ -46,7 +46,7 @@ int main(int argv, char * argc[]) {
     //cout << "Width: " << videoInfo->current_w << endl;
     //cout << "Height: " << videoInfo->current_h << endl;
     //cout << "BPP: " << videoInfo->vfmt->BitsPerPixel << endl;
-    screen = SDL_SetVideoMode( 640, 480, SDL_FULLSCREEN | SDL_SWSURFACE );
+    screen = SDL_SetVideoMode( 640, 480, 32, SDL_FULLSCREEN | SDL_SWSURFACE );
     
     //Check if there's any joysticks
     if( SDL_NumJoysticks() < 1 )
@@ -120,8 +120,8 @@ int main(int argv, char * argc[]) {
         uint32_t recv_size = 0;
         uint16_t width, height;
         recv(sock, &recv_size, 4, 0); // Size is four bytes long
-        recv(sock, &width, 2, 0); // Width is two bytes long
-        recv(sock, &height, 2, 0); // Height is two bytes long
+        recv(sock, &height, 2, 0); // Width is two bytes long
+        recv(sock, &width, 2, 0); // Height is two bytes long
         cout << "Going to receive: " << recv_size << endl;
         cout << "Width: " << width << " ; Height: " << height << endl;
         //int bytes_recvd;
