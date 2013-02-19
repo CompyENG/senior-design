@@ -24,6 +24,12 @@ int main(int argv, char * argc[]) {
         cout << "Fatal error: Unable to setup signal handler. Exception: " << e << endl;
         return 1;
     }
+    
+    if(argc < 2) {
+        // Really lame way of doing this
+        // Prevent us from running...
+        return 1;
+    }
 
     //The event structure
     SDL_Event event;
