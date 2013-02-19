@@ -10,6 +10,8 @@
 #include "surface.hpp"
 #include "SubJoystick.hpp"
 
+#define BUFFER_SIZE 2048
+
 int main(int argv, char * argc[]) {
     bool quit = false; // Optional SDL_QUIT handler -- We can also use this as a shutdown from the joystick
     // Set up signal handler
@@ -50,7 +52,22 @@ int main(int argv, char * argc[]) {
 
     //Make the Sub
     SubJoystick mySubJoystick;
+    
+    // Connect to the submarine
+    int sock, bytes_recieved;
+    struct hostent *host;
+    struct sockaddr_in server_addr;
 
+    host = gethostbyname("pi-submarine");
+
+    sock = socket(AF_INET, SOCK_STREAM,0);
+
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(50000);
+    server_addr.sin_addr = *((struct in_addr *)host->h_addr);
+    bzero(&(server_addr.sin_zero),8);
+
+    connect(sock, (struct sockaddr *)&server_addr,sizeof(struct sockaddr));
 
     //While the user hasn't quit
     while( signalHandler.gotExitSignal() == false && quit == false )
@@ -69,7 +86,29 @@ int main(int argv, char * argc[]) {
             }
             delete[] nav_data;
             
-            // TODO: RECEIVE DATA, PROCESS, DISPLAY
+            uint32_t send_size = (uint32_t)nav_data[0];
+            send(sock, &send_size, 4, 0);
+            send(sock, nav_data, send_size, 0);
+            // Get live view data
+            // Receive size
+            uint32_t recv_size = 0;
+            uint16_t width, height;
+            recv(sock, &recv_size, 4, 0); // Size is four bytes long
+            recv(sock, &width, 2, 0); // Width is two bytes long
+            recv(sock, &height, 2, 0); // Height is two bytes long
+            cout << "Going to receive: " << recv_size << endl;
+            cout << "Width: " << width << " ; Height: " << height << endl;
+            //int bytes_recvd;
+            uint8_t * lv_data = (uint8_t *)malloc(recv_size);
+            int recvd = 0;
+            while(recvd < recv_size) {
+                if(recv_size-recvd < BUFFER_SIZE) {
+                    recvd += recv(sock, lv_data+recvd, recv_size-recvd, 0);
+                } else {
+                    recvd += recv(sock, lv_data+recvd, BUFFER_SIZE, 0);
+                }
+            }
+            free(lv_data);
 
             //If the user has Xed out the window
             if( event.type == SDL_QUIT )
