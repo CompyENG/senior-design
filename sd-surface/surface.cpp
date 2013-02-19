@@ -43,6 +43,9 @@ int main(int argv, char * argc[]) {
     
     // Set up screen
     const SDL_VideoInfo* videoInfo = SDL_GetVideoInfo();
+    cout << "Width: " << videoInfo->current_w << endl;
+    cout << "Height: " << videoInfo->current_h << endl;
+    cout << "BPP: " << videoInfo->vfmt->BitsPerPixel << endl;
     screen = SDL_SetVideoMode( videoInfo->current_w, videoInfo->current_h, videoInfo->vfmt->BitsPerPixel, SDL_FULLSCREEN | SDL_SWSURFACE );
     
     //Check if there's any joysticks
