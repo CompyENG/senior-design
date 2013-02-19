@@ -72,45 +72,18 @@ int main(int argv, char * argc[]) {
     //While the user hasn't quit
     while( signalHandler.gotExitSignal() == false && quit == false )
     {
+        int8_t *nav_data;
         //While there's events to handle
         while( SDL_PollEvent( &event ) )
         {
             //Handle events for the sub (must pass event variable)
             mySubJoystick.handle_input(event);
             
-            int8_t *nav_data = mySubJoystick.get_data();
-            
             // TODO: SEND DATA HERE
-            for(int8_t i=0;i<8;i++) {
-                cout << "nav_data[" << (int) i << "] = " << (int) nav_data[i] << endl;
-            }
+            //for(int8_t i=0;i<8;i++) {
+            //    cout << "nav_data[" << (int) i << "] = " << (int) nav_data[i] << endl;
+            //}
             //delete[] nav_data;
-            
-            uint32_t send_size = (uint32_t)nav_data[0];
-            send(sock, &send_size, 4, 0);
-            send(sock, nav_data, send_size, 0);
-            delete[] nav_data;
-            // Get live view data
-            // Receive size
-            uint32_t recv_size = 0;
-            uint16_t width, height;
-            recv(sock, &recv_size, 4, 0); // Size is four bytes long
-            recv(sock, &width, 2, 0); // Width is two bytes long
-            recv(sock, &height, 2, 0); // Height is two bytes long
-            cout << "Going to receive: " << recv_size << endl;
-            cout << "Width: " << width << " ; Height: " << height << endl;
-            //int bytes_recvd;
-            uint8_t * lv_data = (uint8_t *)malloc(recv_size);
-            int recvd = 0;
-            while(recvd < recv_size) {
-                if(recv_size-recvd < BUFFER_SIZE) {
-                    recvd += recv(sock, lv_data+recvd, recv_size-recvd, 0);
-                } else {
-                    recvd += recv(sock, lv_data+recvd, BUFFER_SIZE, 0);
-                }
-            }
-            free(lv_data);
-
             //If the user has Xed out the window
             if( event.type == SDL_QUIT )
             {
@@ -118,6 +91,35 @@ int main(int argv, char * argc[]) {
                 quit = true;
             }
         }
+        
+        nav_data = mySubJoystick.get_data();
+            
+        uint32_t send_size = (uint32_t)nav_data[0];
+        send(sock, &send_size, 4, 0);
+        send(sock, nav_data, send_size, 0);
+        delete[] nav_data;
+        // Get live view data
+        // Receive size
+        uint32_t recv_size = 0;
+        uint16_t width, height;
+        recv(sock, &recv_size, 4, 0); // Size is four bytes long
+        recv(sock, &width, 2, 0); // Width is two bytes long
+        recv(sock, &height, 2, 0); // Height is two bytes long
+        cout << "Going to receive: " << recv_size << endl;
+        cout << "Width: " << width << " ; Height: " << height << endl;
+        //int bytes_recvd;
+        uint8_t * lv_data = (uint8_t *)malloc(recv_size);
+        int recvd = 0;
+        while(recvd < recv_size) {
+            if(recv_size-recvd < BUFFER_SIZE) {
+                recvd += recv(sock, lv_data+recvd, recv_size-recvd, 0);
+            } else {
+                recvd += recv(sock, lv_data+recvd, BUFFER_SIZE, 0);
+            }
+        }
+        free(lv_data);
+
+        
     }
 
     //Clean up
