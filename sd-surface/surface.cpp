@@ -59,10 +59,18 @@ int main(int argv, char * argc[]) {
             
             int8_t *nav_data = mySubJoystick.get_data();
             
+            cout << "nav_data[FORWARD] = " << (int) nav_data[SubJoystick::FORWARD] << endl;
+            cout << "nav_data[LEFT] = " << (int) nav_data[1] << endl;
+            cout << "nav_data[PITCH] = " << (int) nav_data[2] << endl;
+            cout << "nav_data[ZOOM] = " << (int) nav_data[3] << endl;
+            cout << "nav_data[ASCEND] = " << (int) nav_data[4] << endl;
+            cout << "nav_data[SHOOT] = " << (int) nav_data[5] << endl;
+            cout << "nav_data[LIGHTS] = " << (int) nav_data[6] << endl;
+            
             // TODO: SEND DATA HERE
-            for(int8_t i=0;i<7;i++) {
-                cout << "nav_data[" << (int) i << "] = " << (int) nav_data[i] << endl;
-            }
+            /*for(int8_t i=0;i<7;i++) {
+                cout << "nav_data[" <<  << "] = " << (int) nav_data[i] << endl;
+            } */
             delete[] nav_data;
             
             // TODO: RECEIVE DATA, PROCESS, DISPLAY
