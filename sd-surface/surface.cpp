@@ -13,7 +13,7 @@ int main(int argv, char * argc[]) {
     try {
         signalHandler.setupSignalHandlers();
     } catch(int e) {
-        cout << "Fatal error: Unable to setup signal handler. Exception: " << e << endl;
+        std::cout << "Fatal error: Unable to setup signal handler. Exception: " << e << std::endl;
         return 1;
     }
 
@@ -23,14 +23,14 @@ int main(int argv, char * argc[]) {
     //Initialize
     if( init() == false )
     {
-        cout << "init() failed" << endl;
+        std::cout << "init() failed" << std::endl;
         return 2;
     }
     
     //Check if there's any joysticks
     if( SDL_NumJoysticks() < 1 )
     {
-        cout << "No Joysticks Found" << endl;
+        std::cout << "No Joysticks Found" << std::endl;
         return 3;
     }
 
@@ -40,7 +40,7 @@ int main(int argv, char * argc[]) {
     //If there's a problem opening the joystick
     if( stick == NULL )
     {
-        cout << "Could not open Joystick" << endl;
+        std::cout << "Could not open Joystick" << std::endl;
         return 4;
     }
 
@@ -59,17 +59,17 @@ int main(int argv, char * argc[]) {
             
             int8_t *nav_data = mySubJoystick.get_data();
             
-            cout << "nav_data[FORWARD] = " << (int) nav_data[SubJoystick::FORWARD] << endl;
-            cout << "nav_data[LEFT] = " << (int) nav_data[1] << endl;
-            cout << "nav_data[PITCH] = " << (int) nav_data[2] << endl;
-            cout << "nav_data[ZOOM] = " << (int) nav_data[3] << endl;
-            cout << "nav_data[ASCEND] = " << (int) nav_data[4] << endl;
-            cout << "nav_data[SHOOT] = " << (int) nav_data[5] << endl;
-            cout << "nav_data[LIGHTS] = " << (int) nav_data[6] << endl;
+            std::cout << "nav_data[FORWARD] = " << (int) nav_data[SubJoystick::FORWARD] << std::endl;
+            std::cout << "nav_data[LEFT] = " << (int) nav_data[1] << std::endl;
+            std::cout << "nav_data[PITCH] = " << (int) nav_data[2] << std::endl;
+            std::cout << "nav_data[ZOOM] = " << (int) nav_data[3] << std::endl;
+            std::cout << "nav_data[ASCEND] = " << (int) nav_data[4] << std::endl;
+            std::cout << "nav_data[SHOOT] = " << (int) nav_data[5] << std::endl;
+            std::cout << "nav_data[LIGHTS] = " << (int) nav_data[6] << std::endl;
             
             // TODO: SEND DATA HERE
             /*for(int8_t i=0;i<7;i++) {
-                cout << "nav_data[" <<  << "] = " << (int) nav_data[i] << endl;
+                std::cout << "nav_data[" <<  << "] = " << (int) nav_data[i] << std::endl;
             } */
             delete[] nav_data;
             

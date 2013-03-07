@@ -4,7 +4,6 @@
 #include <string>
 #include "SubJoystick.hpp"
 
-using namespace std;
 
 SubJoystick::SubJoystick()
 {

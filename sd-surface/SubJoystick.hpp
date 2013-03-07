@@ -4,8 +4,6 @@
 #include "SDL/SDL.h"
 #include <stdint.h>
 
-using namespace std;
-
 class SubJoystick
 {
     private:
