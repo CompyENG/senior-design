@@ -41,7 +41,7 @@ int main()
 
 
     std::cout << "send()ing message..."  << std::endl;
-    char *msg = "GET / HTTP/1.1\nhost: www.google.com\n\n";
+    char * msg = "GET / HTTP/1.1\nhost: www.google.com\n\n";
     int len;
     ssize_t bytes_sent;
     len = strlen(msg);
@@ -59,6 +59,6 @@ int main()
     incomming_data_buffer[bytes_recieved -2] = '\0' ;
     std::cout << "Receiving complete. Closing socket..." << std::endl;
     freeaddrinfo(host_info_list);
-    close(socketfd);
+    //close(socketfd);
 
 }

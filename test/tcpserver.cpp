@@ -3,6 +3,8 @@
 #include <sys/socket.h> // Needed for the socket functions
 #include <netdb.h>      // Needed for the socket functions
 
+using namespace std;
+
 int main()
 {
 
