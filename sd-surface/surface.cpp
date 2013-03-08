@@ -5,6 +5,7 @@
 #include "../common/SignalHandler.hpp"
 #include "surface.hpp"
 #include "SubJoystick.hpp"
+#include "SubClient.hpp"
 
 int main(int argv, char * argc[]) {
     bool quit = false; // Optional SDL_QUIT handler -- We can also use this as a shutdown from the joystick
@@ -26,6 +27,21 @@ int main(int argv, char * argc[]) {
         std::cout << "init() failed" << std::endl;
         return 2;
     }
+    
+    //Create a Client
+    SubClient mySubClient;
+    
+    //Connect to server
+    if(mySubClient.connectToSub("127.0.0.1",50000) == false)
+    {
+		std::cout << "Cound not connect to server after 5 tries" << std::endl;
+		return 2;
+	}
+	std::cout << "Connection Successful" << std::endl;
+	
+	for(int i=0;i<5;i++) {
+		mySubClient.sendInt(i);
+	}
     
     //Check if there's any joysticks
     if( SDL_NumJoysticks() < 1 )
