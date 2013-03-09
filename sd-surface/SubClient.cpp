@@ -61,3 +61,19 @@ bool SubClient::sendInt(int data)
     return true;
 }
 
+bool SubClient::sendCommands(int8_t * data)
+{
+	int k;
+	k = send(sock_desc, &data, sizeof(data), 0);
+	if (k == -1)
+	{
+		std::cout << "Cannot write to server!" << std::endl;
+		return false;
+	}
+    return true;
+}
+
+void SubClient::disconnectFromSub()
+{
+	close(sock_desc);
+}

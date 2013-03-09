@@ -76,17 +76,18 @@ int main(int argv, char * argc[]) {
             int8_t *nav_data = mySubJoystick.get_data();
             
             std::cout << "nav_data[FORWARD] = " << (int) nav_data[SubJoystick::FORWARD] << std::endl;
-            std::cout << "nav_data[LEFT] = " << (int) nav_data[1] << std::endl;
-            std::cout << "nav_data[PITCH] = " << (int) nav_data[2] << std::endl;
-            std::cout << "nav_data[ZOOM] = " << (int) nav_data[3] << std::endl;
-            std::cout << "nav_data[ASCEND] = " << (int) nav_data[4] << std::endl;
-            std::cout << "nav_data[SHOOT] = " << (int) nav_data[5] << std::endl;
-            std::cout << "nav_data[LIGHTS] = " << (int) nav_data[6] << std::endl;
+            std::cout << "nav_data[LEFT] = " << (int) nav_data[SubJoystick::LEFT] << std::endl;
+            std::cout << "nav_data[PITCH] = " << (int) nav_data[SubJoystick::PITCH] << std::endl;
+            std::cout << "nav_data[ZOOM] = " << (int) nav_data[SubJoystick::ZOOM] << std::endl;
+            std::cout << "nav_data[ASCEND] = " << (int) nav_data[SubJoystick::ASCEND] << std::endl;
+            std::cout << "nav_data[SHOOT] = " << (int) nav_data[SubJoystick::SHOOT] << std::endl;
+            std::cout << "nav_data[LIGHTS] = " << (int) nav_data[SubJoystick::LIGHTS] << std::endl;
             
             // TODO: SEND DATA HERE
-            /*for(int8_t i=0;i<7;i++) {
-                std::cout << "nav_data[" <<  << "] = " << (int) nav_data[i] << std::endl;
-            } */
+            
+            //Send data to sub
+            mySubClient.sendCommands(nav_data);
+            
             delete[] nav_data;
             
             // TODO: RECEIVE DATA, PROCESS, DISPLAY

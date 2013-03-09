@@ -15,6 +15,7 @@ class SubClient
 	bool connectToSub(char * ip, int port);
 	bool sendInt(int data);
 	bool sendCommands(int8_t * data);
+	void disconnectFromSub();
 };
 
 #endif /* SUBCLIENT */
