@@ -28,14 +28,14 @@ bool SubServer::listen(int port)
     server.sin_family = AF_INET;
     server.sin_addr.s_addr = INADDR_ANY;  
     server.sin_port = htons(50000);  
-    if (bind(sock_desc, (struct sockaddr*)&server, sizeof(server)) != 0)
+    if (::bind(sock_desc, (struct sockaddr*)&server, sizeof(server)) != 0)
     {
         std::cout << "cannot bind socket!\n" << std::endl;
         close(sock_desc);  
         return false;
     }
     
-    if (listen(sock_desc, 20) != 0)
+    if (::listen(sock_desc, 20) != 0)
     {
         std::cout << "cannot listen on socket!\n" << std::endl;
         close(sock_desc);  
@@ -56,15 +56,16 @@ bool SubServer::listen(int port)
     return true;
 }
 
-bool SubServer::send(uint32_t size_of_data, int8_t * data)
+bool SubServer::send(LVData data)
 {
 
     int sent = 0;
-    sent = ::send(temp_sock_desc, &size_of_data, 4, 0);
+    int size_of_data = sizeof(data);
+    sent = ::send(temp_sock_desc, size_of_data, 4, 0);
     while(sent < size_of_data) 
     {
         int bytes_sent = 0;
-        bytes_sent = ::send(temp_sock_desc, &data+sent, size_of_data-sent, 0);
+        bytes_sent = ::send(temp_sock_desc, data+sent, size_of_data-sent, 0);
         if(bytes_sent == -1) {
             std::cout << "Cannot write to server!" << std::endl;
             return false;
@@ -74,7 +75,7 @@ bool SubServer::send(uint32_t size_of_data, int8_t * data)
     return true;
 }
 
-bool SubServer::recv(LVData * out) 
+int8_t * SubServer::recv(int * size)
 {
     int recvd = 0;
     uint32_t size;

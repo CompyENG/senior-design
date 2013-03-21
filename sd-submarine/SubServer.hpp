@@ -9,15 +9,17 @@
 
 class SubServer
 {
-	public:
-	struct sockaddr_in server;
-	struct sockaddr_in client;
-	int temp_sock_desc;
-	int sock_desc;
-	bool listenForClient(int port);
-	int receiveInt();
-	int8_t * receiveCommands();
-	void disconnectFromClient();
+    private:
+    struct sockaddr_in server;
+    struct sockaddr_in client;
+    int temp_sock_desc;
+    int sock_desc;
+    
+    public:
+    bool listen(int port);
+    int8_t * recv(int * size);
+    bool send(LVData data);
+    void disconnect();
 };
 
-#endif /* SUBCLIENT */
+#endif /* SUBSERVER */
