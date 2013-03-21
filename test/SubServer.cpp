@@ -16,7 +16,7 @@ SubClient::Subserver()
 {
 } */
 
-bool SubServer::listenForClient(int port)
+bool SubServer::listen(int port)
 {
 	sock_desc = socket(AF_INET, SOCK_STREAM, 0); 
     if (sock_desc == -1)
@@ -56,57 +56,43 @@ bool SubServer::listenForClient(int port)
     return true;
 }
 
-int SubServer::receiveInt()
+bool SubServer::send(uint32_t size_of_data, int8_t * data)
 {
-	int k;  
-    int integer;
-	k = recv(temp_sock_desc, &integer, 4, 0);
-	
-	if (!recv)
+
+	int sent = 0;
+	sent = ::send(temp_sock_desc, &size_of_data, 4, 0);
+	while(sent < size_of_data) 
 	{
-		std::cout << "\ncannot read from client!\n" << std::endl;
-		return -1;
+		int bytes_sent = 0;
+		bytes_sent = ::send(temp_sock_desc, &data+sent, size_of_data-sent, 0);
+		if(bytes_sent == -1) {
+			std::cout << "Cannot write to server!" << std::endl;
+			return false;
+		}
+		sent += bytes_sent;
 	}
-	else if (recv == 0)
-	{
-		std::cout << "\nclient disconnected.\n" << std::endl;
-		return 0;
-	}
-	else 
-	{
-		return integer;
-	}
-	
+    return true;
 }
 
-int8_t * SubServer::receiveCommands()
+bool SubServer::recv(LVData * out) 
 {
-	int k;  
-    int8_t * commands[7];
-    bzero(commands, 7);
-	k = recv(temp_sock_desc, &commands, sizeof(commands), 0);
-	if (!recv)
+	int recvd = 0;
+	uint32_t size;
+	::recv(temp_sock_desc, &size, 4, 0);
+	while(recvd < size) 
 	{
-		std::cout << "cannot read from client!" << std::endl;
+		int bytes_recvd;
+		bytes_recvd = ::recv(temp_sock_desc, &out+recvd, size-recvd, 0);
+		if(bytes_recvd == -1) {
+			std::cout << "Cannot receive data!" << std::endl;
+			return false;
+		}
+		recvd += bytes_recvd;
 	}
-	else if (recv == 0)
-	{
-		std::cout << "client disconnected." << std::endl;
-	}
-	else 
-	{
-		std::cout << "commands[FORWARD] = " << commands[0] << std::endl;
-		std::cout << "commands[LEFT] = " <<  commands[1] << std::endl;
-		std::cout << "commands[PITCH] = " <<  commands[2] << std::endl;
-		std::cout << "commands[ZOOM] = " <<  commands[3] << std::endl;
-		std::cout << "commands[ASCEND] = " <<  commands[4] << std::endl;
-		std::cout << "commands[SHOOT] = " <<  commands[5] << std::endl;
-		std::cout << "commands[LIGHTS] = " << commands[6] << std::endl;
-		return commands;
-	}
+    return true;
 }
 
-void SubServer::disconnectFromClient()
+void SubClient::disconnect()
 {
 	close(sock_desc);
 	close(temp_sock_desc);
