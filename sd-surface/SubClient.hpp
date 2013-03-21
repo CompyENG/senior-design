@@ -12,10 +12,10 @@ class SubClient
 	public:
 	struct sockaddr_in client;
 	int sock_desc;
-	bool connectToSub(char * ip, int port);
-	bool sendInt(int data);
-	bool sendCommands(int8_t * data);
-	void disconnectFromSub();
+	bool connect(std::string ip, int port);
+	bool recv(LVData * data_out);
+	bool send(uint32_t size_of_data, int8_t * data);
+	void disconnect();
 };
 
 #endif /* SUBCLIENT */

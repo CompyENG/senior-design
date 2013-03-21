@@ -32,16 +32,12 @@ int main(int argv, char * argc[]) {
     SubClient mySubClient;
     
     //Connect to server
-    if(mySubClient.connectToSub("127.0.0.1",50000) == false)
+    if(mySubClient.connect("127.0.0.1",50000) == false)
     {
-		std::cout << "Cound not connect to server after 5 tries" << std::endl;
+		std::cout << "Cound not connect to server." << std::endl;
 		return 2;
 	}
 	std::cout << "Connection Successful" << std::endl;
-	
-	for(int i=0;i<5;i++) {
-		mySubClient.sendInt(i);
-	}
     
     //Check if there's any joysticks
     if( SDL_NumJoysticks() < 1 )
@@ -86,7 +82,7 @@ int main(int argv, char * argc[]) {
             // TODO: SEND DATA HERE
             
             //Send data to sub
-            mySubClient.sendCommands(nav_data);
+            mySubClient.send(sizeof(nav_data),nav_data);
             
             delete[] nav_data;
             
