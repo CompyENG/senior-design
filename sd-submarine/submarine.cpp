@@ -60,6 +60,7 @@ int main(int argc, char * argv[]) {
     while(signalHandler.gotExitSignal() == false) {
         // TODO: Receive data
         joy_data = mySubServer.recv(&joy_data_len);
+        std::cout << "Got data of length " << joy_data_len << std::endl;
         
         // TODO: Motor control
         // NOTE: This is what I imagine receiving will be like. We might need
@@ -271,7 +272,10 @@ bool compare_states(int8_t * sub_state, int8_t * joy_data) {
     // Returns true if the states are the same, false otherwise
     for(int i=0; i < SubJoystick::COMMAND_LENGTH; i++) {
         std::cout << "Compare " << i << std::endl;
-        if(*(sub_state+i) != *(joy_data+i)) return false;
+        if(*(sub_state+i) != *(joy_data+i)) {
+            std::cout << "Returning false" << std::endl;
+            return false;
+        }
     }
     
     return true;
