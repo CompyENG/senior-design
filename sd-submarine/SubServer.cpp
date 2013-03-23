@@ -100,7 +100,7 @@ int8_t * SubServer::recv(uint32_t * size)
     return out;
 }
 
-void SubClient::disconnect()
+void SubServer::disconnect()
 {
     close(sock_desc);
     close(temp_sock_desc);
