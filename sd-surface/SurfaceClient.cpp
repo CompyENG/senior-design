@@ -77,8 +77,8 @@ uint8_t * SurfaceClient::recv(uint32_t * size_out, int16_t * width_out, int16_t 
     ::recv(sock_desc, &size, 4, 0);
     uint32_t dimensions;
     ::recv(sock_desc, &dimensions, 4, 0);
-    *width_out = (dimensions & 0xFFFF0000) >> 16;
-    *height_out = (dimensions & 0xFFFF);
+    *height_out = (dimensions & 0xFFFF0000) >> 16;
+    *width_out = (dimensions & 0xFFFF);
     
     out = (uint8_t *)malloc(size);
     
