@@ -8,7 +8,7 @@
 SubJoystick::SubJoystick()
 {
     //Initialize the commands (and make sure they all start at 0)
-    bzero(commands, 7);
+    bzero(commands, COMMAND_LENGTH);
     //forward/back||left/right||pitch up/down||zoom out||zoom in||descend||ascend||take picture//lights
     
 }
@@ -164,8 +164,8 @@ void SubJoystick::handle_input(SDL_Event event)
 //this method gets the joystick data for use elsewhere
 int8_t *SubJoystick::get_data() {
     
-    int8_t *to_send = new int8_t[7];
-    memcpy(to_send, commands, 7);
+    int8_t *to_send = new int8_t[COMMAND_LENGTH];
+    memcpy(to_send, commands, COMMAND_LENGTH);
     
     return to_send;
 }

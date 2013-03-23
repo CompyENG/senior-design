@@ -5,7 +5,7 @@
 #include "../common/SignalHandler.hpp"
 #include "surface.hpp"
 #include "SubJoystick.hpp"
-#include "SubClient.hpp"
+#include "SurfaceClient.hpp"
 
 int main(int argv, char * argc[]) {
     bool quit = false; // Optional SDL_QUIT handler -- We can also use this as a shutdown from the joystick
@@ -29,10 +29,10 @@ int main(int argv, char * argc[]) {
     }
     
     //Create a Client
-    SubClient mySubClient;
+    SurfaceClient mySurfaceClient;
     
     //Connect to server
-    if(mySubClient.connect("127.0.0.1",50000) == false)
+    if(mySurfaceClient.connect("pi-submarine",50000) == false)
     {
 		std::cout << "Cound not connect to server." << std::endl;
 		return 2;
@@ -82,7 +82,7 @@ int main(int argv, char * argc[]) {
             // TODO: SEND DATA HERE
             
             //Send data to sub
-            mySubClient.send(sizeof(nav_data),nav_data);
+            mySubClient.send(SubJoystick::COMMAND_LENGTH, nav_data);
             
             delete[] nav_data;
             
