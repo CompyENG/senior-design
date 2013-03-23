@@ -9,6 +9,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include "SubServer.hpp"
+#include <libptp++.hpp>
 
 /*
 SubClient::Subserver()
