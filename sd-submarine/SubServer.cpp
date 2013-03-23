@@ -93,7 +93,7 @@ int8_t * SubServer::recv(uint32_t * size)
         bytes_recvd = ::recv(temp_sock_desc, &out+recvd, *(size)-recvd, 0);
         if(bytes_recvd == -1) {
             std::cout << "Cannot receive data!" << std::endl;
-            return false;
+            return NULL;
         }
         recvd += bytes_recvd;
     }
