@@ -7,7 +7,7 @@
 #include "SubJoystick.hpp"
 #include "SurfaceClient.hpp"
 
-int main(int argv, char * argc[]) {
+int main(int argc, char * argv[]) {
     SDL_Surface * screen = NULL;
     SDL_Surface * surf_lv = NULL;
     bool quit = false; // Optional SDL_QUIT handler -- We can also use this as a shutdown from the joystick
@@ -17,6 +17,11 @@ int main(int argv, char * argc[]) {
         signalHandler.setupSignalHandlers();
     } catch(int e) {
         std::cout << "Fatal error: Unable to setup signal handler. Exception: " << e << std::endl;
+        return 1;
+    }
+    
+    // TODO: remove this -- I need it for some debugging.
+    if(argc < 2) {
         return 1;
     }
 
