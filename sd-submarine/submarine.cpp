@@ -69,6 +69,8 @@ int main(int argc, char * argv[]) {
         // DONE: We can probably make this run faster by not doing the GPIO calls
         //  if we're already in the state we're trying to get to.  Make a compare_states function?
         
+        std::cout << "Received data" << std::endl;
+        
         if(compare_states(sub_state, joy_data) == false) {
             std::cout << "State has changed." << std::endl;
             // Only run through these comparisons if our states have changed
@@ -201,6 +203,7 @@ int main(int argc, char * argv[]) {
         
         cam.get_live_view_data(&lv, true);
         mySubServer.send(lv);
+        std::cout << "Sent data" << std::endl;
         //lv_rgb = lv.get_rgb((int *)&size, (int *)&width, (int *)&height, true);
         
         // Manipulate dimensions to send as one 32-bit data piece

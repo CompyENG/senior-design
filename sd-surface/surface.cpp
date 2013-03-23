@@ -101,6 +101,8 @@ int main(int argc, char * argv[]) {
         //Send data to sub
         mySurfaceClient.send(SubJoystick::COMMAND_LENGTH, nav_data);
         
+        std::cout << "Sent data" << std::endl;
+        
         delete[] nav_data;
         
         // TODO: RECEIVE DATA, PROCESS, DISPLAY
@@ -110,6 +112,7 @@ int main(int argc, char * argv[]) {
         bool success;
         lv_rgb = mySurfaceClient.recv(&lv_size, &width, &height, &success);
         if(success) {
+            std::cout << "Received data -- displaying" << std::endl;
             surf_lv = SDL_CreateRGBSurfaceFrom(lv_rgb, width, height, 24, width * 3, 0x0000ff, 0x00ff00, 0xff0000, 0);
             
             // Apply image to screen
