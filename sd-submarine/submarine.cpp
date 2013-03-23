@@ -10,7 +10,7 @@
 #include "submarine.hpp"
 #include "SubServer.hpp"
 
-int main(int argv, char * argc[]) {
+int main(int argc, char * argv[]) {
     int error;
     CHDKCamera cam;
     Motor subMotors[4]; // We need to control 4 motors
@@ -24,6 +24,11 @@ int main(int argv, char * argc[]) {
     int cmd;
     int8_t sub_state[7]; // The current state of the submarine
     SubServer mySubServer;
+    
+    // TODO: Remove this, but I need it to debug some things
+    if(argc < 2) {
+        return 1;
+    }
     
     // Set up our signal handler(s)
     try {
