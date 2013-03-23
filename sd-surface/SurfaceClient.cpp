@@ -35,10 +35,8 @@ bool SurfaceClient::connect(std::string ip, int port)
     if(::connect(sock_desc, (struct sockaddr*)&client, sizeof(client)) != 0 )
     {
         close(sock_desc);
-        delete cip;
         return false;
     }
-    delete cip;
     return true;
 }
 

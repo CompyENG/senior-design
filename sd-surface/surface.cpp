@@ -82,7 +82,7 @@ int main(int argv, char * argc[]) {
             // TODO: SEND DATA HERE
             
             //Send data to sub
-            mySubClient.send(SubJoystick::COMMAND_LENGTH, nav_data);
+            mySurfaceClient.send(SubJoystick::COMMAND_LENGTH, nav_data);
             
             delete[] nav_data;
             
