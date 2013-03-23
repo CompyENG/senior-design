@@ -15,7 +15,6 @@ int main(int argc, char * argv[]) {
     CHDKCamera cam;
     Motor subMotors[4]; // We need to control 4 motors
     SignalHandler signalHandler;
-    LVData lv;
     uint8_t * lv_rgb;
     uint32_t size, width, height, send_dimensions;
     uint16_t send_width, send_height;
@@ -58,6 +57,8 @@ int main(int argc, char * argv[]) {
     
     // TODO: Signal handler to allow us to quit loop when we receive SIGUSR1
     while(signalHandler.gotExitSignal() == false) {
+        LVData lv;
+        
         // TODO: Receive data
         joy_data = mySubServer.recv(&joy_data_len);
         std::cout << "Got data of length " << joy_data_len << std::endl;
