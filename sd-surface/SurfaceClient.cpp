@@ -8,6 +8,7 @@
 #include <cstring>
 #include <stdlib.h> 
 #include <arpa/inet.h>
+#include <netdb.h>
 #include <unistd.h>
 #include "SurfaceClient.hpp"
 #include "../libs/libptp++.hpp"
