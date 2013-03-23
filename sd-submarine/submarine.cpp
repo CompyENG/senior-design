@@ -201,6 +201,7 @@ int main(int argc, char * argv[]) {
         }
         delete[] joy_data;
         
+        std::cout << "Going to send" << std::endl;
         cam.get_live_view_data(&lv, true);
         mySubServer.send(lv);
         std::cout << "Sent data" << std::endl;
@@ -269,6 +270,7 @@ void setup_motors(Motor * subMotors) {
 bool compare_states(int8_t * sub_state, int8_t * joy_data) {
     // Returns true if the states are the same, false otherwise
     for(int i=0; i < SubJoystick::COMMAND_LENGTH; i++) {
+        std::cout << "Compare " << i << std::endl;
         if(*(sub_state+i) != *(joy_data+i)) return false;
     }
     
