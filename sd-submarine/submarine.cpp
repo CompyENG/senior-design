@@ -22,6 +22,7 @@ int main(int argv, char * argc[]) {
     uint32_t joy_data_len;
     int cmd;
     int8_t sub_state[7]; // The current state of the submarine
+    SubServer mySubServer;
     
     // Set up our signal handler(s)
     try {
@@ -30,6 +31,8 @@ int main(int argv, char * argc[]) {
         cout << "Fatal error: Unable to setup signal handler. Exception: " << e << endl;
         return 1;
     }
+    
+    mySubServer.listen(50000);
     
     // Keep trying to set up the camera until something tells us to stop
     while(setup_camera(&cam, &error) == false && signalHandler.gotExitSignal() == false) {
@@ -50,6 +53,7 @@ int main(int argv, char * argc[]) {
     // TODO: Signal handler to allow us to quit loop when we receive SIGUSR1
     while(signalHandler.gotExitSignal() == false) {
         // TODO: Receive data
+        joy_data = mySubServer.recv(&joy_data_len);
         
         // TODO: Motor control
         // NOTE: This is what I imagine receiving will be like. We might need
@@ -186,22 +190,26 @@ int main(int argv, char * argc[]) {
                 // TODO: Turn the lights off
             }
         }
+        delete[] joy_data;
         
         cam.get_live_view_data(&lv, true);
-        lv_rgb = lv.get_rgb((int *)&size, (int *)&width, (int *)&height, true);
+        mySubServer.send(lv);
+        //lv_rgb = lv.get_rgb((int *)&size, (int *)&width, (int *)&height, true);
         
         // Manipulate dimensions to send as one 32-bit data piece
-        send_dimensions = ((0xFFFF & send_width) << 16) | (0xFFFF & send_height);
+        //send_dimensions = ((0xFFFF & send_width) << 16) | (0xFFFF & send_height);
         // TODO: Send live view data
         //  Protocol: send size as four bytes, then width and height as two bytes
         //   then, send live view data
         
-        free(lv_rgb);
+        //free(lv_rgb);
     }
     
     cam.close();
     
     libusb_exit(NULL);
+    
+    mySubServer.disconnect();
     
     return 0;
 }
@@ -250,7 +258,7 @@ void setup_motors(Motor * subMotors) {
 
 bool compare_states(int8_t * sub_state, int8_t * joy_data) {
     // Returns true if the states are the same, false otherwise
-    for(int i=0; i < 7; i++) {
+    for(int i=0; i < SubJoystick::COMMAND_LENGTH; i++) {
         if(*(sub_state+i) != *(joy_data+i)) return false;
     }
     
