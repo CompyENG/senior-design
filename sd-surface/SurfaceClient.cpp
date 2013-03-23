@@ -54,6 +54,7 @@ bool SurfaceClient::send(uint32_t size_of_data, int8_t * data)
 
     int sent = 0;
     sent = ::send(sock_desc, &size_of_data, 4, 0);
+    sent = 0;
     while(sent < size_of_data) 
     {
         int bytes_sent = 0;

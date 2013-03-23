@@ -66,6 +66,7 @@ bool SubServer::send(LVData data)
     
     sent = ::send(temp_sock_desc, &size_of_data, 4, 0);
     ::send(temp_sock_desc, &send_dimensions, 4, 0);
+    sent = 0;
     while(sent < size_of_data) 
     {
         int bytes_sent = 0;
