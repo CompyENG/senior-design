@@ -206,7 +206,7 @@ int main(int argc, char * argv[]) {
         std::cout << "Asking camera for lv data" << std::endl;
         cam.get_live_view_data(&lv, true);
         std::cout << "Going to send" << std::endl;
-        mySubServer.send(lv);
+        mySubServer.send(&lv);
         std::cout << "Sent data" << std::endl;
         //lv_rgb = lv.get_rgb((int *)&size, (int *)&width, (int *)&height, true);
         
