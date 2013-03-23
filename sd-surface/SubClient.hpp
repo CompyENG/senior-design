@@ -1,7 +1,6 @@
 #ifndef SUBCLIENT
 #define SUBCLIENT
 
-#include "SDL/SDL.h"
 #include <stdint.h>
 #include <sys/socket.h>  
 #include <netinet/in.h>  

@@ -1,5 +1,4 @@
 //The headers
-#include "SDL/SDL.h"
 #include <iostream>
 #include <stdint.h>
 #include <sys/socket.h>  
