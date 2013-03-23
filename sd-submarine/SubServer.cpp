@@ -56,13 +56,13 @@ bool SubServer::listen(int port)
     return true;
 }
 
-bool SubServer::send(LVData data)
+bool SubServer::send(LVData * data)
 {
     int sent = 0;
     int size_of_data;
     int width, height;
     std::cout << "Getting rgb data" << std::endl;
-    uint8_t * lv_rgb = data.get_rgb(&size_of_data, &width, &height);
+    uint8_t * lv_rgb = data->get_rgb(&size_of_data, &width, &height);
     uint32_t send_dimensions = ((0xFFFF & width) << 16) | (0xFFFF & height);
     
     std::cout << "Sending size" << std::endl;
