@@ -10,6 +10,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include "SurfaceClient.hpp"
+#include "../libs/libptp++.hpp"
 
 /*
 SurfaceClient::SurfaceClient()
