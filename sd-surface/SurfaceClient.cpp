@@ -37,7 +37,7 @@ bool SurfaceClient::connect(std::string host, int port)
 
     memset(&client, 0, sizeof(client));  
     client.sin_family = AF_INET;
-    memcpy(&client.sin_addr, hp->h_addr_list[0], hp->h_length);
+    memcpy(&client.sin_addr, he->h_addr_list[0], he->h_length);
     client.sin_port = htons(port);
     
     std::cout << "Host: " << host << " PORT: " << port << std::endl;
