@@ -65,6 +65,7 @@ int main(int argv, char * argc[]) {
         //  if we're already in the state we're trying to get to.  Make a compare_states function?
         
         if(compare_states(sub_state, joy_data) == false) {
+            std::cout << "State has changed." << std::endl;
             // Only run through these comparisons if our states have changed
             // Forward/backward
             if(sub_state[SubJoystick::LEFT] == 0) { // Left/right takes priority

@@ -72,41 +72,6 @@ int main(int argv, char * argc[]) {
         {
             //Handle events for the sub (must pass event variable)
             mySubJoystick.handle_input(event);
-            
-            int8_t *nav_data = mySubJoystick.get_data();
-            
-            std::cout << "nav_data[FORWARD] = " << (int) nav_data[SubJoystick::FORWARD] << std::endl;
-            std::cout << "nav_data[LEFT] = " << (int) nav_data[SubJoystick::LEFT] << std::endl;
-            std::cout << "nav_data[PITCH] = " << (int) nav_data[SubJoystick::PITCH] << std::endl;
-            std::cout << "nav_data[ZOOM] = " << (int) nav_data[SubJoystick::ZOOM] << std::endl;
-            std::cout << "nav_data[ASCEND] = " << (int) nav_data[SubJoystick::ASCEND] << std::endl;
-            std::cout << "nav_data[SHOOT] = " << (int) nav_data[SubJoystick::SHOOT] << std::endl;
-            std::cout << "nav_data[LIGHTS] = " << (int) nav_data[SubJoystick::LIGHTS] << std::endl;
-            
-            // TODO: SEND DATA HERE
-            
-            //Send data to sub
-            mySurfaceClient.send(SubJoystick::COMMAND_LENGTH, nav_data);
-            
-            delete[] nav_data;
-            
-            // TODO: RECEIVE DATA, PROCESS, DISPLAY
-            uint8_t * lv_rgb;
-            uint32_t lv_size;
-            int16_t width, height;
-            bool success;
-            lv_rgb = mySurfaceClient.recv(&lv_size, &width, &height, &success);
-            if(success) {
-                surf_lv = SDL_CreateRGBSurfaceFrom(lv_rgb, width, height, 24, width * 3, 0x0000ff, 0x00ff00, 0xff0000, 0);
-                
-                // Apply image to screen
-                SDL_BlitSurface(surf_lv, NULL, screen, NULL);
-                
-                SDL_Flip(screen);
-                
-                SDL_FreeSurface(surf_lv);
-            }
-            free(lv_rgb);
 
             //If the user has Xed out the window
             if( event.type == SDL_QUIT )
@@ -115,6 +80,41 @@ int main(int argv, char * argc[]) {
                 quit = true;
             }
         }
+        
+        int8_t *nav_data = mySubJoystick.get_data();
+            
+        std::cout << "nav_data[FORWARD] = " << (int) nav_data[SubJoystick::FORWARD] << std::endl;
+        std::cout << "nav_data[LEFT] = " << (int) nav_data[SubJoystick::LEFT] << std::endl;
+        std::cout << "nav_data[PITCH] = " << (int) nav_data[SubJoystick::PITCH] << std::endl;
+        std::cout << "nav_data[ZOOM] = " << (int) nav_data[SubJoystick::ZOOM] << std::endl;
+        std::cout << "nav_data[ASCEND] = " << (int) nav_data[SubJoystick::ASCEND] << std::endl;
+        std::cout << "nav_data[SHOOT] = " << (int) nav_data[SubJoystick::SHOOT] << std::endl;
+        std::cout << "nav_data[LIGHTS] = " << (int) nav_data[SubJoystick::LIGHTS] << std::endl;
+        
+        // TODO: SEND DATA HERE
+        
+        //Send data to sub
+        mySurfaceClient.send(SubJoystick::COMMAND_LENGTH, nav_data);
+        
+        delete[] nav_data;
+        
+        // TODO: RECEIVE DATA, PROCESS, DISPLAY
+        uint8_t * lv_rgb;
+        uint32_t lv_size;
+        int16_t width, height;
+        bool success;
+        lv_rgb = mySurfaceClient.recv(&lv_size, &width, &height, &success);
+        if(success) {
+            surf_lv = SDL_CreateRGBSurfaceFrom(lv_rgb, width, height, 24, width * 3, 0x0000ff, 0x00ff00, 0xff0000, 0);
+            
+            // Apply image to screen
+            SDL_BlitSurface(surf_lv, NULL, screen, NULL);
+            
+            SDL_Flip(screen);
+            
+            SDL_FreeSurface(surf_lv);
+        }
+        free(lv_rgb);
     }
 
     //Clean up
