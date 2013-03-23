@@ -8,6 +8,7 @@
 #include "Motor.hpp"
 #include "../common/SignalHandler.hpp"
 #include "submarine.hpp"
+#include "SubServer.hpp"
 
 int main(int argv, char * argc[]) {
     int error;
