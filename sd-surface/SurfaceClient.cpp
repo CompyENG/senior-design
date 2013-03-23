@@ -17,7 +17,7 @@ SurfaceClient::SurfaceClient()
 {
 } */
 
-bool SurfaceClient::connect(std::string ip, int port) 
+bool SurfaceClient::connect(std::string host, int port) 
 {
     sock_desc = socket(AF_INET, SOCK_STREAM, 0); 
     if (sock_desc == -1)
@@ -25,13 +25,21 @@ bool SurfaceClient::connect(std::string ip, int port)
         std::cout << "cannot create socket!\n" << std::endl;
         return false;
     }
+    
+    // Perform a lookup of the hostname
+    struct hostent *he;
+    he = gethostbyname(host.c_str());
+    if(he == NULL || he->h_length == 0) {
+        std::cout << "Couldn't find IP for host " << host << std::endl;
+        return false;
+    }
 
     memset(&client, 0, sizeof(client));  
-    client.sin_family = AF_INET;  
-    client.sin_addr.s_addr = inet_addr(ip.c_str());  
+    client.sin_family = AF_INET;
+    memcpy(&client.sin_addr, hp->h_addr_list[0], hp->h_length);
     client.sin_port = htons(port);
     
-    std::cout << "IP: " << ip << " PORT: " << port << std::endl;
+    std::cout << "Host: " << host << " PORT: " << port << std::endl;
     if(::connect(sock_desc, (struct sockaddr*)&client, sizeof(client)) != 0 )
     {
         close(sock_desc);

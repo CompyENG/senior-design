@@ -14,7 +14,7 @@ class SurfaceClient
     int sock_desc;
     
 	public:
-	bool connect(std::string ip, int port);
+	bool connect(std::string host, int port);
 	bool recv(LVData * data_out);
 	bool send(uint32_t size_of_data, int8_t * data);
 	void disconnect();
