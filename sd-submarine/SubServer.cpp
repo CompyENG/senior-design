@@ -85,12 +85,12 @@ bool SubServer::send(LVData data)
 int8_t * SubServer::recv(uint32_t * size)
 {
     int recvd = 0;
-    ::recv(temp_sock_desc, &size, 4, 0);
-    int8_t * out = new int8_t[size];
-    while(recvd < size) 
+    ::recv(temp_sock_desc, size, 4, 0);
+    int8_t * out = new int8_t[*size];
+    while(recvd < *size) 
     {
         int bytes_recvd;
-        bytes_recvd = ::recv(temp_sock_desc, &out+recvd, size-recvd, 0);
+        bytes_recvd = ::recv(temp_sock_desc, &out+recvd, *(size)-recvd, 0);
         if(bytes_recvd == -1) {
             std::cout << "Cannot receive data!" << std::endl;
             return false;
