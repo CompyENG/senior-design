@@ -58,7 +58,7 @@ bool SurfaceClient::send(uint32_t size_of_data, int8_t * data)
     while(sent < size_of_data) 
     {
         int bytes_sent = 0;
-        bytes_sent = ::send(sock_desc, &data+sent, size_of_data-sent, 0);
+        bytes_sent = ::send(sock_desc, data+sent, size_of_data-sent, 0);
         std::cout << "Sent: " << bytes_sent << std::endl;
         if(bytes_sent == -1) {
             std::cout << "Cannot write to server!" << std::endl;
