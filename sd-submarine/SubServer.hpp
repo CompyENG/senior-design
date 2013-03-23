@@ -17,7 +17,7 @@ class SubServer
     
     public:
     bool listen(int port);
-    int8_t * recv(int * size);
+    int8_t * recv(uint32_t * size);
     bool send(LVData data);
     void disconnect();
 };
