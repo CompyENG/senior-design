@@ -8,6 +8,8 @@
 #include "SurfaceClient.hpp"
 
 int main(int argv, char * argc[]) {
+    SDL_Surface * screen = NULL;
+    SDL_Surface * surf_lv = NULL;
     bool quit = false; // Optional SDL_QUIT handler -- We can also use this as a shutdown from the joystick
     // Set up signal handler
     SignalHandler signalHandler;
@@ -27,6 +29,8 @@ int main(int argv, char * argc[]) {
         std::cout << "init() failed" << std::endl;
         return 2;
     }
+    
+    screen = SDL_SetVideoMode( 640, 480, 16, SDL_FULLSCREEN | SDL_SWSURFACE );
     
     //Create a Client
     SurfaceClient mySurfaceClient;
@@ -87,6 +91,22 @@ int main(int argv, char * argc[]) {
             delete[] nav_data;
             
             // TODO: RECEIVE DATA, PROCESS, DISPLAY
+            uint8_t * lv_rgb;
+            uint32_t lv_size;
+            int16_t width, height;
+            bool success;
+            lv_rgb = mySurfaceClient.recv(&lv_size, &width, &height, &success);
+            if(success) {
+                surf_lv = SDL_CreateRGBSurfaceFrom(lv_rgb, width, height, 24, width * 3, 0x0000ff, 0x00ff00, 0xff0000, 0);
+                
+                // Apply image to screen
+                SDL_BlitSurface(surf_lv, NULL, screen, NULL);
+                
+                SDL_Flip(screen);
+                
+                SDL_FreeSurface(surf_lv);
+            }
+            free(lv_rgb);
 
             //If the user has Xed out the window
             if( event.type == SDL_QUIT )
