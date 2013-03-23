@@ -61,9 +61,11 @@ bool SubServer::send(LVData data)
     int sent = 0;
     int size_of_data;
     int width, height;
+    std::cout << "Getting rgb data" << std::endl;
     uint8_t * lv_rgb = data.get_rgb(&size_of_data, &width, &height);
     uint32_t send_dimensions = ((0xFFFF & width) << 16) | (0xFFFF & height);
     
+    std::cout << "Sending size" << std::endl;
     sent = ::send(temp_sock_desc, &size_of_data, 4, 0);
     ::send(temp_sock_desc, &send_dimensions, 4, 0);
     sent = 0;
