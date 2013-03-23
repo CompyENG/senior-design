@@ -9,14 +9,14 @@
 #include <stdlib.h> 
 #include <arpa/inet.h>
 #include <unistd.h>
-#include "SubClient.hpp"
+#include "SurfaceClient.hpp"
 
 /*
-SubClient::SubClient()
+SurfaceClient::SurfaceClient()
 {
 } */
 
-bool SubClient::connect(std::string ip, int port) 
+bool SurfaceClient::connect(std::string ip, int port) 
 {
     sock_desc = socket(AF_INET, SOCK_STREAM, 0); 
     if (sock_desc == -1)
@@ -42,7 +42,7 @@ bool SubClient::connect(std::string ip, int port)
 }
 
 
-bool SubClient::send(uint32_t size_of_data, int8_t * data)
+bool SurfaceClient::send(uint32_t size_of_data, int8_t * data)
 {
 
     int sent = 0;
@@ -60,7 +60,7 @@ bool SubClient::send(uint32_t size_of_data, int8_t * data)
     return true;
 }
 
-bool SubClient::recv(LVData * out) 
+bool SurfaceClient::recv(LVData * out) 
 {
     int recvd = 0;
     uint32_t size;
@@ -78,7 +78,7 @@ bool SubClient::recv(LVData * out)
     return true;
 }
 
-void SubClient::disconnect()
+void SurfaceClient::disconnect()
 {
     close(sock_desc);
 }

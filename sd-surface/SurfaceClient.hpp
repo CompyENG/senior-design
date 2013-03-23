@@ -1,12 +1,12 @@
-#ifndef SUBCLIENT
-#define SUBCLIENT
+#ifndef SURFACECLIENT
+#define SURFACECLIENT
 
 #include <stdint.h>
 #include <sys/socket.h>  
 #include <netinet/in.h>  
 #include <arpa/inet.h>
 
-class SubClient
+class SurfaceClient
 {
     private:
     struct sockaddr_in client;
@@ -19,4 +19,4 @@ class SubClient
 	void disconnect();
 };
 
-#endif /* SUBCLIENT */
+#endif /* SURFACECLIENT */
