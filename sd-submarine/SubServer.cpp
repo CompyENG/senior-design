@@ -57,28 +57,35 @@ bool SubServer::listen(int port)
 
 bool SubServer::send(LVData data)
 {
-
     int sent = 0;
-    int size_of_data = sizeof(data);
+    int size_of_data;
+    int width, height;
+    uint8_t * lv_rgb = data.get_rgb(&size_of_data, &width, &height);
+    uint32_t send_dimensions = ((0xFFFF & width) << 16) | (0xFFFF & height);
+    
     sent = ::send(temp_sock_desc, size_of_data, 4, 0);
+    ::send(temp_sock_desc, send_dimensions, 4, 0);
     while(sent < size_of_data) 
     {
         int bytes_sent = 0;
         bytes_sent = ::send(temp_sock_desc, data+sent, size_of_data-sent, 0);
         if(bytes_sent == -1) {
             std::cout << "Cannot write to server!" << std::endl;
+            free(lv_rgb);
             return false;
         }
         sent += bytes_sent;
     }
+    
+    free(lv_rgb);
     return true;
 }
 
-int8_t * SubServer::recv(int * size)
+int8_t * SubServer::recv(uint32_t * size)
 {
     int recvd = 0;
-    uint32_t size;
     ::recv(temp_sock_desc, &size, 4, 0);
+    int8_t * out = new int8_t[size];
     while(recvd < size) 
     {
         int bytes_recvd;
@@ -89,7 +96,7 @@ int8_t * SubServer::recv(int * size)
         }
         recvd += bytes_recvd;
     }
-    return true;
+    return out;
 }
 
 void SubClient::disconnect()

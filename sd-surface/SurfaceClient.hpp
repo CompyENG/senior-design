@@ -15,7 +15,7 @@ class SurfaceClient
     
 	public:
 	bool connect(std::string host, int port);
-	bool recv(LVData * data_out);
+	uint8_t * recv(uint32_t * size_out, int16_t * width_out, int16_t * height_out, bool * success_out)
 	bool send(uint32_t size_of_data, int8_t * data);
 	void disconnect();
 };

@@ -67,22 +67,34 @@ bool SurfaceClient::send(uint32_t size_of_data, int8_t * data)
     return true;
 }
 
-bool SurfaceClient::recv(LVData * out) 
+uint8_t * SurfaceClient::recv(uint32_t * size_out, int16_t * width_out, int16_t * height_out, bool * success_out) 
 {
+    uint8_t * out;
     int recvd = 0;
     uint32_t size;
     ::recv(sock_desc, &size, 4, 0);
+    uint32_t dimensions;
+    ::recv(sock_desc, &dimensions, 4, 0);
+    *width_out = (dimensions & 0xFFFF0000) >> 16;
+    *height_out = (dimensions & 0xFFFF);
+    
+    out = (uint8_t *)malloc(size);
+    
     while(recvd < size) 
     {
         int bytes_recvd;
         bytes_recvd = ::recv(sock_desc, out+recvd, size-recvd, 0);
         if(bytes_recvd == -1) {
             std::cout << "Cannot receive data!" << std::endl;
-            return false;
+            free(out);
+            *success_out = false;
+            return NULL;
         }
         recvd += bytes_recvd;
     }
-    return true;
+    
+    *success_out = true;
+    return out;
 }
 
 void SurfaceClient::disconnect()
