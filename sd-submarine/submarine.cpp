@@ -29,7 +29,7 @@ int main(int argv, char * argc[]) {
     try {
         signalHandler.setupSignalHandlers();
     } catch(int e) {
-        cout << "Fatal error: Unable to setup signal handler. Exception: " << e << endl;
+        std::cout << "Fatal error: Unable to setup signal handler. Exception: " << e << std::endl;
         return 1;
     }
     
@@ -37,19 +37,19 @@ int main(int argv, char * argc[]) {
     
     // Keep trying to set up the camera until something tells us to stop
     while(setup_camera(&cam, &error) == false && signalHandler.gotExitSignal() == false) {
-        cout << "Error setting up camera: " << error << " -- Trying again" << endl;
+        std::cout << "Error setting up camera: " << error << " -- Trying again" << std::endl;
     }
     if(signalHandler.gotExitSignal() == true) {
-        cout << "Fatal error: Failed to set up camera. Quitting. Last error: " << error << endl;
+        std::cout << "Fatal error: Failed to set up camera. Quitting. Last error: " << error << std::endl;
         return 2;
     }
     
-    cout << "Camera is ready" << endl;
-    cout << "CHDK Version: " << cam.get_chdk_version() << endl;
+    std::cout << "Camera is ready" << std::endl;
+    std::cout << "CHDK Version: " << cam.get_chdk_version() << std::endl;
     
     // Initialize motors
     setup_motors(subMotors);
-    cout << "Motors are ready" << endl;
+    std::cout << "Motors are ready" << std::endl;
     
     // TODO: Signal handler to allow us to quit loop when we receive SIGUSR1
     while(signalHandler.gotExitSignal() == false) {
