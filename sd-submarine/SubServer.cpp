@@ -64,8 +64,8 @@ bool SubServer::send(LVData data)
     uint8_t * lv_rgb = data.get_rgb(&size_of_data, &width, &height);
     uint32_t send_dimensions = ((0xFFFF & width) << 16) | (0xFFFF & height);
     
-    sent = ::send(temp_sock_desc, size_of_data, 4, 0);
-    ::send(temp_sock_desc, send_dimensions, 4, 0);
+    sent = ::send(temp_sock_desc, &size_of_data, 4, 0);
+    ::send(temp_sock_desc, &send_dimensions, 4, 0);
     while(sent < size_of_data) 
     {
         int bytes_sent = 0;
