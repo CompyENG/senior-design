@@ -255,7 +255,8 @@ bool setup_camera(CHDKCamera * cam, int * error) {
     cam->execute_lua("set_prop(121, 1)", NULL); // Set flash to manual adjustment
     usleep(500 * 10^3);   // Sleep for half a second -- TODO: Block instead?
     cam->execute_lua("set_prop(143, 2)", NULL); // Set flash mode to off
-    usleep(500 * 10^3);
+    //usleep(500 * 10^3);
+    sleep(5); // Wait a few seconds for the camera to get ready.
     
     return true;
 }
