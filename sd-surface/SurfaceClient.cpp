@@ -17,7 +17,7 @@ SurfaceClient::SurfaceClient()
 {
 } */
 
-bool SurfaceClient::connect(std::string host, int port) 
+bool SurfaceClient::connect(const std::string& host, int port) 
 {
     sock_desc = socket(AF_INET, SOCK_STREAM, 0); 
     if (sock_desc == -1)
