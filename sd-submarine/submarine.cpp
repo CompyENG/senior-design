@@ -24,11 +24,6 @@ int main(int argc, char * argv[]) {
     int8_t sub_state[7]; // The current state of the submarine
     SubServer mySubServer;
     
-    // TODO: Remove this, but I need it to debug some things
-    if(argc < 2) {
-        return 1;
-    }
-    
     // Set up our signal handler(s)
     try {
         signalHandler.setupSignalHandlers();
