@@ -105,7 +105,7 @@ uint8_t * SurfaceClient::recv(uint32_t * size_out, int16_t * width_out, int16_t 
         bytes_recvd = ::recv(sock_desc, out+recvd, size-recvd, 0);
         std::cout << "Received: " << bytes_recvd << std::endl;
         if(bytes_recvd == -1) {
-            throw ERR_RECV
+            throw ERR_RECV;
             free(out);
             *success_out = false;
             return NULL;

@@ -37,7 +37,7 @@ int main(int argc, char * argv[]) {
     
     //Connect to server
     try {
-		mySurfaceClient.connect("pi-submarine",50000) == false)
+		mySurfaceClient.connect("pi-submarine",50000);
 	} catch(int e) {
 		std::cout << "Fatal Error: Could not connect to socket. Exception: " << e << std::endl;
 		return 2;
@@ -65,7 +65,7 @@ int main(int argc, char * argv[]) {
     SubJoystick mySubJoystick;
     
     //Wait for both the sub and surface to be ready
-    wait_for_ready();
+    wait_for_ready(mySurfaceClient, signalHandler);
 
     //While the user hasn't quit
     while( signalHandler.gotExitSignal() == false && quit == false )
