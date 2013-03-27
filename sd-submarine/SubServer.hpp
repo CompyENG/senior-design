@@ -20,6 +20,7 @@ class SubServer
     int8_t * recv(uint32_t * size);
     bool send(LVData& data);
     void disconnect();
+    bool reply_ready();
 };
 
 #endif /* SUBSERVER */

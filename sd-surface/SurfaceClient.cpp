@@ -12,6 +12,9 @@
 #include <unistd.h>
 #include "SurfaceClient.hpp"
 
+#define MAGIC_REQ 0xF061
+#define MAGIC_RESP 0xA542
+
 /*
 SurfaceClient::SurfaceClient()
 {
@@ -47,7 +50,6 @@ bool SurfaceClient::connect(const std::string& host, int port)
     }
     return true;
 }
-
 
 bool SurfaceClient::send(uint32_t size_of_data, int8_t * data)
 {
@@ -103,4 +105,26 @@ uint8_t * SurfaceClient::recv(uint32_t * size_out, int16_t * width_out, int16_t 
 void SurfaceClient::disconnect()
 {
     close(sock_desc);
+}
+
+// Send MAGIC_REQ, and return false if we fail to do so
+// If successful, receive two bytes, and return true if we get MAGIC_RESP
+// Return false on any failure
+bool SurfaceClient::check_ready() {
+    uint16_t send_d = MAGIC_REQ;
+    int bytes_sent = 0;
+    bytes_sent = ::send(sock_desc, &send_d, 2, 0);
+    if(bytes_sent < 2) {
+        return false;
+    } else {
+        uint16_t recvd = 0;
+        int bytes_recvd = 0;
+        bytes_recvd = ::recv(sock_desc, &recvd, 2, 0);
+        if(bytes_recvd < 2) {
+            return false;
+        } else if(recvd == MAGIC_RESP) {
+            return true;
+        }
+    }
+    return false;
 }

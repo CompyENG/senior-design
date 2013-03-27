@@ -11,6 +11,9 @@
 #include "SubServer.hpp"
 #include <libptp++.hpp>
 
+#define MAGIC_REQ 0xF061
+#define MAGIC_RESP 0xA542
+
 /*
 SubClient::Subserver()
 {
@@ -109,4 +112,27 @@ void SubServer::disconnect()
 {
     close(sock_desc);
     close(temp_sock_desc);
+}
+
+// Receives two bytes, and checks if it receives MAGIC_REQ. If not, return false
+//  If we get MAGIC_REQ, send MAGIC_RESP, and ensure we sent two bytes
+//  If anything goes wrong, return false
+bool SubServer::reply_ready()
+{
+    int bytes_recvd;
+    uint16_t recvd = 0;
+    bytes_recvd = ::recv(temp_sock_desc, &recvd, 2, 0);
+    if(bytes_recvd < 2) {
+        return false;
+    } else if(recvd == MAGIC_REQ) {
+        int bytes_sent;
+        uint16_t send_d = MAGIC_RESP;
+        bytes_sent = ::send(temp_sock_desc, &send_d, 2, 0);
+        if(bytes_sent < 2) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+    return false;
 }
