@@ -24,7 +24,7 @@ bool SubServer::listen(int port)
     sock_desc = socket(AF_INET, SOCK_STREAM, 0); 
     if (sock_desc == -1)
     {
-        printf("cannot create socket!\n");
+        std::cout << "cannot create socket!" << std::endl;
         return false;
     }
     memset(&server, 0, sizeof(server));  
@@ -33,29 +33,44 @@ bool SubServer::listen(int port)
     server.sin_port = htons(50000);  
     if (::bind(sock_desc, (struct sockaddr*)&server, sizeof(server)) != 0)
     {
-        std::cout << "cannot bind socket!\n" << std::endl;
+        std::cout << "cannot bind socket!" << std::endl;
         close(sock_desc);  
         return false;
     }
     
     if (::listen(sock_desc, 20) != 0)
     {
-        std::cout << "cannot listen on socket!\n" << std::endl;
+        std::cout << "cannot listen on socket!" << std::endl;
         close(sock_desc);  
         return false;
     }
     
     memset(&client, 0, sizeof(client));  
-    socklen_t len = sizeof(client); 
+    socklen_t len = sizeof(client);
     temp_sock_desc = accept(sock_desc, (struct sockaddr*)&client, &len);  
     if (temp_sock_desc == -1)
     {
-        std::cout << "cannot accept client!\n" << std::endl;
+        std::cout << "cannot accept client!" << std::endl;
         close(sock_desc);  
         return 0;
     }
     
-    std::cout << "Server on PORT: " << port << std::endl;
+    struct timeval tv;
+    tv.tv_sec = 1;
+    tv.tv_usec = 0;
+    if(setsockopt(sock_desc, SOL_SOCKET, SO_RCVTIMEO, (char *)&tv, sizeof tv))
+    {
+        std::cout << "cannot set recv timeout!" << std::endl;
+        return false;
+	}
+    if(setsockopt(sock_desc, SOL_SOCKET, SO_SNDTIMEO, (char *)&tv,  sizeof tv))
+    {
+        std::cout << "cannot set send timeout!" << std::endl;
+        return false;
+    }   
+    
+    
+    std::cout << "Server running on PORT: " << port << std::endl;
     return true;
 }
 
@@ -91,6 +106,7 @@ bool SubServer::send(LVData& data)
 
 int8_t * SubServer::recv(uint32_t * size)
 {
+	ERROR_TIMEOUT = 0;
     int recvd = 0;
     ::recv(temp_sock_desc, size, 4, 0);
     int8_t * out = new int8_t[*size];
@@ -101,6 +117,7 @@ int8_t * SubServer::recv(uint32_t * size)
         std::cout << "Received: " << bytes_recvd << std::endl;
         if(bytes_recvd == -1) {
             std::cout << "Cannot receive data!" << std::endl;
+            ERROR_TIMEOUT = 1;
             return out;
         }
         recvd += bytes_recvd;
