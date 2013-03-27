@@ -124,9 +124,9 @@ bool SubServer::reply_ready()
     bytes_recvd = ::recv(temp_sock_desc, &recvd, 2, 0);
     if(bytes_recvd < 2) {
         return false;
-    } else if(recvd == MAGIC_REQ) {
+    } else if(ntohs(recvd) == MAGIC_REQ) {
         int bytes_sent;
-        uint16_t send_d = MAGIC_RESP;
+        uint16_t send_d = htons(MAGIC_RESP);
         bytes_sent = ::send(temp_sock_desc, &send_d, 2, 0);
         if(bytes_sent < 2) {
             return false;

@@ -111,7 +111,7 @@ void SurfaceClient::disconnect()
 // If successful, receive two bytes, and return true if we get MAGIC_RESP
 // Return false on any failure
 bool SurfaceClient::check_ready() {
-    uint16_t send_d = MAGIC_REQ;
+    uint16_t send_d = htons(MAGIC_REQ);
     int bytes_sent = 0;
     bytes_sent = ::send(sock_desc, &send_d, 2, 0);
     if(bytes_sent < 2) {
@@ -122,7 +122,7 @@ bool SurfaceClient::check_ready() {
         bytes_recvd = ::recv(sock_desc, &recvd, 2, 0);
         if(bytes_recvd < 2) {
             return false;
-        } else if(recvd == MAGIC_RESP) {
+        } else if(ntohs(recvd) == MAGIC_RESP) {
             return true;
         }
     }
