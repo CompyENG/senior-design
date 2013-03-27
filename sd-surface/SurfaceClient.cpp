@@ -25,7 +25,7 @@ bool SurfaceClient::connect(const std::string& host, int port)
     sock_desc = socket(AF_INET, SOCK_STREAM, 0); 
     if (sock_desc == -1)
     {
-        std::cout << "cannot create socket!\n" << std::endl;
+        throw ERR_CONNECT;
         return false;
     }
     
@@ -33,7 +33,7 @@ bool SurfaceClient::connect(const std::string& host, int port)
     struct hostent *he;
     he = gethostbyname(host.c_str());
     if(he == NULL || he->h_length == 0) {
-        std::cout << "Couldn't find IP for host " << host << std::endl;
+        throw ERR_IP;
         return false;
     }
 
@@ -42,9 +42,24 @@ bool SurfaceClient::connect(const std::string& host, int port)
     memcpy(&client.sin_addr, he->h_addr_list[0], he->h_length);
     client.sin_port = htons(port);
     
+    struct timeval tv;
+    tv.tv_sec = 1;
+    tv.tv_usec = 0;
+    if(setsockopt(sock_desc, SOL_SOCKET, SO_RCVTIMEO, (char *)&tv, sizeof tv))
+    {
+        throw ERR_SET_RECV_TIMEOUT;
+        return false;
+	}
+    if(setsockopt(sock_desc, SOL_SOCKET, SO_SNDTIMEO, (char *)&tv,  sizeof tv))
+    {
+        throw ERR_SET_SEND_TIMEOUT;
+        return false;
+    }  
+    
     std::cout << "Host: " << host << " PORT: " << port << std::endl;
     if(::connect(sock_desc, (struct sockaddr*)&client, sizeof(client)) != 0 )
     {
+		throw ERR_CONNECT;
         close(sock_desc);
         return false;
     }
@@ -63,7 +78,7 @@ bool SurfaceClient::send(uint32_t size_of_data, int8_t * data)
         bytes_sent = ::send(sock_desc, data+sent, size_of_data-sent, 0);
         std::cout << "Sent: " << bytes_sent << std::endl;
         if(bytes_sent == -1) {
-            std::cout << "Cannot write to server!" << std::endl;
+            throw ERR_SEND;
             return false;
         }
         sent += bytes_sent;
@@ -90,7 +105,7 @@ uint8_t * SurfaceClient::recv(uint32_t * size_out, int16_t * width_out, int16_t 
         bytes_recvd = ::recv(sock_desc, out+recvd, size-recvd, 0);
         std::cout << "Received: " << bytes_recvd << std::endl;
         if(bytes_recvd == -1) {
-            std::cout << "Cannot receive data!" << std::endl;
+            throw ERR_RECV
             free(out);
             *success_out = false;
             return NULL;

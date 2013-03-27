@@ -36,9 +36,10 @@ int main(int argc, char * argv[]) {
     SurfaceClient mySurfaceClient;
     
     //Connect to server
-    if(mySurfaceClient.connect("pi-submarine",50000) == false)
-    {
-		std::cout << "Cound not connect to server." << std::endl;
+    try {
+		mySurfaceClient.connect("pi-submarine",50000) == false)
+	} catch(int e) {
+		std::cout << "Fatal Error: Could not connect to socket. Exception: " << e << std::endl;
 		return 2;
 	}
 	std::cout << "Connection Successful" << std::endl;
@@ -62,7 +63,9 @@ int main(int argc, char * argv[]) {
 
     //Make the Sub
     SubJoystick mySubJoystick;
-
+    
+    //Wait for both the sub and surface to be ready
+    wait_for_ready();
 
     //While the user hasn't quit
     while( signalHandler.gotExitSignal() == false && quit == false )
@@ -94,7 +97,14 @@ int main(int argc, char * argv[]) {
         // TODO: SEND DATA HERE
         
         //Send data to sub
-        mySurfaceClient.send(SubJoystick::COMMAND_LENGTH, nav_data);
+        try {
+			mySurfaceClient.send(SubJoystick::COMMAND_LENGTH, nav_data);
+		} catch(int e) {
+			std::cout << "Error: Could not send data. Exception: " << e << std::endl;
+			std::cout << "Wating for ready" << std::endl;
+			wait_for_ready(mySurfaceClient, signalHandler);
+			continue;
+		}
         
         std::cout << "Sent data" << std::endl;
         
@@ -105,7 +115,14 @@ int main(int argc, char * argv[]) {
         uint32_t lv_size;
         int16_t width, height;
         bool success;
-        lv_rgb = mySurfaceClient.recv(&lv_size, &width, &height, &success);
+        try {
+            lv_rgb = mySurfaceClient.recv(&lv_size, &width, &height, &success);
+	    } catch(int e) {
+			std::cout << "Error: Could not receive data. Exception: " << e << std::endl;
+			std::cout << "Wating for ready" << std::endl;
+			wait_for_ready(mySurfaceClient, signalHandler);
+			continue;
+		}
         if(success) {
             std::cout << "Received data -- displaying" << std::endl;
             surf_lv = SDL_CreateRGBSurfaceFrom(lv_rgb, width, height, 24, width * 3, 0x0000ff, 0x00ff00, 0xff0000, 0);
@@ -145,4 +162,8 @@ void clean_up(SDL_Joystick *stick)
 
     //Quit SDL
     SDL_Quit();
+}
+
+void wait_for_ready(SurfaceClient& client,SignalHandler& sigHand) {
+	while(client.check_ready() == false && sigHand.gotExitSignal() == false);
 }
