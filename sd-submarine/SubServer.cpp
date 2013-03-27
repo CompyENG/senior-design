@@ -60,12 +60,12 @@ bool SubServer::listen(int port)
     tv.tv_usec = 0;
     if(setsockopt(sock_desc, SOL_SOCKET, SO_RCVTIMEO, (char *)&tv, sizeof tv))
     {
-        throw ERR_SET_RECV_TIMEOUT
+        throw ERR_SET_RECV_TIMEOUT;
         return false;
 	}
     if(setsockopt(sock_desc, SOL_SOCKET, SO_SNDTIMEO, (char *)&tv,  sizeof tv))
     {
-        throw ERR_SET_SEND_TIMEOUT
+        throw ERR_SET_SEND_TIMEOUT;
         return false;
     }   
     
@@ -106,7 +106,6 @@ bool SubServer::send(LVData& data)
 
 int8_t * SubServer::recv(uint32_t * size)
 {
-	ERROR_TIMEOUT = 0;
     int recvd = 0;
     ::recv(temp_sock_desc, size, 4, 0);
     int8_t * out = new int8_t[*size];

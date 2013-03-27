@@ -35,7 +35,7 @@ int main(int argc, char * argv[]) {
     try {
         mySubServer.listen(50000);
 	} catch(int e) {
-		std::cout "Fatal Error: Unable to set up socket. Ex: " << e << std::endl;
+		std::cout << "Fatal Error: Unable to set up socket. Ex: " << e << std::endl;
 	}
     
     // Keep trying to set up the camera until something tells us to stop
