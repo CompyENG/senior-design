@@ -16,7 +16,16 @@ class SubServer
     int sock_desc;
     
     public:
-    int ERROR_TIMEOUT;
+    enum Exceptions {
+		ERR_CREATE = 1,
+		ERR_CONNECT,
+		ERR_BIND,
+		ERR_LISTEN,
+		ERR_ACCEPT,
+		ERR_SET_SEND_TIMEOUT,
+		ERR_SET_RECV_TIMEOUT,
+		ERR_SEND,
+		ERR_RECV };
     bool listen(int port);
     int8_t * recv(uint32_t * size);
     bool send(LVData& data);

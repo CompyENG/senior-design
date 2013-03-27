@@ -32,7 +32,11 @@ int main(int argc, char * argv[]) {
         return 1;
     }
     
-    mySubServer.listen(50000);
+    try {
+        mySubServer.listen(50000);
+	} catch(int e) {
+		std::cout "Fatal Error: Unable to set up socket. Ex: " << e << std::endl;
+	}
     
     // Keep trying to set up the camera until something tells us to stop
     while(setup_camera(&cam, &error) == false && signalHandler.gotExitSignal() == false) {
@@ -55,7 +59,11 @@ int main(int argc, char * argv[]) {
         LVData lv;
         
         // TODO: Receive data
-        joy_data = mySubServer.recv(&joy_data_len);
+        try {
+            joy_data = mySubServer.recv(&joy_data_len);
+		} catch(int e) {
+			std::cout << "Error: Could not receive joystick data. Exception: " << e << std::endl;
+		}
         std::cout << "Got data of length " << joy_data_len << std::endl;
         
         // TODO: Motor control
