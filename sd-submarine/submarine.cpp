@@ -54,6 +54,10 @@ int main(int argc, char * argv[]) {
     setup_motors(subMotors);
     std::cout << "Motors are ready" << std::endl;
     
+    //Wait for both the sub and surface to be ready
+    wait_for_ready();
+        
+    
     // TODO: Signal handler to allow us to quit loop when we receive SIGUSR1
     while(signalHandler.gotExitSignal() == false) {
         LVData lv;
@@ -63,6 +67,9 @@ int main(int argc, char * argv[]) {
             joy_data = mySubServer.recv(&joy_data_len);
 		} catch(int e) {
 			std::cout << "Error: Could not receive joystick data. Exception: " << e << std::endl;
+			std::cout << "Wating for ready" << std::endl;
+			wait_for_ready();
+			continue;
 		}
         std::cout << "Got data of length " << joy_data_len << std::endl;
         
@@ -209,7 +216,14 @@ int main(int argc, char * argv[]) {
         std::cout << "Asking camera for lv data" << std::endl;
         cam.get_live_view_data(&lv, true);
         std::cout << "Going to send" << std::endl;
-        mySubServer.send(lv);
+        try {
+            mySubServer.send(lv);
+		} catch(int e) {
+			std::cout << "Error: sending data failed. Exception: " << e << endl;
+			std::cout << "Wating for ready" << std::endl;
+			wait_for_ready();
+			continue;
+		}
         std::cout << "Sent data" << std::endl;
         //lv_rgb = lv.get_rgb((int *)&size, (int *)&width, (int *)&height, true);
         
@@ -285,4 +299,8 @@ bool compare_states(int8_t * sub_state, int8_t * joy_data) {
     }
     
     return true;
+}
+
+void wait_for_ready(SubServer& server,SignalHandler& sigHand) {
+	while(server.reply_ready() == false && sigHand.gotExitSignal() == false);
 }
