@@ -55,7 +55,7 @@ int main(int argc, char * argv[]) {
     std::cout << "Motors are ready" << std::endl;
     
     //Wait for both the sub and surface to be ready
-    wait_for_ready();
+    wait_for_ready(mySubServer, signalHandler);
         
     
     // TODO: Signal handler to allow us to quit loop when we receive SIGUSR1
@@ -68,7 +68,7 @@ int main(int argc, char * argv[]) {
 		} catch(int e) {
 			std::cout << "Error: Could not receive joystick data. Exception: " << e << std::endl;
 			std::cout << "Wating for ready" << std::endl;
-			wait_for_ready();
+			wait_for_ready(mySubServer, signalHandler);
 			continue;
 		}
         std::cout << "Got data of length " << joy_data_len << std::endl;
@@ -219,9 +219,9 @@ int main(int argc, char * argv[]) {
         try {
             mySubServer.send(lv);
 		} catch(int e) {
-			std::cout << "Error: sending data failed. Exception: " << e << endl;
+			std::cout << "Error: sending data failed. Exception: " << e << std::endl;
 			std::cout << "Wating for ready" << std::endl;
-			wait_for_ready();
+			wait_for_ready(mySubServer, signalHandler);
 			continue;
 		}
         std::cout << "Sent data" << std::endl;
