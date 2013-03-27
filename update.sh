@@ -67,6 +67,7 @@ echo "Detected that I am: ${MY_HOSTNAME}, other Pi is: ${OTHER_HOSTNAME}"
 
 echo "SSHing to make directories"
 ssh pi@$OTHER_HOSTNAME << EOF
+rm -Rf /tmp/update/
 mkdir -p /tmp/update/usr/lib/
 mkdir -p /tmp/update/usr/include/
 mkdir -p /tmp/update/usr/bin/
@@ -103,6 +104,8 @@ EOF
 echo "SSH to move files and restart UI"
 ssh pi@$OTHER_HOSTNAME << EOF
 sudo cp -r /tmp/update/* /
+sudo update-rc.d sd-startup defaults
+sudo udevadm control --reload-rules
 sudo /etc/init.d/sd-startup stop
 sudo /etc/init.d/sd-startup start
 EOF
