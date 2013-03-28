@@ -1,166 +1,135 @@
-#ifndef _LIBPTPPP_H
-#define _LIBPTPPP_H
+/**
+ * @file libptp++.hpp
+ * 
+ * @brief A conversion of pyptp2 and all that comes with it to C++
+ * 
+ * libptp2 is nice, but appears to be tightly bound to ptpcam.  There
+ * are a few other CHDK-specific programs to communicate with a camera
+ * through PTP, but all contain source code that is tightly integrated
+ * and difficult to read.
+ * 
+ * While this library should be able to communicate with any PTP camera
+ * through the \c PTPCamera interface, it's primary purpose is to allow
+ * easy communication with cameras running CHDK through \c CHDKCamera.
+ * 
+ * This library has two goals:
+ *  -# Provide all functionality of pyptp2 through a C++ interface.
+ *  -# Be easy to use, and well-documented.
+ *  
+ * @author Bobby Graese <bobby.graese@gmail.com>
+ * 
+ * @see http://code.google.com/p/pyptp2/
+ * @see http://libptp.sourceforge.net/
+ * 
+ * @version 0.1
+ */
+ 
+/**
+ * \mainpage libptp++ API Reference
+ * 
+ * \section intro Introduction
+ *
+ * libptp++ is an open-source C++ library for communicating with PTP devices in
+ * the easiest way possible.  It is a port and extension of the pyptp2 API to
+ * C++.  This API was chosen to avoid designing an API from the ground up, and
+ * because it seems to be fairly stable and useful.  However, the pyptp2 library
+ * was able to use some Python conveniences that aren't available in C++, so
+ * some additions have been made to this API.
+ *
+ * This library does not assume that the developer knows anyting about PTP, or
+ * how it handles its transactions over USB.  Instead, all these functions are
+ * abstracted out to library functions, and these library functions attempt to
+ * hide the underlying USB interface as much as possible.  In some cases, it is
+ * simply not feasibly to hide this interface, so it is exposed to the
+ * developer.
+ *
+ * \section gettingstarted Getting Started
+ *
+ * If you learn best by reading documentation, head over to the "Classes" page,
+ * and you can read an overview of what classes are available, as well as what
+ * functionality each of their methods provide.
+ *
+ * However, most likely, the "Examples" page will be more useful.  This library
+ * is designed so that a lot can be accomplished in as few calls as possible, so
+ * the examples should help get you a quick start to using libptp++.
+ */
+ 
+/**
+ * \page examples Examples
+ *
+ * Note: this page is mostly incomplete. More examples coming in the future.
+ *
+ * \section simple A Simple Example
+ *
+ * This example simply finds the first PTP camera available, connects to it,
+ * and asks CHDK to put the camera in "record" mode.
+\code
+libusb_init(NULL);  // Make sure to initialize libusb first!
+
+libusb_device * dev = CHDKCamera::find_first_camera();
+
+CHDKCamera cam; 
+cam.open(dev);
+
+// Execute a lua script to switch the camera to "Record" mode.
+//  Second parameter, error_code, is NULL, because we don't care if an error
+//  occurs, and we aren't blocking to wait for one.
+cam.execute_lua("switch_mode_usb(1)", NULL);
+
+// The camera is closed automatically when the cam object is destroyed
+
+// Be sure to exit libusb
+libusb_exit(NULL);
+\endcode
+ *
+ */
+ 
+#ifndef LIBPTP_PP_H_
+#define LIBPTP_PP_H_
 
 #include <libusb-1.0/libusb.h>
-#include "live_view.h"
 
-// Error codes
-#define LIBPTP2_CANNOT_CONNECT  1
-#define LIBPTP2_NO_DEVICE       2
-#define LIBPTP2_ALREADY_OPEN    3
-#define LIBPTP2_NOT_OPEN        4
-#define LIBPTP2_CANNOT_RECV     5
-#define LIBPTP2_TIMEOUT         6
-#define LIBPTP2_INVALID_RESPONSE 7
+// This serves as a global "include" file -- include this to grab all the other
+//  headers, too
+#include "CameraBase.hpp"
+#include "CHDKCamera.hpp"
+#include "LVData.hpp"
+#include "PTPCamera.hpp"
+#include "PTPContainer.hpp"
+#include "IPTPComm.hpp"
+#include "PTPUSB.hpp"
 
-#define PTPCONTAINER_NO_PAYLOAD     1
-#define PTPCONTAINER_INVALID_PARAM  2
+namespace PTP {
 
-#define LVDATA_NOT_ENOUGH_DATA  1
+// Force these definitions into the PTP namespace
+#include "chdk/live_view.h"
+#include "chdk/ptp.h"
 
-// PTP Stuff
-enum PTP_CONTAINER_TYPE {
-    PTP_CONTAINER_TYPE_COMMAND  = 1,
-    PTP_CONTAINER_TYPE_DATA     = 2,
-    PTP_CONTAINER_TYPE_RESPONSE = 3,
-    PTP_CONTAINER_TYPE_EVENT    = 4
-};
+    enum LIBPTP_PP_ERRORS {
+        ERR_NONE = 0,
+        ERR_CANNOT_CONNECT,
+        ERR_NO_DEVICE,
+        ERR_ALREADY_OPEN,
+        ERR_NOT_OPEN,
+        ERR_CANNOT_RECV,
+        ERR_TIMEOUT,
+        ERR_INVALID_RESPONSE,
+        ERR_NOT_IMPLEMENTED,
+        
+        ERR_PTPCONTAINER_NO_PAYLOAD,
+        ERR_PTPCONTAINER_INVALID_PARAM,
+        
+        ERR_LVDATA_NOT_ENOUGH_DATA
+    };
+    
+    // Picked out of CHDK source in a header we don't want to include
+    enum CHDK_PTP_RESP {
+        CHDK_PTP_RC_OK = 0x2001,
+        CHDK_PTP_RC_GeneralError = 0x2002,
+        CHDK_PTP_RC_ParameterNotSupported = 0x2006,
+        CHDK_PTP_RC_InvalidParameter = 0x201D
+    };
 
-enum CHDK_OPERATIONS {
-    CHDK_OP_VERSION     = 0,
-    CHDK_OP_GET_MEMORY,
-    CHDK_OP_SET_MEMORY,
-    CHDK_OP_CALL_FUNCTION,
-    CHDK_OP_TEMP_DATA,
-    CHDK_OP_UPLOAD_FILE,
-    CHDK_OP_DOWNLOAD_FILE,
-    CHDK_OP_EXECUTE_SCRIPT,
-    CHDK_OP_SCRIPT_STATUS,
-    CHDK_OP_SCRIPT_SUPPORT,
-    CHDK_OP_READ_SCRIPT_MSG,
-    CHDK_OP_WRITE_SCRIPT_MSG,
-    CHDK_OP_GET_DISPLAY_DATA
-};
+}
 
-enum CHDK_TYPES {
-    CHDK_TYPE_UNSUPPORTED = 0,
-    CHDK_TYPE_NIL,
-    CHDK_TYPE_BOOLEAN,
-    CHDK_TYPE_INTEGER,
-    CHDK_TYPE_STRING,
-    CHDK_TYPE_TABLE
-};
-
-enum CHDK_TEMP_DATA {
-    CHDK_TEMP_DOWNLOAD = 1, // Download data instead of upload
-    CHDK_TEMP_CLEAR
-};
-
-enum CHDK_SCRIPT_LANGAUGE {
-    CHDK_LANGUAGE_LUA   = 0,
-    CHDK_LANGUAGE_UBASIC
-};
-
-enum CHDK_SCRIPT_STATUS {
-    CHDK_SCRIPT_STATUS_NONE = 0,    // No script running
-    CHDK_SCRIPT_STATUS_RUN,         // Script running
-    CHDK_SCRIPT_STATUS_MSG          // Messages waiting
-};
-
-enum CHDK_PTP_RESP {
-    CHDK_PTP_RC_OK = 0x2001,
-    CHDK_PTP_RC_GeneralError = 0x2002,
-    CHDK_PTP_RC_ParameterNotSupported = 0x2006,
-    CHDK_PTP_RC_InvalidParameter = 0x201D
-};
-
-// Have to define the helper class first, or I can't use it in CameraBase
-class PTPContainer {
-    private:
-        static const uint32_t default_length = sizeof(uint32_t)+sizeof(uint32_t)+sizeof(uint16_t)+sizeof(uint16_t);
-        uint32_t length;
-        unsigned char * payload;    // We'll deal with this completely internally
-        void init();
-    public:
-        uint16_t type;
-        uint16_t code;
-        uint32_t transaction_id;    // We'll end up setting this externally
-        PTPContainer();
-        PTPContainer(uint16_t type, uint16_t op_code);
-        PTPContainer(unsigned char * data);
-        ~PTPContainer();
-        void add_param(uint32_t param);
-        void set_payload(unsigned char * payload, int payload_length);
-        unsigned char * pack();
-        unsigned char * get_payload(int * size_out);  // This might end up being useful...
-        uint32_t get_length();  // So we can get, but not set
-        void unpack(unsigned char * data);
-        uint32_t get_param_n(uint32_t n);
-};
-
-class LVData {
-    lv_data_header * vp_head;
-    lv_framebuffer_desc * fb_desc;
-    uint8_t * payload;
-    void init();
-    static uint8_t clip(int v);
-    static void yuv_to_rgb(uint8_t **dest, uint8_t y, int8_t u, int8_t v);
-    public:
-        LVData();
-        LVData(uint8_t * payload, int payload_size);
-        ~LVData();
-        void read(uint8_t * payload, int payload_size);
-        void read(PTPContainer * container);    // Could this make life easier?
-        uint8_t * get_rgb(int * out_size, int * out_width, int * out_height, bool skip=false);    // Some cameras don't require skip
-        float get_lv_version();
-};
-
-class CameraBase {
-    private:
-        libusb_device_handle *handle;
-        int usb_error;
-        struct libusb_interface_descriptor *intf;
-        uint8_t ep_in;
-        uint8_t ep_out;
-        uint32_t _transaction_id;
-        void init();
-    protected:
-        int _bulk_write(unsigned char * bytestr, int length, int timeout=0);
-        int _bulk_read(unsigned char * data_out, int size, int * transferred, int timeout=0);
-        int get_and_increment_transaction_id(); // What a beautiful name for a function
-    public:
-        CameraBase();
-        CameraBase(libusb_device *dev);
-        ~CameraBase();
-        bool open(libusb_device *dev);
-        bool close();
-        bool reopen();
-        int send_ptp_message(PTPContainer * cmd, int timeout=0);
-        void recv_ptp_message(PTPContainer *out, int timeout=0);
-        void ptp_transaction(PTPContainer *cmd, PTPContainer *data, bool receiving, PTPContainer *out_resp, PTPContainer *out_data, int timeout=0);
-        static libusb_device * find_first_camera();
-        int get_usb_error();
-};
-
-class PTPCamera : public CameraBase {
-    public:
-        PTPCamera();
-};
-
-class CHDKCamera : public CameraBase {
-    static uint8_t * _pack_file_for_upload(uint32_t * out_size, char * local_filename, char * remote_filename=NULL);
-    public:
-        CHDKCamera();
-        CHDKCamera(libusb_device *dev);
-        float get_chdk_version(void);
-        uint32_t check_script_status(void);
-        uint32_t execute_lua(char * script, uint32_t * script_error, bool block=false);
-        void read_script_message(PTPContainer * out_data, PTPContainer * out_resp);
-        uint32_t write_script_message(char * message, uint32_t script_id=0);
-        bool upload_file(char * local_filename, char * remote_filename, int timeout=0);
-        char * download_file(char * filename, int timeout);
-        void get_live_view_data(LVData * data_out, bool liveview=true, bool overlay=false, bool palette=false);
-        char * _wait_for_script_return(int timeout);
-};
-
-#endif /* _LIBPTP++_H */
+#endif /* LIBPTP_PP_H_ */
