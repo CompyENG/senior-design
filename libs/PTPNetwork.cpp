@@ -26,6 +26,15 @@ PTPNetwork::PTPNetwork(int port) {
     this->listen(port);
 }
 
+PTPNetwork::~PTPNetwork() {
+    if(this->is_server()) {
+        ::close(this->client_sock);
+        ::close(this->server_sock);
+    } else {
+        ::close(this->client_sock);
+    }
+}
+
 void PTPNetwork::init() {
     this->client_sock = -1;
     this->server_sock = -1;
@@ -90,14 +99,14 @@ bool PTPNetwork::listen(int port) {
     this->server.sin_port = htons(port);  
     if (::bind(this->server_sock, (struct sockaddr*)&this->server, sizeof(this->server)) != 0)
     {
-        close(this->server_sock);
+        ::close(this->server_sock);
         throw PTPNetwork::ERR_CONNECT;
         return false;
     }
     
     if (::listen(this->server_sock, 20) != 0)
     {
-        close(this->server_sock);
+        ::close(this->server_sock);
         throw PTPNetwork::ERR_LISTEN;
         return false;
     }
@@ -107,8 +116,8 @@ bool PTPNetwork::listen(int port) {
     this->client_sock = accept(this->server_sock, (struct sockaddr*)&this->client, &len);  
     if (this->client_sock == -1)
     {
-        close(this->client_sock);
-        close(this->server_sock);
+        ::close(this->client_sock);
+        ::close(this->server_sock);
         throw ERR_ACCEPT;
         return 0;
     }
@@ -137,6 +146,39 @@ bool PTPNetwork::is_server() {
 
 bool PTPNetwork::is_client() {
     return (this->server_sock == -1 && this->client_sock == -1);
+}
+
+bool PTPNetwork::_bulk_write(const unsigned char * bytestr, const int length, const int timeout) {
+    // TODO: Obey timeout
+    
+    int sent = 0;
+    while(sent < length) 
+    {
+        int bytes_sent = 0;
+        bytes_sent = ::send(this->client_sock, bytestr + sent, length - sent, 0);
+        if(bytes_sent == -1) {
+            throw PTPNetwork::ERR_SEND;
+            return false;
+        }
+        sent += bytes_sent;
+    }
+    return true;
+}
+
+bool PTPNetwork::_bulk_read(unsigned char * data_out, const int size, int * transferred, const int timeout) {
+    // TODO: Obey timeout
+    
+    int recvd = 0;
+    recvd = ::recv(this->client_sock, data_out, size, 0);
+    if(recvd == -1) {
+        throw PTPNetwork::ERR_RECV;
+        return false;
+    }
+    *transferred = recvd;
+}
+
+bool PTPNetwork::is_open() {
+    return (this->is_server() || this->is_client());
 }
 
 }

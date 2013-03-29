@@ -1,6 +1,7 @@
 #ifndef LIBPTP_PP_PTPNETWORK_H_
 #define LIBPTP_PP_PTPNETWORK_H_
 
+#include <string>
 #include <stdint.h>
 #include <sys/socket.h>  
 #include <netinet/in.h>  
@@ -18,10 +19,23 @@ namespace PTP {
         private:
             struct sockaddr_in client;
             struct sockaddr_in server;
-            int temp_sock_desc;
-            int sock_desc;
+            int server_sock;
+            int client_sock;
+            void init();
             
         public:
+            enum NetworkErrors {
+                ERR_CREATE = 1,
+                ERR_CONNECT,
+                ERR_BIND,
+                ERR_LISTEN,
+                ERR_ACCEPT,
+                ERR_SET_SEND_TIMEOUT,
+                ERR_SET_RECV_TIMEOUT,
+                ERR_SEND,
+                ERR_RECV,
+                ERR_IP
+            };
             PTPNetwork();
             PTPNetwork(std::string server, int port);
             PTPNetwork(int port);
@@ -33,7 +47,7 @@ namespace PTP {
             virtual bool _bulk_write(const unsigned char * bytestr, const int length, const int timeout);
             virtual bool _bulk_read(unsigned char * data_out, const int size, int * transferred, const int timeout);
             virtual bool is_open();
-    }
+    };
     
 }
 
