@@ -74,7 +74,7 @@ bool SubServer::listen(int port)
     return true;
 }
 
-bool SubServer::send(LVData& data)
+bool SubServer::send(PTP::LVData& data)
 {
     int sent = 0;
     int size_of_data;

@@ -28,7 +28,7 @@ class SubServer
 		ERR_RECV };
     bool listen(int port);
     int8_t * recv(uint32_t * size);
-    bool send(LVData& data);
+    bool send(PTP::LVData& data);
     void disconnect();
     bool reply_ready();
 };
