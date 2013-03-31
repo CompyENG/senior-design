@@ -5,7 +5,7 @@
 #include <sys/socket.h>  
 #include <netinet/in.h>  
 #include <arpa/inet.h>
-#include <libptp++.hpp>
+#include <libptp++/libptp++.hpp>
 
 class SubServer
 {

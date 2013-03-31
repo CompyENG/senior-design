@@ -9,7 +9,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include "SubServer.hpp"
-#include <libptp++.hpp>
+#include <libptp++/libptp++.hpp>
 
 #define MAGIC_REQ 0xF061
 #define MAGIC_RESP 0xA542

@@ -1,6 +1,6 @@
 #include <iostream>
 #include <unistd.h>
-#include <libptp++.hpp>
+#include <libptp++/libptp++.hpp>
 #include <libusb-1.0/libusb.h>
 
 // We need the sub joystick class so we can reuse our data struct
