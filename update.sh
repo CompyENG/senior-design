@@ -18,8 +18,10 @@ cd ./libs/
 bash ./build-lib.sh >> /tmp/update-log 2>&1
 # Copy these files first, as they're necessary for later builds
 sudo cp ./libptp++.so /usr/lib/
-sudo cp ./libptp++.hpp /usr/include/
-sudo cp ./live_view.h /usr/include/
+sudo mkdir -p /usr/include/libptp++/
+sudo cp ./*.hpp /usr/include/libptp++/
+sudo mkdir -p /usr/include/libptp++/chdk/
+sudo cp ./chdk/*.h /usr/include/libptp++/chdk/
 
 echo "Building submarine executable"
 cd ../sd-submarine/
