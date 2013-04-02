@@ -103,6 +103,7 @@ void CameraBase::recv_ptp_message(PTPContainer& out, const int timeout) {
 	unsigned char * buffer = new unsigned char[512];
     int read = 0;
     this->protocol->_bulk_read(buffer, 512, &read, timeout); // TODO: Error checking on response
+    std::cout << "Primed read." << std::endl;
     uint32_t size = 0;
     if(read < 4) {
         // If we actually read less than four bytes, we can't copy four bytes out of the buffer.
@@ -120,6 +121,7 @@ void CameraBase::recv_ptp_message(PTPContainer& out, const int timeout) {
         std::memcpy(out_buf, buffer, 512);
         // We've already read 512 bytes... read the rest!
         this->protocol->_bulk_read(&out_buf[512], size-512, &read, timeout);
+        std::cout << "Second read. Wanted: " << size-512 << " ; Read: " << read << std::endl;
     }
     
     out.unpack(out_buf);
