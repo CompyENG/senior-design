@@ -78,6 +78,8 @@ int main(int argc, char * argv[]) {
             continue;
         }
         
+        std::cout << "Received container" << std::endl;
+        
         // Check command
         if(container_in.type != PTP::PTPContainer::CONTAINER_TYPE_COMMAND || container_in.code != SD_MAGIC) {
             // If what we got isn't a command... or isn't for us... we're in the wrong place!
@@ -86,6 +88,7 @@ int main(int argc, char * argv[]) {
             response.add_param(SD_ERROR);
             
             subServer.send_ptp_message(response);
+            std::cout << "No command." << std::endl;
             continue;
         }
         
@@ -101,13 +104,16 @@ int main(int argc, char * argv[]) {
                 response.add_param(SD_IS_CONNECTED);
                 
                 subServer.send_ptp_message(response);
+                std::cout << "Sent SD_IS_CONNECTED" << std::endl;
                 break;
             }
             case SD_JOYDATA: {
+                std::cout << "Got SD_JOYDATA" << std::endl;
                 // Ah-ha! We've received joystick data! Let's extract it and parse it
                 // First, receive the data container
                 PTP::PTPContainer data;
                 subServer.recv_ptp_message(data);
+                std::cout << "Got data" << std::endl;
                 
                 // TODO: Check transaction ID, also
                 if(data.type != PTP::PTPContainer::CONTAINER_TYPE_DATA) {
@@ -118,6 +124,7 @@ int main(int argc, char * argv[]) {
                 delete[] joy_data; // Need to delete old joy_data before allocating more memory
                 joy_data = (int8_t *)data.get_payload((int *)&joy_data_len);
                 update_motors(sub_state, joy_data, joy_data_len, subMotors, cam);
+                std::cout << "Updated motors" << std::endl;
                 
                 // TODO: Error checking
                 // Everything should have gone OK, so send SD_OK response
@@ -125,6 +132,7 @@ int main(int argc, char * argv[]) {
                 response.add_param(SD_OK);
                 
                 subServer.send_ptp_message(response);
+                std::cout << "Sent OK" << std::cout;
                 break;
             }
             case SD_LVDATA: {
@@ -133,15 +141,18 @@ int main(int argc, char * argv[]) {
                 // First, get the live view data
                 PTP::LVData lv;
                 cam.get_live_view_data(lv, true);
+                std::cout << "Got live view from camera" << std::endl;
                 
                 uint8_t * lv_rgb;
                 uint32_t size, width, height;
                 lv_rgb = lv.get_rgb((int *)&size, (int *)&width, (int *)&height, true);
+                std::cout << "Got lv_rgb" << std::endl;
                 
                 // For whatever reason... send data first.
                 PTP::PTPContainer out_data(PTP::PTPContainer::CONTAINER_TYPE_DATA, SD_MAGIC);
                 out_data.set_payload(lv_rgb, size);
                 subServer.send_ptp_message(out_data);
+                std::cout << "Sent lv_rgb" << std::endl;
                 
                 // Now, send our response
                 PTP::PTPContainer response(PTP::PTPContainer::CONTAINER_TYPE_RESPONSE, SD_MAGIC);
@@ -150,6 +161,7 @@ int main(int argc, char * argv[]) {
                 response.add_param(width);
                 response.add_param(height);
                 subServer.send_ptp_message(response);
+                std::cout << "Sent SD_OK" << std::endl;
                 
                 delete[] lv_rgb;
                 
@@ -162,6 +174,7 @@ int main(int argc, char * argv[]) {
                 subServer.send_ptp_message(response);
                 
                 signalHandler.setExitSignal(true);
+                std::cout << "Got SD_QUIT, sent SD_OK" << std::endl;
                 break;
             }
             default: {
@@ -169,6 +182,7 @@ int main(int argc, char * argv[]) {
                 PTP::PTPContainer response(PTP::PTPContainer::CONTAINER_TYPE_RESPONSE, SD_MAGIC);
                 response.add_param(SD_ERROR);
                 subServer.send_ptp_message(response);
+                std::cout << "Got unkonw. Sent SD_ERROR" << std::endl;
                 break;
             }
         }
