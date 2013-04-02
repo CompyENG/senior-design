@@ -11,6 +11,7 @@
  
 #include <cstring>
 #include <stdint.h>
+#include <iostream>
 
 #include "libptp++.hpp"
 #include "CameraBase.hpp"
