@@ -10,6 +10,7 @@
 #include "submarine.hpp"
 #include "SubServer.hpp"
 
+// TODO: Place these in a common header
 #define SD_MAGIC 0xF061
 
 enum SD_COMMANDS {
@@ -140,7 +141,8 @@ int main(int argc, char * argv[]) {
                 
                 // Now, send our response
                 PTP::PTPContainer response(PTP::PTPContainer::CONTAINER_TYPE_RESPONSE, SD_MAGIC);
-                // Param 0 is width, param 1 is height
+                // Param 0 is "OK", param 1 is width, param 2 is height
+                response.add_param(SD_OK);
                 response.add_param(width);
                 response.add_param(height);
                 subServer.send_ptp_message(response);
