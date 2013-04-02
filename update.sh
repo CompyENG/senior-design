@@ -72,6 +72,7 @@ ssh pi@$OTHER_HOSTNAME << EOF
 rm -Rf /tmp/update/
 mkdir -p /tmp/update/usr/lib/
 mkdir -p /tmp/update/usr/include/
+mkdir -p /tmp/update/usr/include/libptp++/
 mkdir -p /tmp/update/usr/bin/
 mkdir -p /tmp/update/etc/udev/rules.d/
 mkdir -p /tmp/update/usr/sbin/
@@ -87,7 +88,7 @@ EOF
 echo "Copying files"
 sftp pi@$OTHER_HOSTNAME << EOF
 put /usr/lib/libptp++.so /tmp/update/usr/lib/
-put /usr/include/libptp++.hpp /tmp/update/usr/include/
+put /usr/include/libptp++/* /tmp/update/usr/include/libptp++/
 put /usr/bin/sd-submarine /tmp/update/usr/bin/
 put /usr/bin/sd-surface /tmp/update/usr/bin/
 put /etc/udev/rules.d/90-senior-design.rules /tmp/update/etc/udev/rules.d/
