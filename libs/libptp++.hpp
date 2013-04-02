@@ -98,6 +98,7 @@ libusb_exit(NULL);
 #include "PTPContainer.hpp"
 #include "IPTPComm.hpp"
 #include "PTPUSB.hpp"
+#include "PTPNetwork.hpp"
 
 namespace PTP {
 
