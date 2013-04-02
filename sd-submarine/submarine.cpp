@@ -112,7 +112,12 @@ int main(int argc, char * argv[]) {
                 // Ah-ha! We've received joystick data! Let's extract it and parse it
                 // First, receive the data container
                 PTP::PTPContainer data;
-                subServer.recv_ptp_message(data);
+                try {
+                    subServer.recv_ptp_message(data);
+                } catch(int e) {
+                    std::cout << "Error getting data: " << e << std::endl;
+                    break;
+                }
                 std::cout << "Got data" << std::endl;
                 
                 // TODO: Check transaction ID, also
