@@ -121,6 +121,9 @@ int main(int argc, char * argv[]) {
         } catch(PTP::LIBPTP_PP_ERRORS e) {
             std::cout << "Error in ptp_transaction: " << e << std::endl;
             break;
+        } catch(PTP::PTPNetwork::NetworkErrors e) {
+            std::cout << "Network error in ptp_transaction: " << e << std::endl;
+            break;
         }
         
         // Check response
