@@ -116,7 +116,12 @@ int main(int argc, char * argv[]) {
         joy_cmd.add_param(SD_JOYDATA);
         PTP::PTPContainer joy_data(PTP::PTPContainer::CONTAINER_TYPE_DATA, SD_MAGIC);
         joy_data.set_payload(nav_data, SubJoystick::COMMAND_LENGTH);
-        surfaceClient.ptp_transaction(joy_cmd, joy_data, false, out_resp, out_data);
+        try {
+            surfaceClient.ptp_transaction(joy_cmd, joy_data, false, out_resp, out_data);
+        } catch(PTP::LIBPTP_PP_ERRORS e) {
+            std::cout << "Error in ptp_transaction: " << e << std::endl;
+            break;
+        }
         
         // Check response
         if(out_resp.code != SD_MAGIC || out_resp.get_param_n(0) != SD_OK) {

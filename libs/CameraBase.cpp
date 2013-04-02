@@ -165,6 +165,7 @@ void CameraBase::ptp_transaction(PTPContainer& cmd, PTPContainer& data, const bo
     
     if(!data.is_empty()) {
         // Only send data if it doesn't have an empty payload
+        std::cout << "Data is not empty! Sending data." << std::endl;
         data.transaction_id = cmd.transaction_id;
         this->send_ptp_message(data, timeout);
     }
