@@ -10,20 +10,31 @@
 #include "submarine.hpp"
 #include "SubServer.hpp"
 
+#define SD_MAGIC 0xF061
+
+enum SD_COMMANDS {
+    SD_REQ_CONNECTED = 1,
+    SD_IS_CONNECTED,
+    SD_NOT_CONNECTED,
+    SD_JOYDATA,
+    SD_LVDATA,
+    SD_QUIT,
+    SD_OK,
+    SD_ERROR
+};
+
 int main(int argc, char * argv[]) {
     int error;
     PTP::PTPUSB proto;
     PTP::CHDKCamera cam;
     Motor subMotors[4]; // We need to control 4 motors
     SignalHandler signalHandler;
-    uint8_t * lv_rgb;
-    uint32_t size, width, height, send_dimensions;
-    uint16_t send_width, send_height;
     int8_t * joy_data;
     uint32_t joy_data_len;
     int cmd;
     int8_t sub_state[7]; // The current state of the submarine
-    SubServer mySubServer;
+    PTP::PTPNetwork subServerBackend;
+    PTP::CameraBase subServer;
     
     // Set up our signal handler(s)
     try {
@@ -34,7 +45,8 @@ int main(int argc, char * argv[]) {
     }
     
     try {
-        mySubServer.listen(50000);
+        subServerBackend.listen(50000);
+        subServer.set_protocol(&subServerBackend);
 	} catch(int e) {
 		std::cout << "Fatal Error: Unable to set up socket. Ex: " << e << std::endl;
 	}
@@ -55,189 +67,109 @@ int main(int argc, char * argv[]) {
     setup_motors(subMotors);
     std::cout << "Motors are ready" << std::endl;
     
-    //Wait for both the sub and surface to be ready
-    wait_for_ready(mySubServer, signalHandler);
-        
-    
     // TODO: Signal handler to allow us to quit loop when we receive SIGUSR1
     while(signalHandler.gotExitSignal() == false) {
-        PTP::LVData lv;
+        // Receive a PTP container
+        PTP::PTPContainer container_in;
+        subServer.recv_ptp_message(container_in);
         
-        // TODO: Receive data
-        try {
-            joy_data = mySubServer.recv(&joy_data_len);
-		} catch(int e) {
-			std::cout << "Error: Could not receive joystick data. Exception: " << e << std::endl;
-			std::cout << "Wating for ready" << std::endl;
-			wait_for_ready(mySubServer, signalHandler);
-			continue;
-		}
-        std::cout << "Got data of length " << joy_data_len << std::endl;
+        // Check command
+        if(container_in.type != PTP::PTPContainer::CONTAINER_TYPE_COMMAND || container.code != SD_MAGIC) {
+            // If what we got isn't a command... or isn't for us... we're in the wrong place!
+            // Let's send an error and bail
+            PTP::PTPContainer response(PTP::PTPContainer::CONTAINER_TYPE_RESPONSE, SD_MAGIC);
+            response.add_param(SD_ERROR);
+            
+            subServer.send_ptp_message(response);
+            continue;
+        }
         
-        // TODO: Motor control
-        // NOTE: This is what I imagine receiving will be like. We might need
-        //  to adjust this later.  Until Shawn updates SubJoystick, this will
-        //  cause compilation to fail.
-        // TODO: Put these in functions, call, ex., handle_forward, etc.
-        // DONE: We can probably make this run faster by not doing the GPIO calls
-        //  if we're already in the state we're trying to get to.  Make a compare_states function?
-        
-        std::cout << "Received data" << std::endl;
-        
-        if(compare_states(sub_state, joy_data) == false) {
-            std::cout << "State has changed." << std::endl;
-            // Only run through these comparisons if our states have changed
-            // Forward/backward
-            if(sub_state[SubJoystick::LEFT] == 0) { // Left/right takes priority
-                if(joy_data[SubJoystick::FORWARD] == 1) {
-                    // If we want to go forward, and we're not trying to turn
-                    subMotors[MOTOR_LEFT].spinForward();
-                    subMotors[MOTOR_RIGHT].spinForward();
-                    
-                    sub_state[SubJoystick::FORWARD] = 1;
-                } else if(joy_data[SubJoystick::FORWARD] == -1) {
-                    // If we want to go backward, and we're not trying to turn
-                    subMotors[MOTOR_LEFT].spinBackward();
-                    subMotors[MOTOR_RIGHT].spinBackward();
-                    
-                    sub_state[SubJoystick::FORWARD] == -1;
-                } else if(joy_data[SubJoystick::FORWARD] == 0) {
-                    // If we want to go neither forward nor backward, and we're not trying to turn
-                    subMotors[MOTOR_LEFT].stop();
-                    subMotors[MOTOR_RIGHT].stop();
-                    
-                    sub_state[SubJoystick::FORWARD] = 0;
+        // OK... we MUST have received a command.  Let's check what its param is
+        uint32_t param = container_in.get_param_n(0);
+        switch(param) {
+            case SD_REQ_CONNECTED: {
+                // For now, this is a dumb response.  In the future, let's move where
+                //  we attempt to connect to the camera.  That way, there's a possibility
+                //  this would say it's not connected.
+                // Alternatively, this command could be required to initiate the connection
+                PTP::PTPContainer response(PTP::PTPContainer::CONTAINER_TYPE_RESPONSE, SD_MAGIC);
+                response.add_param(SD_IS_CONNECTED);
+                
+                subServer.send_ptp_message(response);
+                break;
+            }
+            case SD_JOYDATA: {
+                // Ah-ha! We've received joystick data! Let's extract it and parse it
+                // First, receive the data container
+                PTP::PTPContainer data;
+                subServer.recv_ptp_message(data);
+                
+                // TODO: Check transaction ID, also
+                if(data.type != PTP::PTPContainer::CONTAINER_TYPE_DATA) {
+                    std::cout << "Got SD_JOYDATA, but no data" << std::endl;
+                    break;
                 }
-            }
-            
-            // Left/right
-            if(joy_data[SubJoystick::LEFT] == 1) {
-                // If we want to turn left
-                subMotors[MOTOR_LEFT].spinBackward();
-                subMotors[MOTOR_RIGHT].spinForward();
                 
-                sub_state[SubJoystick::LEFT] = 1;
-            } else if(joy_data[SubJoystick::LEFT] == -1) {
-                // If we want to turn right
-                subMotors[MOTOR_LEFT].spinForward();
-                subMotors[MOTOR_RIGHT].spinBackward();
+                delete[] joy_data; // Need to delete old joy_data before allocating more memory
+                joy_data = (int8_t *)data.get_payload((int *)&joy_data_len);
+                update_motors(sub_state, joy_data, joy_data_len, subMotors, cam);
                 
-                sub_state[SubJoystick::LEFT] == -1;
-            } else if(joy_data[SubJoystick::LEFT] == 0) {
-                sub_state[SubJoystick::LEFT] = 0;
+                // TODO: Error checking
+                // Everything should have gone OK, so send SD_OK response
+                PTP::PTPContainer response(PTP::PTPContainer::CONTAINER_TYPE_RESPONSE, SD_MAGIC);
+                response.add_param(SD_OK);
                 
-                if(sub_state[SubJoystick::FORWARD] == 0) {
-                    // If we don't want to turn, and we aren't trying to move forward/backward
-                    subMotors[MOTOR_LEFT].stop();
-                    subMotors[MOTOR_RIGHT].stop();
-                }
+                subServer.send_ptp_message(response);
+                break;
             }
-            
-            // Pitch up/down
-            if(sub_state[SubJoystick::ASCEND] == 0) {
-                // If we're not ascending or descending, we can pitch up/down
-                if(joy_data[SubJoystick::PITCH] == -1) {
-                    // If we want to pitch down and we're not ascending or descending
-                    subMotors[MOTOR_TOP_FRONT].spinForward();
-                    subMotors[MOTOR_TOP_REAR].spinBackward();
-                    
-                    sub_state[SubJoystick::PITCH] = -1;
-                } else if(joy_data[SubJoystick::PITCH] == 1) {
-                    // If we want to pitch up and we're not ascending or descending
-                    subMotors[MOTOR_TOP_FRONT].spinBackward();
-                    subMotors[MOTOR_TOP_REAR].spinForward();
-                    
-                    sub_state[SubJoystick::PITCH] = 1;
-                } else if(joy_data[SubJoystick::PITCH] == 0) {
-                    // If we want to stop pitching, and we're not ascending/descending
-                    subMotors[MOTOR_TOP_FRONT].stop();
-                    subMotors[MOTOR_TOP_REAR].stop();
-                    
-                    sub_state[SubJoystick::PITCH] = 0;
-                }
-            }
-            
-            // Ascend/descend
-            if(joy_data[SubJoystick::ASCEND] == -1) {
-                // If we want to descend
-                subMotors[MOTOR_TOP_FRONT].spinForward();
-                subMotors[MOTOR_TOP_REAR].spinForward();
+            case SD_LVDATA: {
+                // We want live view data! Let's pack it up and send it off!
                 
-                sub_state[SubJoystick::ASCEND] = -1;
-            } else if(joy_data[SubJoystick::ASCEND] == 1) {
-                // If we want to ascend
-                subMotors[MOTOR_TOP_FRONT].spinBackward();
-                subMotors[MOTOR_TOP_REAR].spinBackward();
+                // First, get the live view data
+                PTP::LVData lv;
+                cam.get_live_view_data(lv, true);
                 
-                sub_state[SubJoystick::ASCEND] = 1;
-            } else if(joy_data[SubJoystick::ASCEND] == 0) {
-                sub_state[SubJoystick::ASCEND] = 0;
+                uint8_t * lv_rgb;
+                uint32_t size, width, height;
+                lv_rgb = lv.get_rgb(&size, &width, &height, true);
                 
-                if(sub_state[SubJoystick::PITCH] == 0) {
-                    // If we don't want to ascend/descend, and we're not pitching
-                    subMotors[MOTOR_TOP_FRONT].stop();
-                    subMotors[MOTOR_TOP_REAR].stop();
-                }
+                // For whatever reason... send data first.
+                PTP::PTPContainer out_data(PTP::PTPContainer::CONTAINER_TYPE_DATA, SD_MAGIC);
+                out_data.set_payload(lv_rgb, size);
+                subServer.send_ptp_message(out_data);
+                
+                // Now, send our response
+                PTP::PTPContainer response(PTP::PTPContainer::CONTAINER_TYPE_RESPONSE, SD_MAGIC);
+                // Param 0 is width, param 1 is height
+                response.add_param(width);
+                response.add_param(height);
+                subServer.send_ptp_message(response);
+                
+                delete[] lv_rgb;
+                
+                break;
             }
-            
-            // Zoom in/out
-            if(joy_data[SubJoystick::ZOOM] == -1) {
-                // If we want to zoom out
-                cam.execute_lua("click('zoom_in')", NULL);
-                sub_state[SubJoystick::ZOOM] = -1;
-            } else if(joy_data[SubJoystick::ZOOM] == 1) {
-                // If we want to zoom in
-                cam.execute_lua("click('zoom_out')", NULL);
-                sub_state[SubJoystick::ZOOM] = 1;
-            } else if(joy_data[SubJoystick::ZOOM] == 0) {
-                sub_state[SubJoystick::ZOOM] = 0;
+            case SD_QUIT: {
+                // OK! Let's get out of here! But first, let's let the surface know that we're OK with this.
+                PTP::PTPContainer response(PTP::PTPContainer::CONTAINER_TYPE_RESPONSE, SD_MAGIC);
+                response.add_param(SD_OK);
+                subServer.send_ptp_message(response);
+                
+                signalHandler.setExitSignal(true);
+                break;
             }
-            
-            // Shoot
-            if(joy_data[SubJoystick::SHOOT] == 1 && sub_state[SubJoystick::SHOOT] == 0) {
-                // We don't want to shoot continuously.
-                cam.execute_lua("shoot()", NULL);
-                sub_state[SubJoystick::SHOOT] = 1;
-            } else if(joy_data[SubJoystick::SHOOT] == 0 && sub_state[SubJoystick::SHOOT] == 1) {
-                // Check current state so we're not doing this every loop iteration
-                sub_state[SubJoystick::SHOOT] = 0;
-            }
-            
-            // Lights
-            if(joy_data[SubJoystick::LIGHTS] == 1 && sub_state[SubJoystick::LIGHTS] == 0) {
-                // If the lights aren't already on
-                // TODO: Turn the lights on. Which GPIO are we using for this?
-            } else if(joy_data[SubJoystick::LIGHTS] == 0 && sub_state[SubJoystick::LIGHTS] == 1) {
-                // Check current state so we're not doing this every loop iteration
-                // TODO: Turn the lights off
+            default: {
+                // We got something else... let's just send an error
+                PTP::PTPContainer response(PTP::PTPContainer::CONTAINER_TYPE_RESPONSE, SD_MAGIC);
+                response.add_param(SD_ERROR);
+                subServer.send_ptp_message(response);
+                break;
             }
         }
-        delete[] joy_data;
-        
-        std::cout << "Asking camera for lv data" << std::endl;
-        cam.get_live_view_data(lv, true);
-        std::cout << "Going to send" << std::endl;
-        try {
-            mySubServer.send(lv);
-		} catch(int e) {
-			std::cout << "Error: sending data failed. Exception: " << e << std::endl;
-			std::cout << "Wating for ready" << std::endl;
-			wait_for_ready(mySubServer, signalHandler);
-			continue;
-		}
-        std::cout << "Sent data" << std::endl;
-        //lv_rgb = lv.get_rgb((int *)&size, (int *)&width, (int *)&height, true);
-        
-        // Manipulate dimensions to send as one 32-bit data piece
-        //send_dimensions = ((0xFFFF & send_width) << 16) | (0xFFFF & send_height);
-        // TODO: Send live view data
-        //  Protocol: send size as four bytes, then width and height as two bytes
-        //   then, send live view data
-        
-        //free(lv_rgb);
     }
     
-    mySubServer.disconnect();
+    // Deconstructor will automatically take care of closing network connection
+    // TODO: Make PTPNetwork a pointer instead, so we can control when destruction happens?
     
     return 0;
 }
@@ -280,4 +212,135 @@ bool compare_states(int8_t * sub_state, int8_t * joy_data) {
 
 void wait_for_ready(SubServer& server,SignalHandler& sigHand) {
 	while(server.reply_ready() == false && sigHand.gotExitSignal() == false);
+}
+
+void update_motors(int8_t * sub_state, int8_t * joy_data, uint32_t joy_data_len, Motor * subMotors, PTP::CHDKCamera& cam) {
+    if(compare_states(sub_state, joy_data) == false) {
+        std::cout << "State has changed." << std::endl;
+        // Only run through these comparisons if our states have changed
+        // Forward/backward
+        if(sub_state[SubJoystick::LEFT] == 0) { // Left/right takes priority
+            if(joy_data[SubJoystick::FORWARD] == 1) {
+                // If we want to go forward, and we're not trying to turn
+                subMotors[MOTOR_LEFT].spinForward();
+                subMotors[MOTOR_RIGHT].spinForward();
+                
+                sub_state[SubJoystick::FORWARD] = 1;
+            } else if(joy_data[SubJoystick::FORWARD] == -1) {
+                // If we want to go backward, and we're not trying to turn
+                subMotors[MOTOR_LEFT].spinBackward();
+                subMotors[MOTOR_RIGHT].spinBackward();
+                
+                sub_state[SubJoystick::FORWARD] == -1;
+            } else if(joy_data[SubJoystick::FORWARD] == 0) {
+                // If we want to go neither forward nor backward, and we're not trying to turn
+                subMotors[MOTOR_LEFT].stop();
+                subMotors[MOTOR_RIGHT].stop();
+                
+                sub_state[SubJoystick::FORWARD] = 0;
+            }
+        }
+        
+        // Left/right
+        if(joy_data[SubJoystick::LEFT] == 1) {
+            // If we want to turn left
+            subMotors[MOTOR_LEFT].spinBackward();
+            subMotors[MOTOR_RIGHT].spinForward();
+            
+            sub_state[SubJoystick::LEFT] = 1;
+        } else if(joy_data[SubJoystick::LEFT] == -1) {
+            // If we want to turn right
+            subMotors[MOTOR_LEFT].spinForward();
+            subMotors[MOTOR_RIGHT].spinBackward();
+            
+            sub_state[SubJoystick::LEFT] == -1;
+        } else if(joy_data[SubJoystick::LEFT] == 0) {
+            sub_state[SubJoystick::LEFT] = 0;
+            
+            if(sub_state[SubJoystick::FORWARD] == 0) {
+                // If we don't want to turn, and we aren't trying to move forward/backward
+                subMotors[MOTOR_LEFT].stop();
+                subMotors[MOTOR_RIGHT].stop();
+            }
+        }
+        
+        // Pitch up/down
+        if(sub_state[SubJoystick::ASCEND] == 0) {
+            // If we're not ascending or descending, we can pitch up/down
+            if(joy_data[SubJoystick::PITCH] == -1) {
+                // If we want to pitch down and we're not ascending or descending
+                subMotors[MOTOR_TOP_FRONT].spinForward();
+                subMotors[MOTOR_TOP_REAR].spinBackward();
+                
+                sub_state[SubJoystick::PITCH] = -1;
+            } else if(joy_data[SubJoystick::PITCH] == 1) {
+                // If we want to pitch up and we're not ascending or descending
+                subMotors[MOTOR_TOP_FRONT].spinBackward();
+                subMotors[MOTOR_TOP_REAR].spinForward();
+                
+                sub_state[SubJoystick::PITCH] = 1;
+            } else if(joy_data[SubJoystick::PITCH] == 0) {
+                // If we want to stop pitching, and we're not ascending/descending
+                subMotors[MOTOR_TOP_FRONT].stop();
+                subMotors[MOTOR_TOP_REAR].stop();
+                
+                sub_state[SubJoystick::PITCH] = 0;
+            }
+        }
+        
+        // Ascend/descend
+        if(joy_data[SubJoystick::ASCEND] == -1) {
+            // If we want to descend
+            subMotors[MOTOR_TOP_FRONT].spinForward();
+            subMotors[MOTOR_TOP_REAR].spinForward();
+            
+            sub_state[SubJoystick::ASCEND] = -1;
+        } else if(joy_data[SubJoystick::ASCEND] == 1) {
+            // If we want to ascend
+            subMotors[MOTOR_TOP_FRONT].spinBackward();
+            subMotors[MOTOR_TOP_REAR].spinBackward();
+            
+            sub_state[SubJoystick::ASCEND] = 1;
+        } else if(joy_data[SubJoystick::ASCEND] == 0) {
+            sub_state[SubJoystick::ASCEND] = 0;
+            
+            if(sub_state[SubJoystick::PITCH] == 0) {
+                // If we don't want to ascend/descend, and we're not pitching
+                subMotors[MOTOR_TOP_FRONT].stop();
+                subMotors[MOTOR_TOP_REAR].stop();
+            }
+        }
+        
+        // Zoom in/out
+        if(joy_data[SubJoystick::ZOOM] == -1) {
+            // If we want to zoom out
+            cam.execute_lua("click('zoom_in')", NULL);
+            sub_state[SubJoystick::ZOOM] = -1;
+        } else if(joy_data[SubJoystick::ZOOM] == 1) {
+            // If we want to zoom in
+            cam.execute_lua("click('zoom_out')", NULL);
+            sub_state[SubJoystick::ZOOM] = 1;
+        } else if(joy_data[SubJoystick::ZOOM] == 0) {
+            sub_state[SubJoystick::ZOOM] = 0;
+        }
+        
+        // Shoot
+        if(joy_data[SubJoystick::SHOOT] == 1 && sub_state[SubJoystick::SHOOT] == 0) {
+            // We don't want to shoot continuously.
+            cam.execute_lua("shoot()", NULL);
+            sub_state[SubJoystick::SHOOT] = 1;
+        } else if(joy_data[SubJoystick::SHOOT] == 0 && sub_state[SubJoystick::SHOOT] == 1) {
+            // Check current state so we're not doing this every loop iteration
+            sub_state[SubJoystick::SHOOT] = 0;
+        }
+        
+        // Lights
+        if(joy_data[SubJoystick::LIGHTS] == 1 && sub_state[SubJoystick::LIGHTS] == 0) {
+            // If the lights aren't already on
+            // TODO: Turn the lights on. Which GPIO are we using for this?
+        } else if(joy_data[SubJoystick::LIGHTS] == 0 && sub_state[SubJoystick::LIGHTS] == 1) {
+            // Check current state so we're not doing this every loop iteration
+            // TODO: Turn the lights off
+        }
+    }
 }

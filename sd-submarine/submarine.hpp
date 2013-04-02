@@ -19,3 +19,4 @@ bool setup_camera(PTP::CHDKCamera& cam, PTP::PTPUSB& proto, int * error);
 void setup_motors(Motor * subMotors);
 bool compare_states(int8_t * sub_state, int8_t * joy_data);
 void wait_for_ready(SubServer& server, SignalHandler& sigHand);
+void update_motors(int8_t * sub_state, int8_t * joy_data, uint32_t joy_data_len, Motor * subMotors, PTP::CHDKCamera& cam);
