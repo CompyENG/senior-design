@@ -145,7 +145,7 @@ bool PTPNetwork::is_server() {
 }
 
 bool PTPNetwork::is_client() {
-    return (this->server_sock == -1 && this->client_sock == -1);
+    return (this->server_sock == -1 && this->client_sock != -1);
 }
 
 bool PTPNetwork::_bulk_write(const unsigned char * bytestr, const int length, const int timeout) {
