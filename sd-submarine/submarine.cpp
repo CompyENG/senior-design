@@ -74,7 +74,7 @@ int main(int argc, char * argv[]) {
         subServer.recv_ptp_message(container_in);
         
         // Check command
-        if(container_in.type != PTP::PTPContainer::CONTAINER_TYPE_COMMAND || container.code != SD_MAGIC) {
+        if(container_in.type != PTP::PTPContainer::CONTAINER_TYPE_COMMAND || container_in.code != SD_MAGIC) {
             // If what we got isn't a command... or isn't for us... we're in the wrong place!
             // Let's send an error and bail
             PTP::PTPContainer response(PTP::PTPContainer::CONTAINER_TYPE_RESPONSE, SD_MAGIC);
@@ -131,7 +131,7 @@ int main(int argc, char * argv[]) {
                 
                 uint8_t * lv_rgb;
                 uint32_t size, width, height;
-                lv_rgb = lv.get_rgb(&size, &width, &height, true);
+                lv_rgb = lv.get_rgb((int *)&size, (int *)&width, (int *)&height, true);
                 
                 // For whatever reason... send data first.
                 PTP::PTPContainer out_data(PTP::PTPContainer::CONTAINER_TYPE_DATA, SD_MAGIC);
