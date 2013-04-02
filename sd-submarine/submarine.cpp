@@ -71,7 +71,12 @@ int main(int argc, char * argv[]) {
     while(signalHandler.gotExitSignal() == false) {
         // Receive a PTP container
         PTP::PTPContainer container_in;
-        subServer.recv_ptp_message(container_in);
+        try {
+            subServer.recv_ptp_message(container_in);
+        } catch(int e) {
+            std::cout << "Error: PTP error. Code: " << e << std::endl;
+            continue;
+        }
         
         // Check command
         if(container_in.type != PTP::PTPContainer::CONTAINER_TYPE_COMMAND || container_in.code != SD_MAGIC) {
