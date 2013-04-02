@@ -5,6 +5,6 @@
 # optimizations we want.
 
 pwd
-g++ -o sd-submarine submarine.cpp Motor.cpp ../common/SignalHandler.cpp SubServer.cpp -lusb-1.0 -lptp++ -lbcm2835
+g++ -o sd-submarine submarine.cpp Motor.cpp ../common/SignalHandler.cpp -lusb-1.0 -lptp++ -lbcm2835
 
 echo "g++ status: $?"

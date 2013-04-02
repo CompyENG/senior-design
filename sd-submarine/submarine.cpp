@@ -8,7 +8,6 @@
 #include "Motor.hpp"
 #include "../common/SignalHandler.hpp"
 #include "submarine.hpp"
-#include "SubServer.hpp"
 
 // TODO: Place these in a common header
 #define SD_MAGIC 0xF061

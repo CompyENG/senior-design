@@ -6,7 +6,6 @@
 #include "../common/SignalHandler.hpp"
 #include "surface.hpp"
 #include "SubJoystick.hpp"
-#include "SurfaceClient.hpp"
 
 // TODO: Place these in a common header
 #define SD_MAGIC 0xF061
@@ -197,8 +196,4 @@ void clean_up(SDL_Joystick *stick)
 
     //Quit SDL
     SDL_Quit();
-}
-
-void wait_for_ready(SurfaceClient& client,SignalHandler& sigHand) {
-	while(client.check_ready() == false && sigHand.gotExitSignal() == false);
 }
