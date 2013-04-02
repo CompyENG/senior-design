@@ -211,10 +211,6 @@ bool compare_states(int8_t * sub_state, int8_t * joy_data) {
     return true;
 }
 
-void wait_for_ready(SubServer& server,SignalHandler& sigHand) {
-	while(server.reply_ready() == false && sigHand.gotExitSignal() == false);
-}
-
 void update_motors(int8_t * sub_state, int8_t * joy_data, uint32_t joy_data_len, Motor * subMotors, PTP::CHDKCamera& cam) {
     if(compare_states(sub_state, joy_data) == false) {
         std::cout << "State has changed." << std::endl;
