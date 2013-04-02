@@ -73,7 +73,7 @@ int main(int argc, char * argv[]) {
         PTP::PTPContainer container_in;
         try {
             subServer.recv_ptp_message(container_in);
-        } catch(int e) {
+        } catch(PTP::LIBPTP_PP_ERRORS e) {
             std::cout << "Error: PTP error. Code: " << e << std::endl;
             continue;
         }
@@ -112,9 +112,10 @@ int main(int argc, char * argv[]) {
                 // Ah-ha! We've received joystick data! Let's extract it and parse it
                 // First, receive the data container
                 PTP::PTPContainer data;
+                
                 try {
                     subServer.recv_ptp_message(data);
-                } catch(int e) {
+                } catch(PTP::LIBPTP_PP_ERRORS e) {
                     std::cout << "Error getting data: " << e << std::endl;
                     break;
                 }
