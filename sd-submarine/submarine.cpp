@@ -271,7 +271,7 @@ bool compare_states(int8_t * sub_state, int8_t * joy_data) {
 }
 
 void update_motors(int8_t * sub_state, int8_t * joy_data, uint32_t joy_data_len, Motor * subMotors, PTP::CHDKCamera& cam) {
-    if(compare_states(sub_state, joy_data) == false) {
+    //if(compare_states(sub_state, joy_data) == false) {
         std::cout << "State has changed." << std::endl;
         // Only run through these comparisons if our states have changed
         // Forward/backward
@@ -398,5 +398,5 @@ void update_motors(int8_t * sub_state, int8_t * joy_data, uint32_t joy_data_len,
             // Check current state so we're not doing this every loop iteration
             // TODO: Turn the lights off
         }
-    }
+    //}
 }
