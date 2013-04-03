@@ -64,6 +64,7 @@ bool PTPNetwork::connect(std::string server, int port) {
     this->server.sin_port = htons(port);
     
     // TODO: Move timeout set to a different location
+    /*
     struct timeval tv;
     tv.tv_sec = 1;
     tv.tv_usec = 0;
@@ -77,6 +78,7 @@ bool PTPNetwork::connect(std::string server, int port) {
         throw PTPNetwork::ERR_SET_SEND_TIMEOUT;
         return false;
     }
+    * */
     
     std::cout << "Host: " << server << " PORT: " << port << std::endl;
     if(::connect(this->client_sock, (struct sockaddr*)&this->server, sizeof(this->server)) != 0 )
@@ -124,6 +126,7 @@ bool PTPNetwork::listen(int port) {
         return 0;
     }
     
+    /*
     struct timeval tv;
     tv.tv_sec = 1;
     tv.tv_usec = 0;
@@ -137,6 +140,7 @@ bool PTPNetwork::listen(int port) {
         throw PTPNetwork::ERR_SET_SEND_TIMEOUT;
         return false;
     }
+    * */
     
     std::cout << "Server running on PORT: " << port << std::endl;
     return true;
