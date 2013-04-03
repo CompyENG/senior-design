@@ -83,8 +83,8 @@ bool Motor::spinForward() {
 bool Motor::spinReverse() {
     if(!Motor::gpio_setup) return false;
     
-    bcm2835_gpio_write(pins[0], LOW); // Always set low first
-    bcm2835_gpio_write(pins[1], HIGH);
+    bcm2835_gpio_write(pins[1], LOW); // Always set low first
+    bcm2835_gpio_write(pins[0], HIGH);
     
     this->state = REVERSE;
     return true;
