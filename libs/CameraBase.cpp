@@ -121,8 +121,12 @@ void CameraBase::recv_ptp_message(PTPContainer& out, const int timeout) {
     } else {
         std::memcpy(out_buf, buffer, read);
         // We've already read 512 bytes... read the rest!
-        this->protocol->_bulk_read(&out_buf[read], size-read, &read, timeout);
-        std::cout << "Second read. Wanted: " << size-read << " ; Read: " << read << std::endl;
+        int to_read = size-read;
+        while(to_read > 0) {
+            this->protocol->_bulk_read(&out_buf[size-to_read], to_read, &read, timeout);
+            to_read = to_read - read;
+            std::cout << "Second read. Wanted: " << size-read << " ; Read: " << read << std::endl;
+        }
     }
     
     out.unpack(out_buf);
