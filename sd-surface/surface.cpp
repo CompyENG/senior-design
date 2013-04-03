@@ -118,6 +118,12 @@ int main(int argc, char * argv[]) {
         std::cout << "nav_data[ASCEND] = " << (int) nav_data[SubJoystick::ASCEND] << std::endl;
         std::cout << "nav_data[SHOOT] = " << (int) nav_data[SubJoystick::SHOOT] << std::endl;
         std::cout << "nav_data[LIGHTS] = " << (int) nav_data[SubJoystick::LIGHTS] << std::endl;
+        std::cout << "nav_data[QUIT] = " << (int) nav_data[SubJoystick::QUIT] << std::endl;
+        
+        if(nav_data[SubJoystick::QUIT] == 1) {
+            quit = true;
+            break;
+        }
         
         // Send data
         PTP::PTPContainer joy_cmd(PTP::PTPContainer::CONTAINER_TYPE_COMMAND, SD_MAGIC);
