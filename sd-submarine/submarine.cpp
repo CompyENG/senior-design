@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <libptp++/libptp++.hpp>
 #include <libusb-1.0/libusb.h>
+#include <bcm2835.h>
 
 // We need the sub joystick class so we can reuse our data struct
 #include "../sd-surface/SubJoystick.hpp"
@@ -24,12 +25,16 @@ enum SD_COMMANDS {
 };
 
 int main(int argc, char * argv[]) {
+    if(argc > 1) {
+        bcm2835_set_debug(1);
+    }
+    
     int error;
     PTP::PTPUSB proto;
     PTP::CHDKCamera cam;
     Motor subMotors[4]; // We need to control 4 motors
     SignalHandler signalHandler;
-    int8_t * joy_data;
+    int8_t * joy_data = NULL;
     uint32_t joy_data_len;
     int cmd;
     int8_t sub_state[7]; // The current state of the submarine
@@ -122,7 +127,7 @@ int main(int argc, char * argv[]) {
                     std::cout << "Error getting data: " << e << std::endl;
                     break;
                 }
-                std::cout << "Got data" << std::endl;
+                std::cout << "Got data -- " << data.type << std::endl;
                 
                 // TODO: Check transaction ID, also
                 if(data.type != PTP::PTPContainer::CONTAINER_TYPE_DATA) {
@@ -130,8 +135,13 @@ int main(int argc, char * argv[]) {
                     break;
                 }
                 
-                delete[] joy_data; // Need to delete old joy_data before allocating more memory
+                if(joy_data != NULL) {
+                    std::cout << "Deleting joy_data" << std::endl;
+                    delete[] joy_data; // Need to delete old joy_data before allocating more memory
+                }
+                std::cout << "About to get payload" << std::endl;
                 joy_data = (int8_t *)data.get_payload((int *)&joy_data_len);
+                std::cout << "Got payload, updating motors" << std::endl;
                 update_motors(sub_state, joy_data, joy_data_len, subMotors, cam);
                 std::cout << "Updated motors" << std::endl;
                 
@@ -153,13 +163,18 @@ int main(int argc, char * argv[]) {
                 std::cout << "Got live view from camera" << std::endl;
                 
                 uint8_t * lv_rgb;
-                uint32_t size, width, height;
-                lv_rgb = lv.get_rgb((int *)&size, (int *)&width, (int *)&height, true);
-                std::cout << "Got lv_rgb" << std::endl;
+                int size, width, height;
+                uint32_t size_out, width_out, height_out;
+                lv_rgb = lv.get_rgb(&size, &width, &height, true);
+                std::cout << "Got lv_rgb -- " << size << std::endl;
+                size_out = size;
+                width_out = width;
+                height_out = height;
+                std::cout << "size_out -- " << size_out << std::endl;
                 
                 // For whatever reason... send data first.
                 PTP::PTPContainer out_data(PTP::PTPContainer::CONTAINER_TYPE_DATA, SD_MAGIC);
-                out_data.set_payload(lv_rgb, size);
+                out_data.set_payload(lv_rgb, size_out);
                 subServer.send_ptp_message(out_data);
                 std::cout << "Sent lv_rgb" << std::endl;
                 
@@ -167,8 +182,8 @@ int main(int argc, char * argv[]) {
                 PTP::PTPContainer response(PTP::PTPContainer::CONTAINER_TYPE_RESPONSE, SD_MAGIC);
                 // Param 0 is "OK", param 1 is width, param 2 is height
                 response.add_param(SD_OK);
-                response.add_param(width);
-                response.add_param(height);
+                response.add_param(width_out);
+                response.add_param(height_out);
                 subServer.send_ptp_message(response);
                 std::cout << "Sent SD_OK" << std::endl;
                 
