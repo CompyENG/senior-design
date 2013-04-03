@@ -37,9 +37,11 @@ int main(int argc, char * argv[]) {
     int8_t * joy_data = NULL;
     uint32_t joy_data_len;
     int cmd;
-    int8_t sub_state[7]; // The current state of the submarine
+    int8_t sub_state[SubJoystick::COMMAND_LENGTH]; // The current state of the submarine
     PTP::PTPNetwork subServerBackend;
     PTP::CameraBase subServer;
+    
+    bzero(sub_state, SubJoystick::COMMAND_LENGTH);
     
     // Set up our signal handler(s)
     try {
@@ -242,11 +244,25 @@ void setup_motors(Motor * subMotors) {
 }
 
 bool compare_states(int8_t * sub_state, int8_t * joy_data) {
+    std::cout << "joy_data[FORWARD] = " << (int) joy_data[SubJoystick::FORWARD] << std::endl;
+    std::cout << "joy_data[LEFT] = " << (int) joy_data[SubJoystick::LEFT] << std::endl;
+    std::cout << "joy_data[PITCH] = " << (int) joy_data[SubJoystick::PITCH] << std::endl;
+    std::cout << "joy_data[ZOOM] = " << (int) joy_data[SubJoystick::ZOOM] << std::endl;
+    std::cout << "joy_data[ASCEND] = " << (int) joy_data[SubJoystick::ASCEND] << std::endl;
+    std::cout << "joy_data[SHOOT] = " << (int) joy_data[SubJoystick::SHOOT] << std::endl;
+    std::cout << "joy_data[LIGHTS] = " << (int) joy_data[SubJoystick::LIGHTS] << std::endl;
+    
+    std::cout << "sub_state[FORWARD] = " << (int) sub_state[SubJoystick::FORWARD] << std::endl;
+    std::cout << "sub_state[LEFT] = " << (int) sub_state[SubJoystick::LEFT] << std::endl;
+    std::cout << "sub_state[PITCH] = " << (int) sub_state[SubJoystick::PITCH] << std::endl;
+    std::cout << "sub_state[ZOOM] = " << (int) sub_state[SubJoystick::ZOOM] << std::endl;
+    std::cout << "sub_state[ASCEND] = " << (int) sub_state[SubJoystick::ASCEND] << std::endl;
+    std::cout << "sub_state[SHOOT] = " << (int) sub_state[SubJoystick::SHOOT] << std::endl;
+    std::cout << "sub_state[LIGHTS] = " << (int) sub_state[SubJoystick::LIGHTS] << std::endl;
+    
     // Returns true if the states are the same, false otherwise
     for(int i=0; i < SubJoystick::COMMAND_LENGTH; i++) {
-        std::cout << "Compare " << i << std::endl;
         if(*(sub_state+i) != *(joy_data+i)) {
-            std::cout << "Returning false" << std::endl;
             return false;
         }
     }
