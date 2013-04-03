@@ -76,7 +76,7 @@ bool PTPNetwork::connect(std::string server, int port) {
     {
         throw PTPNetwork::ERR_SET_SEND_TIMEOUT;
         return false;
-    }  
+    }
     
     std::cout << "Host: " << server << " PORT: " << port << std::endl;
     if(::connect(this->client_sock, (struct sockaddr*)&this->server, sizeof(this->server)) != 0 )
@@ -173,7 +173,6 @@ bool PTPNetwork::_bulk_read(unsigned char * data_out, const int size, int * tran
     int recvd = 0;
     recvd = ::recv(this->client_sock, data_out, size, 0);
     if(recvd == -1) {
-        perror("Error in _bulk_read: ");
         throw PTPNetwork::ERR_RECV;
         return false;
     }
