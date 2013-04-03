@@ -141,7 +141,7 @@ int main(int argc, char * argv[]) {
             continue;
         }
         
-        std::cout << "Sent joystick data" << std::endl;
+        //std::cout << "Sent joystick data" << std::endl;
         
         delete[] nav_data;
         
@@ -168,7 +168,7 @@ int main(int argc, char * argv[]) {
         width = lv_resp.get_param_n(1);
         height = lv_resp.get_param_n(2);
         
-        std::cout << "Received data -- displaying" << std::endl;
+        //std::cout << "Received data -- displaying" << std::endl;
         surf_lv = SDL_CreateRGBSurfaceFrom(lv_rgb, width, height, 24, width * 3, 0x0000ff, 0x00ff00, 0xff0000, 0);
         
         // Apply image to screen
