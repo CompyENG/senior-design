@@ -25,7 +25,7 @@ void SubJoystick::handle_input(SDL_Event event)
             if( event.jaxis.axis == 1 )
             {
                 //If the F/R axis is neutral
-                if( ( event.jaxis.value > -8000 ) && ( event.jaxis.value < 8000 ) )
+                if( ( event.jaxis.value > -32000 ) && ( event.jaxis.value < 32000 ) )
                 {
                     commands[FORWARD] = 0; 
                 }
@@ -47,7 +47,7 @@ void SubJoystick::handle_input(SDL_Event event)
             else if( event.jaxis.axis == 3 )
             {
                 //If the X axis is neutral
-                if( ( event.jaxis.value > -8000 ) && ( event.jaxis.value < 8000 ) )
+                if( ( event.jaxis.value > -32000 ) && ( event.jaxis.value < 32000 ) )
                 {
                     commands[LEFT] = 0;
                 }
@@ -69,7 +69,7 @@ void SubJoystick::handle_input(SDL_Event event)
             else if( event.jaxis.axis == 4 )
             {
                 //If the axis is neutral
-                if( ( event.jaxis.value > -8000 ) && ( event.jaxis.value < 8000 ) )
+                if( ( event.jaxis.value > -32000 ) && ( event.jaxis.value < 32000 ) )
                 {
                     commands[PITCH] = 0; //stop pitch
                 }
@@ -91,7 +91,7 @@ void SubJoystick::handle_input(SDL_Event event)
             else if( event.jaxis.axis == 2 )
             {
                 //If the zoom in axis is neutral and we're not zoooming out
-                if( event.jaxis.value < 8000 && commands[ZOOM] !=-1)
+                if( event.jaxis.value < 32000 && commands[ZOOM] !=-1)
                 {
                     commands[ZOOM] = 0; 
                 }
@@ -104,7 +104,7 @@ void SubJoystick::handle_input(SDL_Event event)
             else if( event.jaxis.axis == 5 )
             {
                 //If the zoom out axis is neutral
-                if(  event.jaxis.value < 8000)
+                if(  event.jaxis.value < 32000)
                 {
                     commands[ZOOM] = 0; 
                 }
