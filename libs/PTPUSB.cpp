@@ -239,4 +239,8 @@ void PTPUSB::close() {
     }
 }
 
+int PTPUSB::get_min_read() {
+    return 512;
+}
+
 }

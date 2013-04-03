@@ -28,6 +28,10 @@ namespace PTP {
         public:
             virtual ~IPTPComm() { }
             /**
+             * @brief The minimum size a _bulk_read/_bulk_write can perform
+             */
+            virtual int get_min_read() = 0;
+            /**
              * @brief Check that we have open communication
              * 
              * @return True if we can _bulk_write and _bulk_read, false otherwise

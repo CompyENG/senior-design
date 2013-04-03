@@ -187,4 +187,8 @@ bool PTPNetwork::is_open() {
     return (this->is_server() || this->is_client());
 }
 
+int PTPNetwork::get_min_read() {
+    return 4;
+}
+
 }

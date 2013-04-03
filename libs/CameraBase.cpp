@@ -100,9 +100,9 @@ void CameraBase::recv_ptp_message(PTPContainer& out, const int timeout) {
     }
     
     // Determine size we need to read
-	unsigned char * buffer = new unsigned char[4];
+	unsigned char * buffer = new unsigned char[this->protocol->get_min_read()];
     int read = 0;
-    this->protocol->_bulk_read(buffer, 4, &read, timeout); // TODO: Error checking on response
+    this->protocol->_bulk_read(buffer, this->protocol->get_min_read(), &read, timeout); // TODO: Error checking on response
     std::cout << "Primed read." << std::endl;
     uint32_t size = 0;
     if(read < 4) {
@@ -116,13 +116,13 @@ void CameraBase::recv_ptp_message(PTPContainer& out, const int timeout) {
     
     // Copy our first part into the output buffer -- so we can reuse buffer
     unsigned char * out_buf = new unsigned char[size];
-    if(size <= 4) {
+    if(size <= this->protocol->get_min_read()) {
         std::memcpy(out_buf, buffer, size);
     } else {
-        std::memcpy(out_buf, buffer, 4);
+        std::memcpy(out_buf, buffer, read);
         // We've already read 512 bytes... read the rest!
-        this->protocol->_bulk_read(&out_buf[4], size-4, &read, timeout);
-        std::cout << "Second read. Wanted: " << size-4 << " ; Read: " << read << std::endl;
+        this->protocol->_bulk_read(&out_buf[read], size-read, &read, timeout);
+        std::cout << "Second read. Wanted: " << size-read << " ; Read: " << read << std::endl;
     }
     
     out.unpack(out_buf);
