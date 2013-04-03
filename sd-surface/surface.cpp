@@ -46,7 +46,11 @@ int main(int argc, char * argv[]) {
         return 2;
     }
     
-    screen = SDL_SetVideoMode( 640, 480, 16, SDL_FULLSCREEN | SDL_SWSURFACE );
+    if(argc > 1) {
+        screen = SDL_SetVideoMode( 640, 480, 16, SDL_SWSURFACE );
+    } else {
+        screen = SDL_SetVideoMode( 640, 480, 16, SDL_FULLSCREEN | SDL_SWSURFACE );
+    }
     
     //Create a Client
     PTP::PTPNetwork surfaceClientBackend;
