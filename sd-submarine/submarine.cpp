@@ -64,6 +64,9 @@ int main(int argc, char * argv[]) {
     std::cout << "CHDK Version: " << cam.get_chdk_version() << std::endl;
     
     // Initialize motors
+    if(argc > 1) {
+        Motor::setup_gpio(true);
+    }
     setup_motors(subMotors);
     std::cout << "Motors are ready" << std::endl;
     

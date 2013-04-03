@@ -4,22 +4,26 @@
 
 bool Motor::gpio_setup = false;
 
-Motor::Motor(int * GPIO) {
+Motor::Motor(int * GPIO, bool debug) {
     this->state = UNKNOWN;
     // Set up GPIO (if it hasn't been already)
-    this->setup_gpio();
+    this->setup_gpio(debug);
     // Set up the pins we received
     this->setup(GPIO);
 }
 
-Motor::Motor() {
+Motor::Motor(bool debug) {
     this->state = UNKNOWN;
     // Set up GPIO (if it hasn't been already)
-    this->setup_gpio();
+    this->setup_gpio(debug);
 }
 
-bool Motor::setup_gpio() {
+bool Motor::setup_gpio(bool debug) {
     // This function needs to be called once per application
+    if(debug) {
+        bcm2835_set_debug(1);
+    }
+    
     if(!Motor::gpio_setup) {
         if (!bcm2835_init()) {
             return false;

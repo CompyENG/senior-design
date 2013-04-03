@@ -7,9 +7,9 @@ class Motor {
             BACKWARD = 2,
             UNKNOWN
         };
-        static bool setup_gpio();
-        Motor();
-        Motor(int * GPIO);
+        static bool setup_gpio(bool debug);
+        Motor(bool debug=false);
+        Motor(int * GPIO, bool debug=false);
         bool setup(int * GPIO);
         bool spinForward();
         bool spinBackward();
