@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <libptp++/libptp++.hpp>
+#include <SDL/SDL_rotozoom.h>
 
 #include "../common/SignalHandler.hpp"
 #include "surface.hpp"
@@ -176,7 +177,7 @@ int main(int argc, char * argv[]) {
         
         //std::cout << "Received data -- displaying" << std::endl;
         surf_lv = SDL_CreateRGBSurfaceFrom(lv_rgb, width, height, 24, width * 3, 0x0000ff, 0x00ff00, 0xff0000, 0);
-        
+        resizeImage( surf_lv, 640, 480);
         // Apply image to screen
         SDL_BlitSurface(surf_lv, NULL, screen, NULL);
         
@@ -209,6 +210,65 @@ bool init()
 
     //If everything initialized fine
     return true;
+}
+
+// resizeImage: Resizes an image at its current place in memory. This means
+//      that if you skew and stretch, you'll lose quality, but it also
+//      means no worrying about new pointers. This uses the zoomSurface functions
+//      in SDL_rotozoom.h ( SDL_gfx package )
+void resizeImage( SDL_Surface*& img, const double newwidth, const double newheight )
+{
+    // Zoom function uses doubles for rates of scaling, rather than
+    // exact size values. This is how we get around that:
+    double zoomx = newwidth  / (float)img->w;
+    double zoomy = newheight / (float)img->h;
+
+    // This function assumes no smoothing, so that any colorkeys wont bleed.
+    SDL_Surface* sized = zoomSurface( img, zoomx, zoomy, SMOOTHING_OFF );
+
+    // Copy transparency data.
+    matchColorKeys( img, sized );
+
+    // The original picture is no longer needed.
+    SDL_FreeSurface( img );
+
+    // Set it instead to the new image.
+    img =  sized;
+}
+
+// matchColorKeys: This copies the transparency data from one
+//      surface to another.
+void matchColorKeys( SDL_Surface* src, SDL_Surface* dest )
+{
+    // If the original had an alpha color key, give it to the new one.
+    if( src->flags & SDL_SRCCOLORKEY )
+    {
+        // Acquire the original Key
+        Uint32 colorkey = src->format->colorkey;
+
+        // Set to the new image
+        SDL_SetColorKey( dest, SDL_SRCCOLORKEY, colorkey );
+    }
+}
+
+// get_pixel: Acquires a 32-bit pixel from a surface at given coordinates
+Uint32 get_pixel( SDL_Surface* surface, int x, int y )
+{
+    //Convert the pixels to 32 bit
+    Uint32 *pixels = (Uint32*)surface->pixels;
+
+    //Get the requested pixelSDL_SRCCOLORKEY
+    return pixels[ ( y * surface->w ) + x ];
+}
+
+// put_pixel: Drops a 32-bit pixel onto a surface at given coordinates.
+void put_pixel( SDL_Surface *surface, int x, int y, Uint32 pixel )
+{
+    //Convert the pixels to 32 bit
+    Uint32 *pixels = (Uint32 *)surface->pixels;
+
+    //Set the pixel
+    pixels[ ( y * surface->w ) + x ] = pixel;
 }
 
 void clean_up(SDL_Joystick *stick)
