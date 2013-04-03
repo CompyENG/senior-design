@@ -98,7 +98,7 @@ void LVData::read(const uint8_t * payload, const int payload_size) {
  * @param[in] container The \c PTPContainer to read live view data from
  * @see LVData::read(uint8_t * payload, int payload_size)
  */
-void LVData::read(const PTPContainer& container) {
+void LVData::read(PTPContainer& container) {
     int payload_size;
     unsigned char * payload;
     

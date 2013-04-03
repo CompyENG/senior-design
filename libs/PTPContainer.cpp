@@ -155,7 +155,7 @@ unsigned char * PTPContainer::pack() const {
  * @param[out] size_out The size of the payload returned
  * @return A new copy of the payload contained in this \c PTPContainer
  */
-unsigned char * PTPContainer::get_payload(int * size_out) const {
+unsigned char * PTPContainer::get_payload(int * size_out) {
     unsigned char * out;
     
     *size_out = this->length - this->default_length;
