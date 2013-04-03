@@ -3,9 +3,11 @@
 #include "Motor.hpp"
 
 bool Motor::gpio_setup = false;
+int Motor::instances = 0;
 
 Motor::Motor(int * GPIO, bool debug) {
     this->state = UNKNOWN;
+    this->instances++;
     // Set up GPIO (if it hasn't been already)
     this->setup_gpio(debug);
     // Set up the pins we received
@@ -14,8 +16,17 @@ Motor::Motor(int * GPIO, bool debug) {
 
 Motor::Motor(bool debug) {
     this->state = UNKNOWN;
+    this->instances++;
     // Set up GPIO (if it hasn't been already)
     this->setup_gpio(debug);
+}
+
+Motor::~Motor() {
+    this->instances--;
+    
+    if(this->instances == 0) {
+        bcm2835_close();
+    }
 }
 
 bool Motor::setup_gpio(bool debug) {
