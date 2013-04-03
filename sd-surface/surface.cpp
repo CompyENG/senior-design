@@ -55,7 +55,11 @@ int main(int argc, char * argv[]) {
     bool connected = false;
     while(connected == false && signalHandler.gotExitSignal() == false) {
         try {
-            surfaceClientBackend.connect("pi-submarine",50000);
+            std::string host = "pi-submarine";
+            if(argc > 1) {
+                host = argv[1];
+            }
+            surfaceClientBackend.connect(host,50000);
             connected = true;
         } catch(int e) {
             std::cout << "Error: Could not connect to socket. Trying again. Exception: " << e << std::endl;
