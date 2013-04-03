@@ -11,7 +11,7 @@
  
 #include <cstring>
 #include <stdint.h>
-#include <iostream>
+//#include <iostream>
 
 #include "libptp++.hpp"
 #include "CameraBase.hpp"
@@ -103,12 +103,12 @@ void CameraBase::recv_ptp_message(PTPContainer& out, const int timeout) {
 	unsigned char * buffer = new unsigned char[this->protocol->get_min_read()];
     int read = 0;
     this->protocol->_bulk_read(buffer, this->protocol->get_min_read(), &read, timeout); // TODO: Error checking on response
-    std::cout << "Primed read." << std::endl;
+    //std::cout << "Primed read." << std::endl;
     uint32_t size = 0;
     if(read < 4) {
         // If we actually read less than four bytes, we can't copy four bytes out of the buffer.
         // Also, something went very, very wrong
-        std::cout << "Only read: " << read << std::endl;
+        //std::cout << "Only read: " << read << std::endl;
         throw PTP::ERR_CANNOT_RECV;
         return;
     }
@@ -125,7 +125,7 @@ void CameraBase::recv_ptp_message(PTPContainer& out, const int timeout) {
         while(to_read > 0) {
             this->protocol->_bulk_read(&out_buf[size-to_read], to_read, &read, timeout);
             to_read = to_read - read;
-            std::cout << "Second read. Wanted: " << size-read << " ; Read: " << read << std::endl;
+            //std::cout << "Second read. Wanted: " << size-read << " ; Read: " << read << std::endl;
         }
     }
     
@@ -173,7 +173,7 @@ void CameraBase::ptp_transaction(PTPContainer& cmd, PTPContainer& data, const bo
     
     if(!data.is_empty()) {
         // Only send data if it doesn't have an empty payload
-        std::cout << "Data is not empty! Sending data." << std::endl;
+        //std::cout << "Data is not empty! Sending data." << std::endl;
         data.transaction_id = cmd.transaction_id;
         this->send_ptp_message(data, timeout);
     }
