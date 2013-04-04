@@ -183,7 +183,11 @@ int main(int argc, char * argv[]) {
     
     // Send stop command to submarine
     PTP::PTPContainer quit_cmd(PTP::PTPContainer::CONTAINER_TYPE_COMMAND, SD_MAGIC);
-    quit_cmd.add_param(SD_QUIT);
+    if(signalHandler.gotUpdateSignal()) {
+        quit_cmd.add_param(SD_UPDATE);
+    } else {
+        quit_cmd.add_param(SD_QUIT);
+    }
     surfaceClient.ptp_transaction(quit_cmd, in_data, false, out_resp, out_data);
     // TODO: Check response
 

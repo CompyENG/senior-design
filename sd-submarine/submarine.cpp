@@ -180,13 +180,18 @@ int main(int argc, char * argv[]) {
                 
                 break;
             }
+            case SD_UPDATE:
             case SD_QUIT: {
                 // OK! Let's get out of here! But first, let's let the surface know that we're OK with this.
                 PTP::PTPContainer response(PTP::PTPContainer::CONTAINER_TYPE_RESPONSE, SD_MAGIC);
                 response.add_param(SD_OK);
                 subServer.send_ptp_message(response);
                 
-                signalHandler.setExitSignal(true);
+                if(param == SD_UPDATE) {
+                    signalHandler.setUpdateSignal(true);
+                } else {
+                    signalHandler.setExitSignal(true);
+                }
                 std::cout << "Got SD_QUIT, sent SD_OK" << std::endl;
                 break;
             }
