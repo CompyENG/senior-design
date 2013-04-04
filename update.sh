@@ -32,6 +32,10 @@ cd ../sd-surface/
 bash ./build-surface.sh >> /tmp/update-log 2>&1
 cd ../
 
+echo "Stopping UI locally"
+sudo /etc/init.d/sd-startup update
+sleep 2
+
 # Copy files to correct locations
 echo "Copying files locally"
 # Submarine file
@@ -42,6 +46,7 @@ sudo cp ./sd-surface/sd-surface /usr/bin/
 sudo cp ./utils/90-senior-design.rules /etc/udev/rules.d/
 sudo cp ./utils/sd-start /usr/sbin/
 sudo cp ./utils/sd-stop /usr/sbin/
+sudo cp ./utils/sd-stop-update /usr/sbin/
 sudo cp ./utils/sd-update /usr/sbin/
 sudo cp ./utils/sd-startup /etc/init.d/
 
@@ -56,7 +61,6 @@ sudo udevadm control --reload-rules
 
 # Restart the UI
 echo "Restarting UI"
-sudo /etc/init.d/sd-startup stop
 sudo /etc/init.d/sd-startup start
 
 MY_HOSTNAME=`hostname -s`
@@ -73,6 +77,7 @@ rm -Rf /tmp/update/
 mkdir -p /tmp/update/usr/lib/
 mkdir -p /tmp/update/usr/include/
 mkdir -p /tmp/update/usr/include/libptp++/
+mkdir -p /tmp/update/usr/include/libptp++/chdk/
 mkdir -p /tmp/update/usr/bin/
 mkdir -p /tmp/update/etc/udev/rules.d/
 mkdir -p /tmp/update/usr/sbin/
@@ -89,11 +94,13 @@ echo "Copying files"
 sftp pi@$OTHER_HOSTNAME << EOF
 put /usr/lib/libptp++.so /tmp/update/usr/lib/
 put /usr/include/libptp++/* /tmp/update/usr/include/libptp++/
+put /usr/include/libptp++/chdk/* /tmp/update/usr/include/libptp++/chdk/
 put /usr/bin/sd-submarine /tmp/update/usr/bin/
 put /usr/bin/sd-surface /tmp/update/usr/bin/
 put /etc/udev/rules.d/90-senior-design.rules /tmp/update/etc/udev/rules.d/
 put /usr/sbin/sd-start /tmp/update/usr/sbin/
 put /usr/sbin/sd-stop /tmp/update/usr/sbin/
+put /usr/sbin/sd-stop-update /tmp/update/usr/sbin/sd-stop-update
 put /usr/sbin/sd-update /tmp/update/usr/sbin/
 put /etc/init.d/sd-startup /tmp/update/etc/init.d/
 EOF
@@ -106,10 +113,11 @@ EOF
 # correctly above.  We can always reimage the SD card if something goes wrong.
 echo "SSH to move files and restart UI"
 ssh pi@$OTHER_HOSTNAME << EOF
+sudo /etc/init.d/sd-startup update
+sleep 2
 sudo cp -r /tmp/update/* /
 sudo update-rc.d sd-startup defaults
 sudo udevadm control --reload-rules
-sudo /etc/init.d/sd-startup stop
 sudo /etc/init.d/sd-startup start
 EOF
 
