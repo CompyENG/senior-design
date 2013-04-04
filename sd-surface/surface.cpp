@@ -28,6 +28,7 @@ int main(int argc, char * argv[]) {
     SDL_Surface * screen = NULL;
     SDL_Surface * surf_lv = NULL;
     bool quit = false; // Optional SDL_QUIT handler -- We can also use this as a shutdown from the joystick
+    bool select = false;
     // Set up signal handler
     SignalHandler signalHandler;
     try {
@@ -58,7 +59,7 @@ int main(int argc, char * argv[]) {
     
     //Connect to server
     bool connected = false;
-    while(connected == false && signalHandler.gotExitSignal() == false) {
+    while(connected == false && signalHandler.gotExitSignal() == false && signalHandler.gotUpdateSignal() == false) {
         try {
             std::string host = "pi-submarine";
             if(argc > 1) {
@@ -94,7 +95,7 @@ int main(int argc, char * argv[]) {
     SubJoystick mySubJoystick;
 
     //While the user hasn't quit
-    while( signalHandler.gotExitSignal() == false && quit == false )
+    while( signalHandler.gotExitSignal() == false && signalHandler.gotUpdateSignal() == false && quit == false )
     {
         //While there's events to handle
         while( SDL_PollEvent( &event ) )
@@ -120,6 +121,11 @@ int main(int argc, char * argv[]) {
         std::cout << "nav_data[SHOOT] = " << (int) nav_data[SubJoystick::SHOOT] << std::endl;
         std::cout << "nav_data[LIGHTS] = " << (int) nav_data[SubJoystick::LIGHTS] << std::endl;
         std::cout << "nav_data[QUIT] = " << (int) nav_data[SubJoystick::QUIT] << std::endl;
+        
+        if(nav_data[SubJoystick::OPTION] == 1) {
+            // If you hold select, different things may happen
+            select = true;
+        }
         
         if(nav_data[SubJoystick::QUIT] == 1) {
             quit = true;
@@ -196,7 +202,10 @@ int main(int argc, char * argv[]) {
 
     //Clean up
     clean_up(stick);
-	system ("sudo shutdown -h now");
+    if(select == false && signalHandler.gotUpdateSignal() == false) {
+        // Only shutdown if we aren't holding select, and haven't received an "update" signal
+        system ("sudo shutdown -h now");
+    }
     return 0;
 }
 
