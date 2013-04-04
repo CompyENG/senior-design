@@ -59,7 +59,7 @@ int main(int argc, char * argv[]) {
     
     //Connect to server
     bool connected = false;
-    while(connected == false && signalHandler.gotExitSignal() == false && signalHandler.gotUpdateSignal() == false) {
+    while(connected == false && signalHandler.gotAnySignal() == false) {
         try {
             std::string host = "pi-submarine";
             if(argc > 1) {
@@ -95,7 +95,7 @@ int main(int argc, char * argv[]) {
     SubJoystick mySubJoystick;
 
     //While the user hasn't quit
-    while( signalHandler.gotExitSignal() == false && signalHandler.gotUpdateSignal() == false && quit == false )
+    while( signalHandler.gotAnySignal() == false && quit == false )
     {
         //While there's events to handle
         while( SDL_PollEvent( &event ) )
