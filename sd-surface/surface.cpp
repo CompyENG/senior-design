@@ -54,8 +54,10 @@ int main(int argc, char * argv[]) {
             }
             surfaceClientBackend.connect(host,50000);
             connected = true;
-        } catch(int e) {
+        } catch(PTP::PTPNetwork::NetworkErrors e) {
             std::cout << "Error: Could not connect to socket. Trying again. Exception: " << e << std::endl;
+        } catch(...) {
+            std::cout << "Caught some other exception.  Trying again." << std::endl;
         }
     }
 	std::cout << "Connection Successful" << std::endl;
