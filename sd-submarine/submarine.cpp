@@ -209,6 +209,8 @@ int main(int argc, char * argv[]) {
     // Deconstructor will automatically take care of closing network connection
     // TODO: Make PTPNetwork a pointer instead, so we can control when destruction happens?
     if(signalHandler.gotUpdateSignal() == false) {
+        // Turn the camera off!
+        cam.execute_lua("post_levent_to_ui('PressPowerButton')", NULL);
         // Don't shutdown if we got the update signal
         system ("sudo shutdown -h now");
     }
