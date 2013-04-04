@@ -6,6 +6,7 @@
 // Code borrowed from http://www.yolinux.com/TUTORIALS/C++Signals.html
 
 bool SignalHandler::mbGotExitSignal = false;
+bool SignalHandler::mbGotUpdateSignal = false;
 
 /**
 * Default Contructor.
