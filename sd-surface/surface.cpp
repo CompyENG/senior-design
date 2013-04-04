@@ -227,7 +227,7 @@ void resizeImage( SDL_Surface*& img, const double newwidth, const double newheig
     SDL_Surface* sized = zoomSurface( img, zoomx, zoomy, SMOOTHING_OFF );
 
     // Copy transparency data.
-    matchColorKeys( img, sized );
+    //matchColorKeys( img, sized );
 
     // The original picture is no longer needed.
     SDL_FreeSurface( img );
