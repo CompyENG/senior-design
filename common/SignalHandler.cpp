@@ -58,6 +58,13 @@ void SignalHandler::updateSignalHandler(int _ignored) {
 }
 
 /**
+ * Returns true if any signal we handle was caught
+ */
+bool SignalHandler::gotAnySignal() {
+    return mbGotUpdateSignal || mbGotExitSignal;
+}
+
+/**
 * Set up the signal handlers for CTRL-C.
 */
 void SignalHandler::setupSignalHandlers() {

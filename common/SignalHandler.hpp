@@ -12,6 +12,8 @@ public:
     
     static bool gotUpdateSignal();
     static void setUpdateSignal(bool _bUpdateSignal);
+    
+    static bool gotAnySignal();
 
     void        setupSignalHandlers();
     static void exitSignalHandler(int _ignored);
