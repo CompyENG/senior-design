@@ -1,80 +1,25 @@
-#include <sys/socket.h>  
-#include <netinet/in.h>  
-#include <stdio.h>  
-#include <string.h> 
-#include <stdlib.h>  
-#include <arpa/inet.h> 
-//#include <fcntl.h> 
-#include <unistd.h> 
+#include <iostream>
+#include <unistd.h>
+#include <libptp++/libptp++.hpp>
 
-main() 
-{  
-    int sock_desc = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock_desc == -1)
-    {
-        printf("cannot create socket!\n");
-        return 0;
-    }
-
-    struct sockaddr_in server;  
-    memset(&server, 0, sizeof(server));  
-    server.sin_family = AF_INET;
-    server.sin_addr.s_addr = INADDR_ANY;  
-    server.sin_port = htons(50000);  
-    if (bind(sock_desc, (struct sockaddr*)&server, sizeof(server)) != 0)
-    {
-        printf("cannot bind socket!\n");
-        close(sock_desc);  
-        return 0;
-    }
-
-    if (listen(sock_desc, 20) != 0)
-    {
-        printf("cannot listen on socket!\n");
-        close(sock_desc);  
-        return 0;
-    }
-
-    struct sockaddr_in client;  
-    memset(&client, 0, sizeof(client));  
-    socklen_t len = sizeof(client); 
-    int temp_sock_desc = accept(sock_desc, (struct sockaddr*)&client, &len);  
-    if (temp_sock_desc == -1)
-    {
-        printf("cannot accept client!\n");
-        close(sock_desc);  
-        return 0;
-    }
-
-    char buf[100];  
-    int k;  
-    int integer;
-
-    while(1) 
-    {      
-        k = recv(temp_sock_desc, &integer, 4, 0);      
-        if (!recv)
-        {
-            printf("\ncannot read from client!\n");
-            break;
-        }
-
-        if (recv == 0)
-        {
-            printf("\nclient disconnected.\n");
-            break;
-        }
-
-        if (k > 0)          
-            printf("%u\n", integer);
-
-        if (strcmp(buf, "exit") == 0)         
-            break;      
-    }
-
-    close(temp_sock_desc);  
-    close(sock_desc);  
-
-    printf("server disconnected\n");
-    return 0;  
-} 
+int main(int argc, char * argv[]) {
+    PTP::PTPNetwork serverBackend(50000);
+    PTP::CameraBase server(&serverBackend);
+    
+    PTP::PTPContainer in_cmd, in_data;
+    server.recv_ptp_message(in_cmd);
+    std::cout << "Got command: " << in_cmd.get_param_n(0) << std::endl;
+    
+    server.recv_ptp_message(in_data);
+    std::cout << "Got data: " << in_data.get_param_n(0) << std::endl;
+    
+    PTP::PTPContainer out_data(PTP::PTPContainer::CONTAINER_TYPE_DATA, 0x1234);
+    out_data.add_param(1);
+    server.send_ptp_message(out_data);
+    
+    PTP::PTPContainer out_resp(PTP::PTPContainer::CONTAINER_TYPE_RESPONSE, 0x1234);
+    out_resp.add_param(1);
+    server.send_ptp_message(out_resp);
+    std::cout << "Done" << std::endl;
+    //sleep(5);
+}

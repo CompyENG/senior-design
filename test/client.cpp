@@ -1,71 +1,27 @@
-#include <sys/socket.h>  
-#include <netinet/in.h>  
-#include <stdio.h>  
-#include <string.h>  
-#include <stdlib.h> 
-#include <arpa/inet.h> 
-//#include <fcntl.h> 
-#include <unistd.h> 
+#include <iostream>
+#include <libptp++/libptp++.hpp>
 
-main() 
-{  
-    int sock_desc = socket(AF_INET, SOCK_STREAM, 0); 
-    if (sock_desc == -1)
-    {
-        printf("cannot create socket!\n");
+int main(int argc, char * argv[]) {
+    PTP::PTPNetwork clientBackend("127.0.0.1", 50000);
+    PTP::CameraBase client(&clientBackend);
+    
+    PTP::PTPContainer cmd(PTP::PTPContainer::CONTAINER_TYPE_COMMAND, 0x1234);
+    cmd.add_param(1);
+    PTP::PTPContainer data(PTP::PTPContainer::CONTAINER_TYPE_DATA, 0x1234);
+    data.add_param(1);
+    data.add_param(2);
+    data.add_param(3);
+    PTP::PTPContainer out_resp, out_data;
+    try {
+        client.ptp_transaction(cmd, data, true, out_resp, out_data);
+    } catch(PTP::LIBPTP_PP_ERRORS e) {
+        std::cout << "Caught error: " << e << std::endl;
         return 0;
     }
-
-    struct sockaddr_in client;  
-    memset(&client, 0, sizeof(client));  
-    client.sin_family = AF_INET;  
-    client.sin_addr.s_addr = inet_addr("127.0.0.1");  
-    client.sin_port = htons(50000);  
-
-    if (connect(sock_desc, (struct sockaddr*)&client, sizeof(client)) != 0)
-    {
-        printf("cannot connect to server!\n");
-        close(sock_desc);
-    }
-
-    char buf[100];
-    char c = '\n';
-    char *p_buf;
-    int k, len;  
-
-    while(1) 
-    {      
-        gets(buf);
-
-        len = strlen(buf);
-        p_buf = buf;
-
-        while (len > 0)
-        {
-            k = send(sock_desc, p_buf, len, 0);      
-            if (k == -1)
-            {
-                printf("cannot write to server!\n");
-                break;
-            }
-
-            p_buf += k;
-            len -= k;
-        }
-
-        k = send(sock_desc, &c, 1, 0);      
-        if (k == -1)
-        {
-            printf("cannot write to server!\n");
-            break;
-        }
-
-        if (strcmp(buf, "exit") == 0)          
-            break;  
-    }  
-
-    close(sock_desc);  
-    printf("client disconnected\n");
-
-    return 0;  
-} 
+    
+    std::cout << "Got response: " << out_resp.get_param_n(0) << std::endl;
+    std::cout << "Got data: " << out_data.get_param_n(0) << std::endl;
+    
+    return 0;
+}
+    
