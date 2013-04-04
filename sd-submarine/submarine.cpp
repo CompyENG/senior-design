@@ -288,7 +288,7 @@ void update_motors(int8_t * sub_state, int8_t * joy_data, uint32_t joy_data_len,
                 subMotors[MOTOR_LEFT].spinBackward();
                 subMotors[MOTOR_RIGHT].spinBackward();
                 
-                sub_state[SubJoystick::FORWARD] == -1;
+                sub_state[SubJoystick::FORWARD] = -1;
             } else if(joy_data[SubJoystick::FORWARD] == 0) {
                 // If we want to go neither forward nor backward, and we're not trying to turn
                 subMotors[MOTOR_LEFT].stop();
@@ -310,7 +310,7 @@ void update_motors(int8_t * sub_state, int8_t * joy_data, uint32_t joy_data_len,
             subMotors[MOTOR_LEFT].spinForward();
             subMotors[MOTOR_RIGHT].spinBackward();
             
-            sub_state[SubJoystick::LEFT] == -1;
+            sub_state[SubJoystick::LEFT] = -1;
         } else if(joy_data[SubJoystick::LEFT] == 0) {
             sub_state[SubJoystick::LEFT] = 0;
             
