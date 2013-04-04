@@ -244,6 +244,18 @@ void setup_motors(Motor * subMotors) {
 }
 
 bool compare_states(int8_t * sub_state, int8_t * joy_data) {
+    // Returns true if the states are the same, false otherwise
+    for(int i=0; i < SubJoystick::COMMAND_LENGTH; i++) {
+        if(*(sub_state+i) != *(joy_data+i)) {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+void update_motors(int8_t * sub_state, int8_t * joy_data, uint32_t joy_data_len, Motor * subMotors, PTP::CHDKCamera& cam) {
+    
     std::cout << "joy_data[FORWARD] = " << (int) joy_data[SubJoystick::FORWARD] << std::endl;
     std::cout << "joy_data[LEFT] = " << (int) joy_data[SubJoystick::LEFT] << std::endl;
     std::cout << "joy_data[PITCH] = " << (int) joy_data[SubJoystick::PITCH] << std::endl;
@@ -260,19 +272,8 @@ bool compare_states(int8_t * sub_state, int8_t * joy_data) {
     std::cout << "sub_state[SHOOT] = " << (int) sub_state[SubJoystick::SHOOT] << std::endl;
     std::cout << "sub_state[LIGHTS] = " << (int) sub_state[SubJoystick::LIGHTS] << std::endl;
     
-    // Returns true if the states are the same, false otherwise
-    for(int i=0; i < SubJoystick::COMMAND_LENGTH; i++) {
-        if(*(sub_state+i) != *(joy_data+i)) {
-            return false;
-        }
-    }
-    
-    return true;
-}
-
-void update_motors(int8_t * sub_state, int8_t * joy_data, uint32_t joy_data_len, Motor * subMotors, PTP::CHDKCamera& cam) {
     //if(compare_states(sub_state, joy_data) == false) {
-        std::cout << "State has changed." << std::endl;
+        //std::cout << "State has changed." << std::endl;
         // Only run through these comparisons if our states have changed
         // Forward/backward
         if(sub_state[SubJoystick::LEFT] == 0) { // Left/right takes priority
