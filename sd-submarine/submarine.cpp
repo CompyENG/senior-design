@@ -9,20 +9,7 @@
 #include "Motor.hpp"
 #include "../common/SignalHandler.hpp"
 #include "submarine.hpp"
-
-// TODO: Place these in a common header
-#define SD_MAGIC 0xF061
-
-enum SD_COMMANDS {
-    SD_REQ_CONNECTED = 1,
-    SD_IS_CONNECTED,
-    SD_NOT_CONNECTED,
-    SD_JOYDATA,
-    SD_LVDATA,
-    SD_QUIT,
-    SD_OK,
-    SD_ERROR
-};
+#include "../common/SDDefines.hpp"
 
 int main(int argc, char * argv[]) {
     if(argc > 1) {

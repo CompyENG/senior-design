@@ -7,20 +7,7 @@
 #include "../common/SignalHandler.hpp"
 #include "surface.hpp"
 #include "SubJoystick.hpp"
-
-// TODO: Place these in a common header
-#define SD_MAGIC 0xF061
-
-enum SD_COMMANDS {
-    SD_REQ_CONNECTED = 1,
-    SD_IS_CONNECTED,
-    SD_NOT_CONNECTED,
-    SD_JOYDATA,
-    SD_LVDATA,
-    SD_QUIT,
-    SD_OK,
-    SD_ERROR
-};
+#include "../common/SDDefines.hpp"
 
 int main(int argc, char * argv[]) {
     // These variables can be used as dummy placeholders when we don't need a parameter to ptp_transaction
