@@ -45,11 +45,28 @@ void SignalHandler::exitSignalHandler(int _ignored) {
     mbGotExitSignal = true;
 }
 
+bool SignalHandler::gotUpdateSignal() {
+    return mbGotUpdateSignal;
+}
+
+void SignalHandler::setUpdateSignal(bool _bUpdateSignal) {
+    mbGotUpdateSignal = _bUpdateSignal;
+}
+
+void SignalHandler::updateSignalHandler(int _ignored) {
+    mbGotUpdateSignal = true;
+}
+
 /**
 * Set up the signal handlers for CTRL-C.
 */
 void SignalHandler::setupSignalHandlers() {
     if (signal((int) SIGINT, SignalHandler::exitSignalHandler) == SIG_ERR)
+    {
+        throw 1;
+    }
+    
+    if (signal((int) SIGUSR1, SignalHandler::updateSignalHandler) == SIG_ERR)
     {
         throw 1;
     }
