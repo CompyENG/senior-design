@@ -146,6 +146,9 @@ void SubJoystick::handle_input(SDL_Event event)
         else if(event.jbutton.button == 7) {
 			commands[QUIT] = 1;
 		}
+		else if (event.jbutton.button == 6) {
+			commands[OPTION] = 1;
+		}
     }
     //buttons released
     if(event.type == SDL_JOYBUTTONUP) {
@@ -161,6 +164,9 @@ void SubJoystick::handle_input(SDL_Event event)
         }
         else if (event.jbutton.button == 0) {
             commands[ASCEND] = 0; //decend
+        }
+        else if (event.jbutton.button == 6) {
+            commands[OPTION] = 0; //decend
         }
     }
 }

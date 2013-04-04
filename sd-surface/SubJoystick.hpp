@@ -19,6 +19,7 @@ class SubJoystick
 		SHOOT, // 1 for "take a picture", 0 for don't
 		LIGHTS, // 1 when lights should be on, 0 when lights should be off
 		QUIT, //1 when we want to quit
+		OPTION, //Hold Select and different things might happen!
         COMMAND_LENGTH  // A field to denote how many fields we have
 	};
     
