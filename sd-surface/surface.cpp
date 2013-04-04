@@ -196,7 +196,7 @@ int main(int argc, char * argv[]) {
 
     //Clean up
     clean_up(stick);
-
+	system ("sudo shutdown -h now");
     return 0;
 }
 

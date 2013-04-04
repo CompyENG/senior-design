@@ -216,7 +216,7 @@ int main(int argc, char * argv[]) {
     
     // Deconstructor will automatically take care of closing network connection
     // TODO: Make PTPNetwork a pointer instead, so we can control when destruction happens?
-    
+    system ("sudo shutdown -h now");
     return 0;
 }
 
