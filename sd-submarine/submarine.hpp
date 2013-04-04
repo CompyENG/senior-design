@@ -1,8 +1,8 @@
 int MOTOR_PINS[4][2] = {
-    {18, 23},
-    {24, 25},
-    { 8,  7},
-    {17, 27}
+    {18, 23}, //P1-12, P1-16 (LEFT)
+    {24, 25}, //P1-18, P1-22 (RIGHT)
+    { 8,  7}, //P1-24, P1-26 (TOP_FRONT)
+    {17, 27} //P1-11, P1-13 (TOP_REAR)
 };
 
 enum Submarine_Motors {

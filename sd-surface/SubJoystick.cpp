@@ -18,6 +18,7 @@ void SubJoystick::handle_input(SDL_Event event)
     //If a axis was changed
     if( event.type == SDL_JOYAXISMOTION )
     {
+		std::cout << "AXIS VALUE " << (int) event.jaxis.value << std::endl;
         //If the first joystick has moved
         if( event.jaxis.which == 0 )
         {
