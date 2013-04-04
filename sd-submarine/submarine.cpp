@@ -59,10 +59,10 @@ int main(int argc, char * argv[]) {
 	}
     
     // Keep trying to set up the camera until something tells us to stop
-    while(setup_camera(cam, proto, &error) == false && signalHandler.gotExitSignal() == false) {
+    while(setup_camera(cam, proto, &error) == false && signalHandler.gotAnySignal() == false) {
         std::cout << "Error setting up camera: " << error << " -- Trying again" << std::endl;
     }
-    if(signalHandler.gotExitSignal() == true) {
+    if(signalHandler.gotAnySignal() == true) {
         std::cout << "Fatal error: Failed to set up camera. Quitting. Last error: " << error << std::endl;
         return 2;
     }
@@ -78,7 +78,7 @@ int main(int argc, char * argv[]) {
     std::cout << "Motors are ready" << std::endl;
     
     // TODO: Signal handler to allow us to quit loop when we receive SIGUSR1
-    while(signalHandler.gotExitSignal() == false) {
+    while(signalHandler.gotAnySignal() == false) {
         // Receive a PTP container
         PTP::PTPContainer container_in;
         try {
@@ -216,7 +216,10 @@ int main(int argc, char * argv[]) {
     
     // Deconstructor will automatically take care of closing network connection
     // TODO: Make PTPNetwork a pointer instead, so we can control when destruction happens?
-    system ("sudo shutdown -h now");
+    if(signalHandler.gotUpdateSignal() == false) {
+        // Don't shutdown if we got the update signal
+        system ("sudo shutdown -h now");
+    }
     return 0;
 }
 
