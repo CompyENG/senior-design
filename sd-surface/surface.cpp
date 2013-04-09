@@ -3,7 +3,7 @@
 #include <string>
 #include <libptp++/libptp++.hpp>
 #include <SDL/SDL_rotozoom.h>
-#include <SDL/SDL_ttf.h>
+//#include <SDL/SDL_ttf.h>
 
 #include "../common/SignalHandler.hpp"
 #include "surface.hpp"
@@ -82,14 +82,16 @@ int main(int argc, char * argv[]) {
     }
     
     //Load Font
+    /*
 	TTF_Font *font;
 	font = TTF_OpenFont("FreeSans.ttf", 12);
+	
 	if (font == NULL)
 	{
 	   std::cout << "TTF_OpenFont() Failed: " << TTF_GetError() << std::endl;
 	   TTF_Quit();
 	}
-
+	*/
     //Make the Sub
     SubJoystick mySubJoystick;
 
@@ -184,7 +186,7 @@ int main(int argc, char * argv[]) {
         surf_lv = SDL_CreateRGBSurfaceFrom(lv_rgb, width, height, 24, width * 3, 0x0000ff, 0x00ff00, 0xff0000, 0);
         SDL_SoftStretch(surf_lv, NULL, screen, NULL);
         //resizeImage( surf_lv, 640, 480);
-        
+        /*
         SDL_Surface * text;
 
 	    // Write text to surface
@@ -202,7 +204,7 @@ int main(int argc, char * argv[]) {
         
         // Apply image to screen
         SDL_BlitSurface(surf_lv, NULL, screen, NULL);
-        
+  */      
         SDL_Flip(screen);
         
         SDL_FreeSurface(surf_lv);
