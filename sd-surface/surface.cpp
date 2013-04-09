@@ -183,7 +183,7 @@ int main(int argc, char * argv[]) {
         height = lv_resp.get_param_n(2);
         
         //std::cout << "Received data -- displaying" << std::endl;
-        surf_lv = SDL_CreateRGBSurfaceFrom(lv_rgb, width, height, 16, width * 3, 0x0000f8, 0x00fC00, 0xf80000, 0);
+        surf_lv = SDL_CreateRGBSurfaceFrom(lv_rgb, width, height, 16, width * 3, 0x0000ff, 0x00ff00, 0xff0000, 0);
         SDL_SoftStretch(surf_lv, NULL, screen, NULL);
         //resizeImage( surf_lv, 640, 480);
         /*
