@@ -3,6 +3,7 @@
 #include <string>
 #include <libptp++/libptp++.hpp>
 #include <SDL/SDL_rotozoom.h>
+#include <SDL/SDL_ttf.h>
 
 #include "../common/SignalHandler.hpp"
 #include "surface.hpp"
@@ -36,9 +37,9 @@ int main(int argc, char * argv[]) {
     }
     
     if(argc > 1) {
-        screen = SDL_SetVideoMode( 640, 480, 16, SDL_SWSURFACE );
+        screen = SDL_SetVideoMode( 640, 480, 24, SDL_SWSURFACE );
     } else {
-        screen = SDL_SetVideoMode( 640, 480, 16, SDL_FULLSCREEN | SDL_SWSURFACE );
+        screen = SDL_SetVideoMode( 640, 480, 24, SDL_FULLSCREEN | SDL_SWSURFACE );
     }
     
     //Create a Client
@@ -79,6 +80,15 @@ int main(int argc, char * argv[]) {
         std::cout << "Could not open Joystick" << std::endl;
         return 4;
     }
+    
+    //Load Font
+	TTF_Font *font;
+	font = TTF_OpenFont("FreeSans.ttf", 12);
+	if (font == NULL)
+	{
+	   std::cout << "TTF_OpenFont() Failed: " << TTF_GetError() << std::endl;
+	   TTF_Quit();
+	}
 
     //Make the Sub
     SubJoystick mySubJoystick;
@@ -172,7 +182,24 @@ int main(int argc, char * argv[]) {
         
         //std::cout << "Received data -- displaying" << std::endl;
         surf_lv = SDL_CreateRGBSurfaceFrom(lv_rgb, width, height, 24, width * 3, 0x0000ff, 0x00ff00, 0xff0000, 0);
-        resizeImage( surf_lv, 640, 480);
+        SDL_SoftStretch(surf_lv, NULL, screen, NULL);
+        //resizeImage( surf_lv, 640, 480);
+        
+        SDL_Surface * text;
+
+	    // Write text to surface
+	    SDL_Color text_color = {255, 255, 255};
+	    text = TTF_RenderText_Blended(font, "Team Sub-Optical", text_color);
+ 
+ 	    if (text == NULL)
+	    {
+		   std::cout << "TTF_RenderText_Solid() Failed: " << TTF_GetError() << std::endl;
+		   TTF_Quit();
+	    }
+        
+        // Apply text to image
+        SDL_BlitSurface(text, NULL, surf_lv, NULL);
+        
         // Apply image to screen
         SDL_BlitSurface(surf_lv, NULL, screen, NULL);
         
