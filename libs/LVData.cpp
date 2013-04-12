@@ -138,7 +138,7 @@ uint8_t * LVData::get_rgb(int * out_size, int * out_width, int * out_height, con
     
     *out_width = this->fb_desc->visible_width / par;           // Vertical width of output
     unsigned int dispsize = *out_width * (this->fb_desc->visible_height);   // Size of output
-    *out_size = dispsize*3;                                             // RGB output size
+    *out_size = dispsize*2;                                             // RGB output size -- 16 bpp
     
 	uint8_t * out = new uint8_t[*out_size];  // Allocate space for RGB output
     
@@ -195,9 +195,14 @@ void LVData::yuv_to_rgb(uint8_t **dest, const uint8_t y, const int8_t u, const i
     *((*dest)++) = LVData::clip(((y<<12) + u*7258          + 2048)>>12);
     */
     // Testing alternative formula:
-    *((*dest)++) = LVData::clip(y                     + 1.402   * v);
-    *((*dest)++) = LVData::clip(y - 0.34414 * u - 0.71414 * v);
-    *((*dest)++) = LVData::clip(y + 1.772   * u);
+    uint8_t red = LVData::clip(y                     + 1.402   * v);
+    uint8_t green = LVData::clip(y - 0.34414 * u - 0.71414 * v);
+    uint8_t blue = LVData::clip(y + 1.772   * u);
+    
+    //*((*dest)++) = (0xF8 & red) | ((0xE0 & green) >> 5); // The upper 5 bits from red, with the upper bits of green filling out to 8
+    //*((*dest)++) = ((0x1C & green) << 3) | ((0xF8 & blue) >>3);
+    *((*dest)++) = ((0x1C & green) << 3) | ((0xF8 & blue) >>3);
+    *((*dest)++) = (0xF8 & red) | ((0xE0 & green) >> 5); // The upper 5 bits from red, with the upper bits of green filling out to 8
 }
 
 /**

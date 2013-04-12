@@ -12,8 +12,10 @@
 #include "../common/SDDefines.hpp"
 
 int main(int argc, char * argv[]) {
+    bool debug = false;
     if(argc > 1) {
         bcm2835_set_debug(1);
+        debug = true;
     }
     
     int error;
@@ -208,7 +210,7 @@ int main(int argc, char * argv[]) {
     
     // Deconstructor will automatically take care of closing network connection
     // TODO: Make PTPNetwork a pointer instead, so we can control when destruction happens?
-    if(signalHandler.gotUpdateSignal() == false) {
+    if(signalHandler.gotUpdateSignal() == false && !debug) {
         // Turn the camera off!
         cam.execute_lua("post_levent_to_ui('PressPowerButton')", NULL);
         // Don't shutdown if we got the update signal
