@@ -95,15 +95,17 @@ int main(int argc, char * argv[]) {
         uint32_t param = container_in.get_param_n(0);
         switch(param) {
             case SD_REQ_CONNECTED: {
-                // For now, this is a dumb response.  In the future, let's move where
-                //  we attempt to connect to the camera.  That way, there's a possibility
-                //  this would say it's not connected.
-                // Alternatively, this command could be required to initiate the connection
+                bool setup = setup_camera(cam, proto, &error);
+                
                 PTP::PTPContainer response(PTP::PTPContainer::CONTAINER_TYPE_RESPONSE, SD_MAGIC);
-                response.add_param(SD_IS_CONNECTED);
+                if(setup == true) {
+                    response.add_param(SD_IS_CONNECTED);
+                } else {
+                    response.add_param(SD_NOT_CONNECTED);
+                }
                 
                 subServer.send_ptp_message(response);
-                std::cout << "Sent SD_IS_CONNECTED" << std::endl;
+                std::cout << "Sent connection status" << std::endl;
                 break;
             }
             case SD_JOYDATA: {

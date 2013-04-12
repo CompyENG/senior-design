@@ -83,6 +83,28 @@ int main(int argc, char * argv[]) {
     
     //Make the Sub
     SubJoystick mySubJoystick;
+    
+    // Make sure we're connected to the camera
+    // TODO: Display a message to the user while waiting
+    bool camera_connected = false;
+    while(camera_connected = false) {
+        PTP::PTPContainer connect_cmd(PTP::PTPContainer::CONTAINER_TYPE_COMMAND, SD_MAGIC);
+        connect_cmd.add_param(SD_REQ_CONNECTED);
+        try {
+            surfaceClient.ptp_transaction(connect_cmd, in_data, false, out_resp, out_data);
+        } catch(PTP::LIBPTP_PP_ERRORS e) {
+            std::cout << "Error in ptp_transaction: " << e << std::endl;
+            continue;
+        } catch(PTP::PTPNetwork::NetworkErrors e) {
+            std::cout << "Network error in ptp_transaction: " << e << std::endl;
+            continue;
+        }
+        
+        if(out_resp.code == SD_MAGIC && out_resp.get_param_n(0) == SD_IS_CONNECTED) {
+            camera_connected = true;
+        }
+    }
+    
 
     //While the user hasn't quit
     while( signalHandler.gotAnySignal() == false && quit == false )
