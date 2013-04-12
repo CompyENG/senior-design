@@ -48,13 +48,13 @@ int main(int argc, char * argv[]) {
 	}
     
     // Keep trying to set up the camera until something tells us to stop
-    while(setup_camera(cam, proto, &error) == false && signalHandler.gotAnySignal() == false) {
+    /*while(setup_camera(cam, proto, &error) == false && signalHandler.gotAnySignal() == false) {
         std::cout << "Error setting up camera: " << error << " -- Trying again" << std::endl;
     }
     if(signalHandler.gotAnySignal() == true) {
         std::cout << "Fatal error: Failed to set up camera. Quitting. Last error: " << error << std::endl;
         return 2;
-    }
+    }*/
     
     std::cout << "Camera is ready" << std::endl;
     std::cout << "CHDK Version: " << cam.get_chdk_version() << std::endl;
