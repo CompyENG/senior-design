@@ -26,6 +26,10 @@ case "$1" in
     # kill application you want to stop
     /usr/sbin/sd-stop
     ;;
+  update)
+    echo "Allowing update to happen"
+    /usr/sbin/sd-stop-update
+    ;;
   *)
     echo "Usage: /etc/init.d/sd-startup {start|stop}"
     exit 1
