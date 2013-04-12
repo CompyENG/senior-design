@@ -173,6 +173,8 @@ int main(int argc, char * argv[]) {
         
         //std::cout << "Received data -- displaying" << std::endl;
         surf_lv = SDL_CreateRGBSurfaceFrom(lv_rgb, width, height, 16, width * 2, 0xF800, 0x03E0, 0x001F, 0);
+        
+        SDL_SoftStretch(surf_lv, NULL, screen, NULL);
 
         SDL_Flip(screen);
         
