@@ -6,9 +6,6 @@
 
 class SubJoystick
 {
-    private:
-    int8_t commands[7]; //The commands to send
-    
     public:
     SubJoystick(); //Initializes
     int8_t * get_data(); //gets data to send
@@ -20,8 +17,14 @@ class SubJoystick
 		ZOOM, // 1 for zoom in, -1 for zoom out, 0 for neither
 		ASCEND, // 1 for ascend, -1 for descend, 0 for neither
 		SHOOT, // 1 for "take a picture", 0 for don't
-		LIGHTS // 1 when lights should be on, 0 when lights should be off
+		LIGHTS, // 1 when lights should be on, 0 when lights should be off
+		QUIT, //1 when we want to quit
+		OPTION, //Hold Select and different things might happen!
+        COMMAND_LENGTH  // A field to denote how many fields we have
 	};
+    
+    private:
+    int8_t commands[COMMAND_LENGTH];
 
 };
 

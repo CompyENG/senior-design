@@ -8,7 +8,7 @@
 SubJoystick::SubJoystick()
 {
     //Initialize the commands (and make sure they all start at 0)
-    bzero(commands, 7);
+    bzero(commands, COMMAND_LENGTH);
     //forward/back||left/right||pitch up/down||zoom out||zoom in||descend||ascend||take picture//lights
     
 }
@@ -18,6 +18,7 @@ void SubJoystick::handle_input(SDL_Event event)
     //If a axis was changed
     if( event.type == SDL_JOYAXISMOTION )
     {
+		std::cout << "AXIS VALUE " << (int) event.jaxis.value << std::endl;
         //If the first joystick has moved
         if( event.jaxis.which == 0 )
         {
@@ -25,7 +26,7 @@ void SubJoystick::handle_input(SDL_Event event)
             if( event.jaxis.axis == 1 )
             {
                 //If the F/R axis is neutral
-                if( ( event.jaxis.value > -8000 ) && ( event.jaxis.value < 8000 ) )
+                if( ( event.jaxis.value > -32000 ) && ( event.jaxis.value < 32000 ) )
                 {
                     commands[FORWARD] = 0; 
                 }
@@ -47,7 +48,7 @@ void SubJoystick::handle_input(SDL_Event event)
             else if( event.jaxis.axis == 3 )
             {
                 //If the X axis is neutral
-                if( ( event.jaxis.value > -8000 ) && ( event.jaxis.value < 8000 ) )
+                if( ( event.jaxis.value > -32000 ) && ( event.jaxis.value < 32000 ) )
                 {
                     commands[LEFT] = 0;
                 }
@@ -69,7 +70,7 @@ void SubJoystick::handle_input(SDL_Event event)
             else if( event.jaxis.axis == 4 )
             {
                 //If the axis is neutral
-                if( ( event.jaxis.value > -8000 ) && ( event.jaxis.value < 8000 ) )
+                if( ( event.jaxis.value > -32000 ) && ( event.jaxis.value < 32000 ) )
                 {
                     commands[PITCH] = 0; //stop pitch
                 }
@@ -91,7 +92,7 @@ void SubJoystick::handle_input(SDL_Event event)
             else if( event.jaxis.axis == 2 )
             {
                 //If the zoom in axis is neutral and we're not zoooming out
-                if( event.jaxis.value < 8000 && commands[ZOOM] !=-1)
+                if( event.jaxis.value < 32000 && commands[ZOOM] !=-1)
                 {
                     commands[ZOOM] = 0; 
                 }
@@ -104,7 +105,7 @@ void SubJoystick::handle_input(SDL_Event event)
             else if( event.jaxis.axis == 5 )
             {
                 //If the zoom out axis is neutral
-                if(  event.jaxis.value < 8000)
+                if(  event.jaxis.value < 32000)
                 {
                     commands[ZOOM] = 0; 
                 }
@@ -141,7 +142,13 @@ void SubJoystick::handle_input(SDL_Event event)
         }
         else if (event.jbutton.button == 0) {
             commands[ASCEND] = -1; //decend
-        }
+        } 
+        else if(event.jbutton.button == 7) {
+			commands[QUIT] = 1;
+		}
+		else if (event.jbutton.button == 6) {
+			commands[OPTION] = 1;
+		}
     }
     //buttons released
     if(event.type == SDL_JOYBUTTONUP) {
@@ -158,14 +165,17 @@ void SubJoystick::handle_input(SDL_Event event)
         else if (event.jbutton.button == 0) {
             commands[ASCEND] = 0; //decend
         }
+        else if (event.jbutton.button == 6) {
+            commands[OPTION] = 0; //decend
+        }
     }
 }
 
 //this method gets the joystick data for use elsewhere
 int8_t *SubJoystick::get_data() {
     
-    int8_t *to_send = new int8_t[7];
-    memcpy(to_send, commands, 7);
+    int8_t *to_send = new int8_t[COMMAND_LENGTH];
+    memcpy(to_send, commands, COMMAND_LENGTH);
     
     return to_send;
 }

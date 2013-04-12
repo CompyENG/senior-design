@@ -3,23 +3,38 @@
 #include "Motor.hpp"
 
 bool Motor::gpio_setup = false;
+int Motor::instances = 0;
 
-Motor::Motor(int * GPIO) {
+Motor::Motor(int * GPIO, bool debug) {
     this->state = UNKNOWN;
+    this->instances++;
     // Set up GPIO (if it hasn't been already)
-    this->setup_gpio();
+    this->setup_gpio(debug);
     // Set up the pins we received
     this->setup(GPIO);
 }
 
-Motor::Motor() {
+Motor::Motor(bool debug) {
     this->state = UNKNOWN;
+    this->instances++;
     // Set up GPIO (if it hasn't been already)
-    this->setup_gpio();
+    this->setup_gpio(debug);
 }
 
-bool Motor::setup_gpio() {
+Motor::~Motor() {
+    this->instances--;
+    
+    if(this->instances == 0) {
+        bcm2835_close();
+    }
+}
+
+bool Motor::setup_gpio(bool debug) {
     // This function needs to be called once per application
+    if(debug) {
+        bcm2835_set_debug(1);
+    }
+    
     if(!Motor::gpio_setup) {
         if (!bcm2835_init()) {
             return false;
@@ -79,8 +94,8 @@ bool Motor::spinForward() {
 bool Motor::spinReverse() {
     if(!Motor::gpio_setup) return false;
     
-    bcm2835_gpio_write(pins[0], LOW); // Always set low first
-    bcm2835_gpio_write(pins[1], HIGH);
+    bcm2835_gpio_write(pins[1], LOW); // Always set low first
+    bcm2835_gpio_write(pins[0], HIGH);
     
     this->state = REVERSE;
     return true;
