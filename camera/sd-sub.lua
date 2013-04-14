@@ -51,9 +51,15 @@ while run do
         
         elseif cmd == "modev" then
             set_capture_mode_canon(32000)
+            sleep 500 -- Wait a little bit after switching modes
+            click("shoot_full") -- For some reason required
             
         elseif cmd == "modep" then
             set_capture_mode_canon(32768)
+            sleep 500 -- Wait a little bit after switching modes
+            
+        elseif cmd == "shoot_full" then
+            click("shoot_full")
             
         end
     end
