@@ -9,6 +9,7 @@
 
 DEVICE=$1
 
+rm -f /tmp/update-log
 sudo -u pi touch /tmp/update-log
 
 # check input
