@@ -118,7 +118,7 @@ sleep 2
 sudo cp -r /tmp/update/* /
 sudo update-rc.d sd-startup defaults
 sudo udevadm control --reload-rules
-sudo /etc/init.d/sd-startup start
+sudo /etc/init.d/sd-startup start &
 EOF3
 
 # "Update light" -- turn off and clean up
