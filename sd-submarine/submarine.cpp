@@ -213,6 +213,8 @@ int main(int argc, char * argv[]) {
     // Deconstructor will automatically take care of closing network connection
     // TODO: Make PTPNetwork a pointer instead, so we can control when destruction happens?
     if(signalHandler.gotUpdateSignal() == false && !debug) {
+        // Stop our script
+        cam.write_script_message("quit");
         // Turn the camera off!
         cam.execute_lua("post_levent_to_ui('PressPowerButton')", NULL);
         // Don't shutdown if we got the update signal
@@ -232,6 +234,7 @@ bool setup_camera(PTP::CHDKCamera& cam, PTP::PTPUSB& proto, int * error) {
     usleep(500 * 10^3);   // Sleep for half a second -- TODO: Block instead?
     cam.execute_lua("set_prop(143, 2)", NULL); // Set flash mode to off
     usleep(500 * 10^3);
+    cam.execute_lua("loadfile('A/CHDK/SCRIPTS/sd-sub.lua')()", NULL); // Load up our script
     
     return true;
 }
@@ -370,22 +373,23 @@ void update_motors(int8_t * sub_state, int8_t * joy_data, uint32_t joy_data_len,
         }
         
         // Zoom in/out
-        if(joy_data[SubJoystick::ZOOM] == -1) {
+        if(joy_data[SubJoystick::ZOOM] == -1 && sub_state[SubJoystick::ZOOM] == 0) {
             // If we want to zoom out
-            cam.execute_lua("click('zoom_in')", NULL);
+            cam.write_script_message("zout");
             sub_state[SubJoystick::ZOOM] = -1;
-        } else if(joy_data[SubJoystick::ZOOM] == 1) {
+        } else if(joy_data[SubJoystick::ZOOM] == 1 && sub_state[SubJoystick::ZOOM] == 0) {
             // If we want to zoom in
-            cam.execute_lua("click('zoom_out')", NULL);
+            cam.write_script_message("zin");
             sub_state[SubJoystick::ZOOM] = 1;
-        } else if(joy_data[SubJoystick::ZOOM] == 0) {
+        } else if(joy_data[SubJoystick::ZOOM] == 0 && sub_state[SubJoystick::ZOOM] != 0) {
+            cam.write_script_message("zstop");
             sub_state[SubJoystick::ZOOM] = 0;
         }
         
         // Shoot
         if(joy_data[SubJoystick::SHOOT] == 1 && sub_state[SubJoystick::SHOOT] == 0) {
             // We don't want to shoot continuously.
-            cam.execute_lua("shoot()", NULL);
+            cam.write_script_message("shoot");
             sub_state[SubJoystick::SHOOT] = 1;
         } else if(joy_data[SubJoystick::SHOOT] == 0 && sub_state[SubJoystick::SHOOT] == 1) {
             // Check current state so we're not doing this every loop iteration
