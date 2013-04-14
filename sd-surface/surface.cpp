@@ -99,7 +99,7 @@ int main(int argc, char * argv[]) {
     // Make sure we're connected to the camera
     // TODO: Display a message to the user while waiting
     bool camera_connected = false;
-    while(camera_connected = false) {
+    while(camera_connected == false) {
         PTP::PTPContainer connect_cmd(PTP::PTPContainer::CONTAINER_TYPE_COMMAND, SD_MAGIC);
         connect_cmd.add_param(SD_REQ_CONNECTED);
         try {
