@@ -11,6 +11,9 @@ DEVICE=$1
 
 rm -f /tmp/update-log
 sudo -u pi touch /tmp/update-log
+chown pi:pi /tmp/update-log
+# Let's just make sure everything is going to work...
+chmod 777 /tmp/update-log
 
 # check input
 if [ -z "$DEVICE" ]; then
