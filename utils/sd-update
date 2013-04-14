@@ -119,8 +119,10 @@ if [ ! -e "/media/${LABEL}" ]; then
         
         echo "error: /media/${LABEL} failed to unmount." >> /tmp/update-log
         exit 1
+    else
+        echo "Couldn't fine mountpoint" >> /tmp/update-log
     fi
 fi
 
-echo "Error: Mount point already exists."
+echo "Error: Mount point already exists." >> /tmp/update-log
 exit 1
