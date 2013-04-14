@@ -61,13 +61,24 @@ int main(int argc, char * argv[]) {
             std::cout << "Caught some other exception.  Trying again." << std::endl;
         }
     }
+    
+    if(signalHandler.gotAnySignal() == true) {
+        clean_up(NULL);
+        if(signalHandler.gotExitSignal() == true) {
+            system ("sudo shutdown -h now");
+        }
+        return 1;
+    }
+        
+    
 	std::cout << "Connection Successful" << std::endl;
     PTP::CameraBase surfaceClient(&surfaceClientBackend);
     
-    //Check if there's any joysticks
+    //Check if there's any joysticks -- TODO: Keep trying
     if( SDL_NumJoysticks() < 1 )
     {
         std::cout << "No Joysticks Found" << std::endl;
+        clean_up(NULL);
         return 3;
     }
 
@@ -78,6 +89,7 @@ int main(int argc, char * argv[]) {
     if( stick == NULL )
     {
         std::cout << "Could not open Joystick" << std::endl;
+        clean_up(NULL);
         return 4;
     }
     
@@ -238,8 +250,10 @@ bool init()
 
 void clean_up(SDL_Joystick *stick)
 {
-    //Close the joystick
-    SDL_JoystickClose( stick );
+    if(stick != NULL) {
+        //Close the joystick
+        SDL_JoystickClose( stick );
+    }
 
     //Quit SDL
     SDL_Quit();
