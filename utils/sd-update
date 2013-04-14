@@ -9,6 +9,8 @@
 
 DEVICE=$1
 
+sudo -u pi touch /tmp/update-log
+
 # check input
 if [ -z "$DEVICE" ]; then
    exit 1
@@ -17,7 +19,7 @@ fi
 # test that this device isn't already mounted
 device_is_mounted=`grep ${DEVICE} /etc/mtab`
 if [ -n "$device_is_mounted" ]; then
-   echo "error: seems /dev/${DEVICE} is already mounted"
+   echo "error: seems /dev/${DEVICE} is already mounted" >> /tmp/update-log
    exit 1
 fi
 
@@ -26,7 +28,7 @@ echo "Getting device information"
 eval `/sbin/blkid -o export /dev/${DEVICE} | sed 's/^/export /; s/=/="/; s/$/"/'`
 
 if [ -z "$LABEL" ] || [ -z "$TYPE" ]; then
-   echo "error: LABEL is empty! did blkid break? tried /dev/${DEVICE}"
+   echo "error: LABEL is empty! did blkid break? tried /dev/${DEVICE}" >> /tmp/update-log
    exit 1
 fi
 
@@ -34,11 +36,11 @@ echo "Testing mountpoint"
 # test mountpoint - it shouldn't exist
 if [ ! -e "/media/${LABEL}" ]; then
     
-    echo "Making mountpoint"
+    echo "Making mountpoint" >> /tmp/update-log
     # make the mountpoint
     mkdir "/media/${LABEL}"
     
-    echo "Mounting"
+    echo "Mounting" >> /tmp/update-log
     # mount the device
     # 
     # If expecting thumbdrives, you probably want 
@@ -68,11 +70,11 @@ if [ ! -e "/media/${LABEL}" ]; then
     UPDATE_FILE=`ls -Cr /media/${LABEL}/update-*.tar.gz | head -n 1`
     DATE=`expr match "$UPDATE_FILE" '.*/update-\([0-9]\{8\}\).tar.gz'`
     
-    echo "Checking for update file"
+    echo "Checking for update file" >> /tmp/update-log
     
     if [ ! -z "$UPDATE_FILE" -a -f "${UPDATE_FILE}" ]; then
         # Our update file exists. Let's make a new directory and copy it
-        echo "Found update file. Setting date and extracting"
+        echo "Found update file. Setting date and extracting" >> /tmp/update-log
         # Changing the date prevents warnings when we extract the tar file
         #  Also, some scripts may error out if the last modified date is greater
         #  than the current date. This gets around that.
@@ -84,18 +86,18 @@ if [ ! -e "/media/${LABEL}" ]; then
         # We don't need to use a wildcard here, but it doesn't hurt
         sudo -u pi tar -C /tmp/update-${DATE} -xf ${UPDATE_FILE}
         
-        echo "Checking for update script"
+        echo "Checking for update script" >> /tmp/update-log
         if [ -f "/tmp/update-${DATE}/update.sh" ]; then
             # Save our working directory
             WD=`pwd`
             # Move to work in the update script's directory
             cd /tmp/update-${DATE}
             
-            echo "Running update script"
+            echo "Running update script" >> /tmp/update-log
             # Run the update script
             # TODO: Allow the script to run as Pi, and sudo commands that need it
             # (Currently not possible because we extract the tar.gz file as root w/o shell)
-            sudo -u pi bash ./update.sh > /tmp/update-log 2>&1
+            sudo -u pi bash ./update.sh >> /tmp/update-log 2>&1
             # Move back to old directory
             cd ${WD}
         fi
@@ -111,7 +113,7 @@ if [ ! -e "/media/${LABEL}" ]; then
         # very naive; just run and pray
         umount "/media/${LABEL}" && rmdir "/media/${LABEL}" && exit 0 >> /tmp/update-log 2>&1
         
-        echo "error: /media/${LABEL} failed to unmount."
+        echo "error: /media/${LABEL} failed to unmount." >> /tmp/update-log
         exit 1
     fi
 fi
