@@ -19,16 +19,16 @@
 case "$1" in
   start)
     echo "Starting sd-startup"
-    /usr/sbin/sd-start
+    /usr/sbin/sd-start &
     ;;
   stop)
     echo "Stopping sd-startup"
     # kill application you want to stop
-    /usr/sbin/sd-stop
+    /usr/sbin/sd-stop &
     ;;
   update)
     echo "Allowing update to happen"
-    /usr/sbin/sd-stop-update
+    /usr/sbin/sd-stop-update &
     ;;
   *)
     echo "Usage: /etc/init.d/sd-startup {start|stop}"
