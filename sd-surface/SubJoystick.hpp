@@ -20,6 +20,7 @@ class SubJoystick
 		LIGHTS, // 1 when lights should be on, 0 when lights should be off
 		QUIT, //1 when we want to quit
 		OPTION, //Hold Select and different things might happen!
+        MODE, // 1 when we want to switch mode
         COMMAND_LENGTH  // A field to denote how many fields we have
 	};
     

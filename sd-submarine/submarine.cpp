@@ -260,6 +260,7 @@ bool compare_states(int8_t * sub_state, int8_t * joy_data) {
 }
 
 void update_motors(int8_t * sub_state, int8_t * joy_data, uint32_t joy_data_len, Motor * subMotors, PTP::CHDKCamera& cam) {
+    static int mode = 0; // 0 = picture currently, 1 = video currently
     
     std::cout << "joy_data[FORWARD] = " << (int) joy_data[SubJoystick::FORWARD] << std::endl;
     std::cout << "joy_data[LEFT] = " << (int) joy_data[SubJoystick::LEFT] << std::endl;
@@ -404,6 +405,24 @@ void update_motors(int8_t * sub_state, int8_t * joy_data, uint32_t joy_data_len,
         } else if(joy_data[SubJoystick::LIGHTS] == 0 && sub_state[SubJoystick::LIGHTS] == 1) {
             // Check current state so we're not doing this every loop iteration
             // TODO: Turn the lights off
+        }
+        
+        // Mode
+        if(joy_data[SubJoystick::MODE] == 1 && sub_state[SubJoystick::MODE] == 0) {
+            if(mode == 0) {
+                cam.write_script_message("modev");
+                mode = 1;
+            } else if(mode == 1) {
+                cam.write_script_message("modep");
+                mode = 0;
+            } else {
+                cam.write_script_message("modep");
+                mode = 0;
+            }
+            
+            sub_state[SubJoystick::MODE] = 1;
+        } else if(joy_data[SubJoystick::MODE] == 0 && sub_state[SubJoystick::MODE] == 1) {
+            sub_state[SubJoystick::MODE] = 0;
         }
     //}
 }
