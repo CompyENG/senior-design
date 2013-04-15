@@ -90,6 +90,14 @@ if [ ! -e "/media/${LABEL}" ]; then
         # We don't need to use a wildcard here, but it doesn't hurt
         sudo -u pi tar -C /tmp/update-${DATE} -xf ${UPDATE_FILE}
         
+        # Unmount the device and remove mountpoint
+        # test mountpoint - it should exist
+        if [ -e "/media/${LABEL}" ]; then
+            echo "Unmounting drive" >> /tmp/update-log
+            # very naive; just run and pray
+            umount "/media/${LABEL}" && rmdir "/media/${LABEL}" >> /tmp/update-log 2>&1
+        fi
+        
         echo "Checking for update script" >> /tmp/update-log
         if [ -f "/tmp/update-${DATE}/update.sh" ]; then
             # Save our working directory
