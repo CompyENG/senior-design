@@ -262,7 +262,7 @@ bool compare_states(int8_t * sub_state, int8_t * joy_data) {
 void update_motors(int8_t * sub_state, int8_t * joy_data, uint32_t joy_data_len, Motor * subMotors, PTP::CHDKCamera& cam) {
     static int mode = 0; // 0 = picture currently, 1 = video currently
     
-    std::cout << "joy_data[FORWARD] = " << (int) joy_data[SubJoystick::FORWARD] << std::endl;
+    /*std::cout << "joy_data[FORWARD] = " << (int) joy_data[SubJoystick::FORWARD] << std::endl;
     std::cout << "joy_data[LEFT] = " << (int) joy_data[SubJoystick::LEFT] << std::endl;
     std::cout << "joy_data[PITCH] = " << (int) joy_data[SubJoystick::PITCH] << std::endl;
     std::cout << "joy_data[ZOOM] = " << (int) joy_data[SubJoystick::ZOOM] << std::endl;
@@ -276,9 +276,9 @@ void update_motors(int8_t * sub_state, int8_t * joy_data, uint32_t joy_data_len,
     std::cout << "sub_state[ZOOM] = " << (int) sub_state[SubJoystick::ZOOM] << std::endl;
     std::cout << "sub_state[ASCEND] = " << (int) sub_state[SubJoystick::ASCEND] << std::endl;
     std::cout << "sub_state[SHOOT] = " << (int) sub_state[SubJoystick::SHOOT] << std::endl;
-    std::cout << "sub_state[LIGHTS] = " << (int) sub_state[SubJoystick::LIGHTS] << std::endl;
+    std::cout << "sub_state[LIGHTS] = " << (int) sub_state[SubJoystick::LIGHTS] << std::endl;*/
     
-    //if(compare_states(sub_state, joy_data) == false) {
+    if(compare_states(sub_state, joy_data) == false) {
         //std::cout << "State has changed." << std::endl;
         // Only run through these comparisons if our states have changed
         // Forward/backward
@@ -424,5 +424,5 @@ void update_motors(int8_t * sub_state, int8_t * joy_data, uint32_t joy_data_len,
         } else if(joy_data[SubJoystick::MODE] == 0 && sub_state[SubJoystick::MODE] == 1) {
             sub_state[SubJoystick::MODE] = 0;
         }
-    //}
+    }
 }
