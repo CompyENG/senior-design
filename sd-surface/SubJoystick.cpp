@@ -92,13 +92,13 @@ void SubJoystick::handle_input(SDL_Event event)
             else if( event.jaxis.axis == 2 )
             {
                 //If the zoom in axis is neutral and we're not zoooming out
-                if( event.jaxis.value < 32000 && commands[ZOOM] !=-1)
+                if( event.jaxis.value < 32000 && commands[ZOOM] != 1)
                 {
                     commands[ZOOM] = 0; 
                 }
                 else
                 {
-                    commands[ZOOM] = 1; //Zoom In
+                    commands[ZOOM] = -1; //Zoom out
                 }
             }
             //zoom out (commands[3])
@@ -111,7 +111,7 @@ void SubJoystick::handle_input(SDL_Event event)
                 }
                 else
                 {
-                    commands[ZOOM] = -1; //Zoom out
+                    commands[ZOOM] = 1; //Zoom in
                 }
             }
         }
