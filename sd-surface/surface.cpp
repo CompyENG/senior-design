@@ -2,8 +2,6 @@
 #include <iostream>
 #include <string>
 #include <libptp++/libptp++.hpp>
-#include <SDL/SDL_rotozoom.h>
-//#include <SDL/SDL_ttf.h>
 
 #include "../common/SignalHandler.hpp"
 #include "surface.hpp"
@@ -41,6 +39,8 @@ int main(int argc, char * argv[]) {
     } else {
         screen = SDL_SetVideoMode( 640, 480, 16, SDL_FULLSCREEN | SDL_SWSURFACE );
     }
+    
+    show_connecting_screen(screen);
     
     //Create a Client
     PTP::PTPNetwork surfaceClientBackend;
@@ -257,4 +257,23 @@ void clean_up(SDL_Joystick *stick)
 
     //Quit SDL
     SDL_Quit();
+}
+
+void show_connecting_screen(SDL_Surface * screen) {
+    SDL_Surface *image;
+    SDL_Rect dest;
+    
+    image = SDL_LoadPNG("/usr/share/sd-surface/connecting.bmp");
+    if(image == NULL) {
+        std::cout << "ERROR: Couldn't load 'connecting' image." << std::endl;
+        return;
+    }
+    
+    dest.x = 0;
+    dest.y = 0;
+    dest.w = image->w;
+    dest.h = image->h;
+    SDL_BlitSurface(image, NULL, screen, &dest);
+    
+    SDL_UpdateRects(screen, 1, &dest);
 }
