@@ -226,7 +226,13 @@ int main(int argc, char * argv[]) {
 
 bool setup_camera(PTP::CHDKCamera& cam, PTP::PTPUSB& proto, int * error) {
     // TODO: try/catch
-    proto.connect_to_first();
+    try {
+        proto.connect_to_first();
+    } catch (...) {
+        std::cout << "No camera found" << std::endl;
+        return false;
+    }
+    
     cam.set_protocol(&proto);
     
     cam.execute_lua("switch_mode_usb(1)", NULL); // TODO: block instead of sleep?
