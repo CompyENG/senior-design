@@ -12,7 +12,7 @@ enum SD_COMMANDS {
     SD_QUIT,
     SD_UPDATE,
     SD_OK,
-    SD_ERROR
+    SD_ERROR,
 };
 
 #endif /* SDDEFINES_HPP_ */

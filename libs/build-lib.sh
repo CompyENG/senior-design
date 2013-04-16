@@ -4,6 +4,6 @@
 # will only be run on the Pi, so we are free to perform build optimizations.
 
 pwd
-g++ -shared -fPIC CameraBase.cpp CHDKCamera.cpp LVData.cpp PTPCamera.cpp PTPContainer.cpp PTPUSB.cpp PTPNetwork.cpp -o libptp++.so -lusb-1.0
+g++ -shared -fPIC -O2 CameraBase.cpp CHDKCamera.cpp LVData.cpp PTPCamera.cpp PTPContainer.cpp PTPUSB.cpp PTPNetwork.cpp -o libptp++.so -lusb-1.0
 
 echo "g++ status: $?"

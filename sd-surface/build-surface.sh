@@ -5,6 +5,6 @@
 # optimizations we want.
 
 pwd
-g++ -o sd-surface surface.cpp SubJoystick.cpp ../common/SignalHandler.cpp -lSDL -lptp++
+g++ -o sd-surface -O2 surface.cpp SubJoystick.cpp ../common/SignalHandler.cpp -lSDL -lptp++
 
 echo "g++ status: $?"

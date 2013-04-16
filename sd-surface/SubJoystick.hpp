@@ -20,11 +20,22 @@ class SubJoystick
 		LIGHTS, // 1 when lights should be on, 0 when lights should be off
 		QUIT, //1 when we want to quit
 		OPTION, //Hold Select and different things might happen!
+        MODE, // 1 when we want to switch mode
         COMMAND_LENGTH  // A field to denote how many fields we have
 	};
     
     private:
     int8_t commands[COMMAND_LENGTH];
+    enum SubButtons {
+		A_BUTTON = 0, // A Button (Descend)
+		B_BUTTON, // B Button (Does Nothing)
+		X_BUTTON, // X Button (Does Nothing)
+		Y_BUTTON, // Y Button (Ascend)
+		RL_BUTTON, // RL Button (Switches Mode)
+		RB_BUTTON, // RB Button (Takes pictures)
+		BACK_BUTTON, // Back Button (Does nothing)
+		START_BUTTON // Start Button (Shuts down)
+	};
 
 };
 

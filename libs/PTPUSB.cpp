@@ -45,6 +45,7 @@ void PTPUSB::connect_to_first() {
     libusb_device * dev = this->find_first_camera();
     if(dev == NULL) {
         // TODO: Throw exception
+        throw 1;
         return;
     }
     

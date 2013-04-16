@@ -50,6 +50,10 @@ sudo cp ./utils/sd-stop-update /usr/sbin/
 sudo cp ./utils/sd-update /usr/sbin/
 sudo cp ./utils/sd-startup /etc/init.d/
 
+# Image files
+sudo mkdir -p /usr/share/sd-surface/
+sudo cp ./images/*.bmp /usr/share/sd-surface/
+
 # Update init.d files
 echo "Reloading init.d rules"
 sudo update-rc.d sd-startup defaults
@@ -72,17 +76,16 @@ fi
 echo "Detected that I am: ${MY_HOSTNAME}, other Pi is: ${OTHER_HOSTNAME}"
 
 echo "SSHing to make directories"
-ssh pi@$OTHER_HOSTNAME << EOF
+ssh pi@$OTHER_HOSTNAME << EOF1
 rm -Rf /tmp/update/
 mkdir -p /tmp/update/usr/lib/
-mkdir -p /tmp/update/usr/include/
-mkdir -p /tmp/update/usr/include/libptp++/
 mkdir -p /tmp/update/usr/include/libptp++/chdk/
 mkdir -p /tmp/update/usr/bin/
 mkdir -p /tmp/update/etc/udev/rules.d/
 mkdir -p /tmp/update/usr/sbin/
 mkdir -p /tmp/update/etc/init.d/
-EOF
+mkdir -p /tmp/update/usr/share/sd-surface/
+EOF1
 
 # TODO: Set up public key authentication so that we can SFTP/SSH
 # without providing credentials
@@ -91,7 +94,7 @@ EOF
 #  Alternatively, let's copy these to /tmp, then run a script to move them
 #  to the right place :/
 echo "Copying files"
-sftp pi@$OTHER_HOSTNAME << EOF
+sftp pi@$OTHER_HOSTNAME << EOF2
 put /usr/lib/libptp++.so /tmp/update/usr/lib/
 put /usr/include/libptp++/* /tmp/update/usr/include/libptp++/
 put /usr/include/libptp++/chdk/* /tmp/update/usr/include/libptp++/chdk/
@@ -100,10 +103,11 @@ put /usr/bin/sd-surface /tmp/update/usr/bin/
 put /etc/udev/rules.d/90-senior-design.rules /tmp/update/etc/udev/rules.d/
 put /usr/sbin/sd-start /tmp/update/usr/sbin/
 put /usr/sbin/sd-stop /tmp/update/usr/sbin/
-put /usr/sbin/sd-stop-update /tmp/update/usr/sbin/sd-stop-update
+put /usr/sbin/sd-stop-update /tmp/update/usr/sbin/
 put /usr/sbin/sd-update /tmp/update/usr/sbin/
 put /etc/init.d/sd-startup /tmp/update/etc/init.d/
-EOF
+put /usr/share/sd-surface/* /tmp/update/usr/share/sd-surface/
+EOF2
 
 # User pi will need sudo access with NOPASSWD, which is a security risk.
 # We're OK with this because neither pi is connected to the Internet, and anyone
@@ -112,17 +116,19 @@ EOF
 # This copy line might not be ideal, but it's fine as long as we set things up
 # correctly above.  We can always reimage the SD card if something goes wrong.
 echo "SSH to move files and restart UI"
-ssh pi@$OTHER_HOSTNAME << EOF
+ssh pi@$OTHER_HOSTNAME << EOF3
 sudo /etc/init.d/sd-startup update
 sleep 2
+sudo mkdir -p /usr/include/libptp++/chdk/
+sudo mkdir -p /usr/share/sd-surface/
 sudo cp -r /tmp/update/* /
 sudo update-rc.d sd-startup defaults
 sudo udevadm control --reload-rules
-sudo /etc/init.d/sd-startup start
-EOF
+sudo /etc/init.d/sd-startup start &
+EOF3
 
 # "Update light" -- turn off and clean up
 echo "0" | sudo tee /sys/class/gpio/gpio4/value
 echo "4" | sudo tee /sys/class/gpio/unexport
 
-exit 0
+#exit 0
