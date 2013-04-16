@@ -79,8 +79,6 @@ echo "SSHing to make directories"
 ssh pi@$OTHER_HOSTNAME << EOF1
 rm -Rf /tmp/update/
 mkdir -p /tmp/update/usr/lib/
-mkdir -p /tmp/update/usr/include/
-mkdir -p /tmp/update/usr/include/libptp++/
 mkdir -p /tmp/update/usr/include/libptp++/chdk/
 mkdir -p /tmp/update/usr/bin/
 mkdir -p /tmp/update/etc/udev/rules.d/
