@@ -263,7 +263,7 @@ void show_connecting_screen(SDL_Surface * screen) {
     SDL_Surface *image;
     SDL_Rect dest;
     
-    image = SDL_LoadPNG("/usr/share/sd-surface/connecting.bmp");
+    image = SDL_LoadBMP("/usr/share/sd-surface/connecting.bmp");
     if(image == NULL) {
         std::cout << "ERROR: Couldn't load 'connecting' image." << std::endl;
         return;
