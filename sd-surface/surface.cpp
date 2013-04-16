@@ -46,7 +46,9 @@ int main(int argc, char * argv[]) {
     show_image_status("/usr/share/sd-surface/controller.bmp", screen);
     
     // TODO: Error out after some amount of time?
-    while(stick == NULL && signalHandler.gotAnySignal == false) {
+    while(stick == NULL && signalHandler.gotAnySignal() == false) {
+        SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
+        SDL_InitSubSystem(SDL_INIT_JOYSTICK);
         //Check if there's any joysticks
         if( SDL_NumJoysticks() < 1 )
         {
