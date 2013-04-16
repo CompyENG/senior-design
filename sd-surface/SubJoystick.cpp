@@ -125,7 +125,7 @@ void SubJoystick::handle_input(SDL_Event event)
             commands[SHOOT] = 1; //Take Picture
         }
         //lights (toggle on button down)
-        else if (event.jbutton.button == X_BUTTON) 
+        else if (event.jbutton.button == Y_BUTTON) 
         {
             commands[ASCEND] = 1; //ascend
         }
