@@ -188,6 +188,8 @@ int main(int argc, char * argv[]) {
             continue;
         }
         
+        int mode = out_resp.get_param_n(1);
+        
         //std::cout << "Sent joystick data" << std::endl;
         
         delete[] nav_data;
@@ -221,6 +223,12 @@ int main(int argc, char * argv[]) {
         SDL_SoftStretch(surf_lv, NULL, screen, NULL);
 
         SDL_Flip(screen);
+        
+        if(mode == 1) {
+            draw_bmp_location("/usr/share/sd-submarine/mode-video.bmp", screen, 50, 50);
+        } else {
+            draw_bmp_location("/usr/share/sd-submarine/mode-picture.bmp", screen, 50, 50);
+        }
         
         SDL_FreeSurface(surf_lv);
             
@@ -281,6 +289,25 @@ void show_image_status(const char * image_path, SDL_Surface * screen) {
     
     dest.x = 0;
     dest.y = 0;
+    dest.w = image->w;
+    dest.h = image->h;
+    SDL_BlitSurface(image, NULL, screen, &dest);
+    
+    SDL_UpdateRects(screen, 1, &dest);
+}
+
+void draw_bmp_location(const char * image_path, SDL_Surface * screen, int x, int y) {
+    SDL_Surface *image;
+    SDL_Rect dest;
+    
+    image = SDL_LoadBMP(image_path);
+    if(image == NULL) {
+        std::cout << "ERROR: Couldn't load image: " << image_path << std::endl;
+        return;
+    }
+    
+    dest.x = x;
+    dest.y = y;
     dest.w = image->w;
     dest.h = image->h;
     SDL_BlitSurface(image, NULL, screen, &dest);

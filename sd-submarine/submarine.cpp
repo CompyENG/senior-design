@@ -29,6 +29,7 @@ int main(int argc, char * argv[]) {
     int8_t sub_state[SubJoystick::COMMAND_LENGTH]; // The current state of the submarine
     PTP::PTPNetwork subServerBackend;
     PTP::CameraBase subServer;
+    int mode = 0; // 0 = picture currently, 1 = video currently
     
     bzero(sub_state, SubJoystick::COMMAND_LENGTH);
     
@@ -135,13 +136,14 @@ int main(int argc, char * argv[]) {
                 std::cout << "About to get payload" << std::endl;
                 joy_data = (int8_t *)data.get_payload((int *)&joy_data_len);
                 std::cout << "Got payload, updating motors" << std::endl;
-                update_motors(sub_state, joy_data, joy_data_len, subMotors, cam);
+                update_motors(sub_state, joy_data, joy_data_len, subMotors, cam, &mode);
                 std::cout << "Updated motors" << std::endl;
                 
                 // TODO: Error checking
                 // Everything should have gone OK, so send SD_OK response
                 PTP::PTPContainer response(PTP::PTPContainer::CONTAINER_TYPE_RESPONSE, SD_MAGIC);
                 response.add_param(SD_OK);
+                response.add_param(mode);
                 
                 subServer.send_ptp_message(response);
                 std::cout << "Sent OK" << std::cout;
@@ -266,8 +268,7 @@ bool compare_states(int8_t * sub_state, int8_t * joy_data) {
     return true;
 }
 
-void update_motors(int8_t * sub_state, int8_t * joy_data, uint32_t joy_data_len, Motor * subMotors, PTP::CHDKCamera& cam) {
-    static int mode = 0; // 0 = picture currently, 1 = video currently
+void update_motors(int8_t * sub_state, int8_t * joy_data, uint32_t joy_data_len, Motor * subMotors, PTP::CHDKCamera& cam, int * mode) {
     
     /*std::cout << "joy_data[FORWARD] = " << (int) joy_data[SubJoystick::FORWARD] << std::endl;
     std::cout << "joy_data[LEFT] = " << (int) joy_data[SubJoystick::LEFT] << std::endl;
@@ -416,15 +417,15 @@ void update_motors(int8_t * sub_state, int8_t * joy_data, uint32_t joy_data_len,
         
         // Mode
         if(joy_data[SubJoystick::MODE] == 1 && sub_state[SubJoystick::MODE] == 0) {
-            if(mode == 0) {
+            if(*mode == 0) {
                 cam.write_script_message("modev");
-                mode = 1;
-            } else if(mode == 1) {
+                *mode = 1;
+            } else if(*mode == 1) {
                 cam.write_script_message("modep");
-                mode = 0;
+                *mode = 0;
             } else {
                 cam.write_script_message("modep");
-                mode = 0;
+                *mode = 0;
             }
             
             sub_state[SubJoystick::MODE] = 1;
