@@ -50,6 +50,10 @@ sudo cp ./utils/sd-stop-update /usr/sbin/
 sudo cp ./utils/sd-update /usr/sbin/
 sudo cp ./utils/sd-startup /etc/init.d/
 
+# Image files
+sudo mkdir -p /usr/share/sd-surface/
+sudo cp ./images/*.bmp /usr/share/sd-surface/
+
 # Update init.d files
 echo "Reloading init.d rules"
 sudo update-rc.d sd-startup defaults
@@ -82,6 +86,7 @@ mkdir -p /tmp/update/usr/bin/
 mkdir -p /tmp/update/etc/udev/rules.d/
 mkdir -p /tmp/update/usr/sbin/
 mkdir -p /tmp/update/etc/init.d/
+mkdir -p /tmp/update/usr/share/sd-surface/
 EOF1
 
 # TODO: Set up public key authentication so that we can SFTP/SSH
@@ -103,6 +108,7 @@ put /usr/sbin/sd-stop /tmp/update/usr/sbin/
 put /usr/sbin/sd-stop-update /tmp/update/usr/sbin/
 put /usr/sbin/sd-update /tmp/update/usr/sbin/
 put /etc/init.d/sd-startup /tmp/update/etc/init.d/
+put /usr/share/sd-surface/* /tmp/update/usr/share/sd-surface/
 EOF2
 
 # User pi will need sudo access with NOPASSWD, which is a security risk.
@@ -115,6 +121,8 @@ echo "SSH to move files and restart UI"
 ssh pi@$OTHER_HOSTNAME << EOF3
 sudo /etc/init.d/sd-startup update
 sleep 2
+sudo mkdir -p /usr/include/libptp++/chdk/
+sudo mkdir -p /usr/share/sd-surface/
 sudo cp -r /tmp/update/* /
 sudo update-rc.d sd-startup defaults
 sudo udevadm control --reload-rules
