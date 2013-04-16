@@ -232,10 +232,11 @@ bool setup_camera(PTP::CHDKCamera& cam, PTP::PTPUSB& proto, int * error) {
     cam.execute_lua("switch_mode_usb(1)", NULL); // TODO: block instead of sleep?
     sleep(1);
     cam.execute_lua("set_prop(121, 1)", NULL); // Set flash to manual adjustment
-    usleep(500 * 10^3);   // Sleep for half a second -- TODO: Block instead?
+    sleep(1);   // Sleep for half a second -- TODO: Block instead?
     cam.execute_lua("set_prop(143, 2)", NULL); // Set flash mode to off
-    usleep(500 * 10^3);
+    sleep(1);
     cam.execute_lua("loadfile('A/CHDK/SCRIPTS/sd-sub.lua')()", NULL); // Load up our script
+    sleep(1);
     
     return true;
 }
