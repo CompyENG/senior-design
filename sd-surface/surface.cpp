@@ -13,6 +13,7 @@ int main(int argc, char * argv[]) {
     PTP::PTPContainer in_data, out_resp, out_data;
     SDL_Surface * screen = NULL;
     SDL_Surface * surf_lv = NULL;
+    SDL_Joystick *stick = NULL;
     bool quit = false; // Optional SDL_QUIT handler -- We can also use this as a shutdown from the joystick
     bool select = false;
     bool debug = false;
@@ -31,7 +32,7 @@ int main(int argc, char * argv[]) {
     //Initialize
     if( init() == false )
     {
-        std::cout << "init() failed" << std::endl;
+        std::cout << "Fatal error: init() failed" << std::endl;
         return 2;
     }
     
@@ -42,12 +43,38 @@ int main(int argc, char * argv[]) {
         screen = SDL_SetVideoMode( 640, 480, 16, SDL_FULLSCREEN | SDL_SWSURFACE );
     }
     
-    show_connecting_screen(screen);
+    show_image_status("/usr/share/sd-surface/controller.bmp", screen);
+    
+    // TODO: Error out after some amount of time?
+    while(stick == NULL && signalHandler.gotAnySignal == false) {
+        //Check if there's any joysticks
+        if( SDL_NumJoysticks() < 1 )
+        {
+            std::cout << "No Joysticks Found" << std::endl;
+            continue;
+        }
+
+        //Open the joystick
+        stick = SDL_JoystickOpen( 0 );
+
+        //If there's a problem opening the joystick
+        if( stick == NULL )
+        {
+            std::cout << "Could not open Joystick" << std::endl;
+            continue; // Try again
+        }
+    }
+    
+    //Make the Sub
+    SubJoystick mySubJoystick;
+    
+    show_image_status("/usr/share/sd-surface/connecting.bmp", screen);
     
     //Create a Client
     PTP::PTPNetwork surfaceClientBackend;
     
-    //Connect to server
+    //Connect to server -- TODO: Move to an FSM implementaiton in the main SDL loop and move this code below?
+    //  This would allow us to exit this portion of the code cleanly using the joystick
     bool connected = false;
     while(connected == false && signalHandler.gotAnySignal() == false) {
         try {
@@ -76,30 +103,8 @@ int main(int argc, char * argv[]) {
 	std::cout << "Connection Successful" << std::endl;
     PTP::CameraBase surfaceClient(&surfaceClientBackend);
     
-    //Check if there's any joysticks -- TODO: Keep trying
-    if( SDL_NumJoysticks() < 1 )
-    {
-        std::cout << "No Joysticks Found" << std::endl;
-        clean_up(NULL);
-        return 3;
-    }
-
-    //Open the joystick
-    SDL_Joystick *stick = SDL_JoystickOpen( 0 );
-
-    //If there's a problem opening the joystick
-    if( stick == NULL )
-    {
-        std::cout << "Could not open Joystick" << std::endl;
-        clean_up(NULL);
-        return 4;
-    }
-    
-    //Make the Sub
-    SubJoystick mySubJoystick;
-    
     // Make sure we're connected to the camera
-    // TODO: Display a message to the user while waiting
+    show_image_status("/usr/share/sd-surface/camera.bmp", screen);
     bool camera_connected = false;
     while(camera_connected == false) {
         PTP::PTPContainer connect_cmd(PTP::PTPContainer::CONTAINER_TYPE_COMMAND, SD_MAGIC);
@@ -110,6 +115,7 @@ int main(int argc, char * argv[]) {
             std::cout << "Error in ptp_transaction: " << e << std::endl;
             continue;
         } catch(PTP::PTPNetwork::NetworkErrors e) {
+            // TODO -- this is probably a fatal error
             std::cout << "Network error in ptp_transaction: " << e << std::endl;
             continue;
         }
@@ -261,13 +267,13 @@ void clean_up(SDL_Joystick *stick)
     SDL_Quit();
 }
 
-void show_connecting_screen(SDL_Surface * screen) {
+void show_image_status(const char * image_path, SDL_Surface * screen) {
     SDL_Surface *image;
     SDL_Rect dest;
     
-    image = SDL_LoadBMP("/usr/share/sd-surface/connecting.bmp");
+    image = SDL_LoadBMP(image_path);
     if(image == NULL) {
-        std::cout << "ERROR: Couldn't load 'connecting' image." << std::endl;
+        std::cout << "ERROR: Couldn't load image: " << image_path << std::endl;
         return;
     }
     

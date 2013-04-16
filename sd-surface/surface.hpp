@@ -5,4 +5,4 @@ class SignalHandler;
 
 bool init();
 void clean_up(SDL_Joystick *stick);
-void show_connecting_screen(SDL_Surface * screen);
+void show_image_status(const char * image, SDL_Surface * screen);
