@@ -15,6 +15,7 @@ int main(int argc, char * argv[]) {
     SDL_Surface * surf_lv = NULL;
     bool quit = false; // Optional SDL_QUIT handler -- We can also use this as a shutdown from the joystick
     bool select = false;
+    bool debug = false;
     // Set up signal handler
     SignalHandler signalHandler;
     try {
@@ -36,6 +37,7 @@ int main(int argc, char * argv[]) {
     
     if(argc > 1) {
         screen = SDL_SetVideoMode( 640, 480, 16, SDL_SWSURFACE );
+        debug = true;
     } else {
         screen = SDL_SetVideoMode( 640, 480, 16, SDL_FULLSCREEN | SDL_SWSURFACE );
     }
@@ -64,7 +66,7 @@ int main(int argc, char * argv[]) {
     
     if(signalHandler.gotAnySignal() == true) {
         clean_up(NULL);
-        if(signalHandler.gotExitSignal() == true) {
+        if(signalHandler.gotExitSignal() == true && debug == false) {
             system ("sudo shutdown -h now");
         }
         return 1;
@@ -229,7 +231,7 @@ int main(int argc, char * argv[]) {
 
     //Clean up
     clean_up(stick);
-    if(select == false && signalHandler.gotUpdateSignal() == false) {
+    if(select == false && signalHandler.gotUpdateSignal() == false && debug == false) {
         // Only shutdown if we aren't holding select, and haven't received an "update" signal
         system ("sudo shutdown -h now");
     }
