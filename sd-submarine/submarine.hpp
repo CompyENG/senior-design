@@ -18,4 +18,4 @@ class SignalHandler;
 bool setup_camera(PTP::CHDKCamera& cam, PTP::PTPUSB& proto, int * error);
 void setup_motors(Motor * subMotors);
 bool compare_states(int8_t * sub_state, int8_t * joy_data);
-void update_motors(int8_t * sub_state, int8_t * joy_data, uint32_t joy_data_len, Motor * subMotors, PTP::CHDKCamera& cam);
+void update_motors(int8_t * sub_state, int8_t * joy_data, uint32_t joy_data_len, Motor * subMotors, PTP::CHDKCamera& cam, int * mode);

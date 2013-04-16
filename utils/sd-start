@@ -7,7 +7,7 @@
 MY_HOSTNAME=`hostname -s`
 
 if [ $MY_HOSTNAME = "pi-surface" ]; then
-    /usr/bin/sd-surface 2>&1 > /tmp/surface-log &
+    /usr/bin/sd-surface 2>&1 > /tmp/surface-log
 else
-    /usr/bin/sd-submarine 2>&1 > /tmp/submarine-log &
+    /usr/bin/sd-submarine 2>&1 > /tmp/submarine-log
 fi

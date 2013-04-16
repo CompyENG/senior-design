@@ -2,8 +2,6 @@
 #include <iostream>
 #include <string>
 #include <libptp++/libptp++.hpp>
-#include <SDL/SDL_rotozoom.h>
-//#include <SDL/SDL_ttf.h>
 
 #include "../common/SignalHandler.hpp"
 #include "surface.hpp"
@@ -15,8 +13,10 @@ int main(int argc, char * argv[]) {
     PTP::PTPContainer in_data, out_resp, out_data;
     SDL_Surface * screen = NULL;
     SDL_Surface * surf_lv = NULL;
+    SDL_Joystick *stick = NULL;
     bool quit = false; // Optional SDL_QUIT handler -- We can also use this as a shutdown from the joystick
     bool select = false;
+    bool debug = false;
     // Set up signal handler
     SignalHandler signalHandler;
     try {
@@ -32,20 +32,51 @@ int main(int argc, char * argv[]) {
     //Initialize
     if( init() == false )
     {
-        std::cout << "init() failed" << std::endl;
+        std::cout << "Fatal error: init() failed" << std::endl;
         return 2;
     }
     
     if(argc > 1) {
         screen = SDL_SetVideoMode( 640, 480, 16, SDL_SWSURFACE );
+        debug = true;
     } else {
         screen = SDL_SetVideoMode( 640, 480, 16, SDL_FULLSCREEN | SDL_SWSURFACE );
     }
     
+    show_image_status("/usr/share/sd-surface/controller.bmp", screen);
+    
+    // TODO: Error out after some amount of time?
+    while(stick == NULL && signalHandler.gotAnySignal() == false) {
+        SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
+        SDL_InitSubSystem(SDL_INIT_JOYSTICK);
+        //Check if there's any joysticks
+        if( SDL_NumJoysticks() < 1 )
+        {
+            std::cout << "No Joysticks Found" << std::endl;
+            continue;
+        }
+
+        //Open the joystick
+        stick = SDL_JoystickOpen( 0 );
+
+        //If there's a problem opening the joystick
+        if( stick == NULL )
+        {
+            std::cout << "Could not open Joystick" << std::endl;
+            continue; // Try again
+        }
+    }
+    
+    //Make the Sub
+    SubJoystick mySubJoystick;
+    
+    show_image_status("/usr/share/sd-surface/connecting.bmp", screen);
+    
     //Create a Client
     PTP::PTPNetwork surfaceClientBackend;
     
-    //Connect to server
+    //Connect to server -- TODO: Move to an FSM implementaiton in the main SDL loop and move this code below?
+    //  This would allow us to exit this portion of the code cleanly using the joystick
     bool connected = false;
     while(connected == false && signalHandler.gotAnySignal() == false) {
         try {
@@ -61,28 +92,41 @@ int main(int argc, char * argv[]) {
             std::cout << "Caught some other exception.  Trying again." << std::endl;
         }
     }
+    
+    if(signalHandler.gotAnySignal() == true) {
+        clean_up(NULL);
+        if(signalHandler.gotExitSignal() == true && debug == false) {
+            system ("sudo shutdown -h now");
+        }
+        return 1;
+    }
+        
+    
 	std::cout << "Connection Successful" << std::endl;
     PTP::CameraBase surfaceClient(&surfaceClientBackend);
     
-    //Check if there's any joysticks
-    if( SDL_NumJoysticks() < 1 )
-    {
-        std::cout << "No Joysticks Found" << std::endl;
-        return 3;
-    }
-
-    //Open the joystick
-    SDL_Joystick *stick = SDL_JoystickOpen( 0 );
-
-    //If there's a problem opening the joystick
-    if( stick == NULL )
-    {
-        std::cout << "Could not open Joystick" << std::endl;
-        return 4;
+    // Make sure we're connected to the camera
+    show_image_status("/usr/share/sd-surface/camera.bmp", screen);
+    bool camera_connected = false;
+    while(camera_connected == false) {
+        PTP::PTPContainer connect_cmd(PTP::PTPContainer::CONTAINER_TYPE_COMMAND, SD_MAGIC);
+        connect_cmd.add_param(SD_REQ_CONNECTED);
+        try {
+            surfaceClient.ptp_transaction(connect_cmd, in_data, false, out_resp, out_data);
+        } catch(PTP::LIBPTP_PP_ERRORS e) {
+            std::cout << "Error in ptp_transaction: " << e << std::endl;
+            continue;
+        } catch(PTP::PTPNetwork::NetworkErrors e) {
+            // TODO -- this is probably a fatal error
+            std::cout << "Network error in ptp_transaction: " << e << std::endl;
+            continue;
+        }
+        
+        if(out_resp.code == SD_MAGIC && out_resp.get_param_n(0) == SD_IS_CONNECTED) {
+            camera_connected = true;
+        }
     }
     
-    //Make the Sub
-    SubJoystick mySubJoystick;
 
     //While the user hasn't quit
     while( signalHandler.gotAnySignal() == false && quit == false )
@@ -103,14 +147,14 @@ int main(int argc, char * argv[]) {
         
         int8_t *nav_data = mySubJoystick.get_data();
             
-        std::cout << "nav_data[FORWARD] = " << (int) nav_data[SubJoystick::FORWARD] << std::endl;
+        /*std::cout << "nav_data[FORWARD] = " << (int) nav_data[SubJoystick::FORWARD] << std::endl;
         std::cout << "nav_data[LEFT] = " << (int) nav_data[SubJoystick::LEFT] << std::endl;
         std::cout << "nav_data[PITCH] = " << (int) nav_data[SubJoystick::PITCH] << std::endl;
         std::cout << "nav_data[ZOOM] = " << (int) nav_data[SubJoystick::ZOOM] << std::endl;
         std::cout << "nav_data[ASCEND] = " << (int) nav_data[SubJoystick::ASCEND] << std::endl;
         std::cout << "nav_data[SHOOT] = " << (int) nav_data[SubJoystick::SHOOT] << std::endl;
         std::cout << "nav_data[LIGHTS] = " << (int) nav_data[SubJoystick::LIGHTS] << std::endl;
-        std::cout << "nav_data[QUIT] = " << (int) nav_data[SubJoystick::QUIT] << std::endl;
+        std::cout << "nav_data[QUIT] = " << (int) nav_data[SubJoystick::QUIT] << std::endl;*/
         
         if(nav_data[SubJoystick::OPTION] == 1) {
             // If you hold select, different things may happen
@@ -143,6 +187,8 @@ int main(int argc, char * argv[]) {
             // Something seems to be wrong -- let's continue so that we just try again
             continue;
         }
+        
+        int mode = out_resp.get_param_n(1);
         
         //std::cout << "Sent joystick data" << std::endl;
         
@@ -178,6 +224,12 @@ int main(int argc, char * argv[]) {
 
         SDL_Flip(screen);
         
+        if(mode == 1) {
+            draw_bmp_location("/usr/share/sd-submarine/mode-video.bmp", screen, 50, 50);
+        } else {
+            draw_bmp_location("/usr/share/sd-submarine/mode-picture.bmp", screen, 50, 50);
+        }
+        
         SDL_FreeSurface(surf_lv);
             
         delete[] lv_rgb;
@@ -195,7 +247,7 @@ int main(int argc, char * argv[]) {
 
     //Clean up
     clean_up(stick);
-    if(select == false && signalHandler.gotUpdateSignal() == false) {
+    if(select == false && signalHandler.gotUpdateSignal() == false && debug == false) {
         // Only shutdown if we aren't holding select, and haven't received an "update" signal
         system ("sudo shutdown -h now");
     }
@@ -216,9 +268,49 @@ bool init()
 
 void clean_up(SDL_Joystick *stick)
 {
-    //Close the joystick
-    SDL_JoystickClose( stick );
+    if(stick != NULL) {
+        //Close the joystick
+        SDL_JoystickClose( stick );
+    }
 
     //Quit SDL
     SDL_Quit();
+}
+
+void show_image_status(const char * image_path, SDL_Surface * screen) {
+    SDL_Surface *image;
+    SDL_Rect dest;
+    
+    image = SDL_LoadBMP(image_path);
+    if(image == NULL) {
+        std::cout << "ERROR: Couldn't load image: " << image_path << std::endl;
+        return;
+    }
+    
+    dest.x = 0;
+    dest.y = 0;
+    dest.w = image->w;
+    dest.h = image->h;
+    SDL_BlitSurface(image, NULL, screen, &dest);
+    
+    SDL_UpdateRects(screen, 1, &dest);
+}
+
+void draw_bmp_location(const char * image_path, SDL_Surface * screen, int x, int y) {
+    SDL_Surface *image;
+    SDL_Rect dest;
+    
+    image = SDL_LoadBMP(image_path);
+    if(image == NULL) {
+        std::cout << "ERROR: Couldn't load image: " << image_path << std::endl;
+        return;
+    }
+    
+    dest.x = x;
+    dest.y = y;
+    dest.w = image->w;
+    dest.h = image->h;
+    SDL_BlitSurface(image, NULL, screen, &dest);
+    
+    SDL_UpdateRects(screen, 1, &dest);
 }
