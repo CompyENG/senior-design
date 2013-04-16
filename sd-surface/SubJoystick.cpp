@@ -120,53 +120,50 @@ void SubJoystick::handle_input(SDL_Event event)
     if(event.type == SDL_JOYBUTTONDOWN) {
         
         //taking a picture has priority
-        if ( event.jbutton.button == 5 ) 
+        if ( event.jbutton.button == RB_BUTTON ) 
         {
             commands[SHOOT] = 1; //Take Picture
         }
         //lights (toggle on button down)
-        else if(event.jbutton.button == 4)
-        {
-            if(commands[LIGHTS] == 1) 
-            {
-                commands[LIGHTS] = 0; //light off
-            } 
-            else
-            {
-                commands[LIGHTS] = 1; //Light on
-            }
-        }
-        else if (event.jbutton.button == 3) 
+        else if (event.jbutton.button == X_BUTTON) 
         {
             commands[ASCEND] = 1; //ascend
         }
-        else if (event.jbutton.button == 0) {
+        else if (event.jbutton.button == A_BUTTON) {
             commands[ASCEND] = -1; //decend
         } 
-        else if(event.jbutton.button == 7) {
+        else if(event.jbutton.button == START_BUTTON) {
 			commands[QUIT] = 1;
 		}
-		else if (event.jbutton.button == 6) {
+		else if(event.jbutton.button == RL_BUTTON)
+        {
+            commands[MODE] = 1; //change mode
+        }
+        //option button always works
+        if (event.jbutton.button == BACK_BUTTON) {
 			commands[OPTION] = 1;
 		}
     }
     //buttons released
     if(event.type == SDL_JOYBUTTONUP) {
         //taking a picture has priority
-        if ( event.jbutton.button == 5 ) 
+        if ( event.jbutton.button == RB_BUTTON ) 
         {
             commands[SHOOT] = 0; //Take Picture
         }
-        //lights only change on button down 
-        else if (event.jbutton.button == 3) 
+        else if (event.jbutton.button == Y_BUTTON) 
         {
             commands[ASCEND] = 0; //ascend
         }
-        else if (event.jbutton.button == 0) {
+        else if (event.jbutton.button == A_BUTTON) {
             commands[ASCEND] = 0; //decend
         }
-        else if (event.jbutton.button == 6) {
-            commands[OPTION] = 0; //decend
+        else if (event.jbutton.button == RL_BUTTON) {
+            commands[MODE] = 0; //mode released
+        }
+        //option button always works
+        if (event.jbutton.button == BACK_BUTTON) {
+            commands[OPTION] = 0; //option released
         }
     }
 }
