@@ -224,11 +224,12 @@ int main(int argc, char * argv[]) {
 
         SDL_Flip(screen);
         
+        /*
         if(mode == 1) {
             draw_bmp_location("/usr/share/sd-submarine/mode-video.bmp", screen, 50, 50);
         } else {
             draw_bmp_location("/usr/share/sd-submarine/mode-picture.bmp", screen, 50, 50);
-        }
+        }*/
         
         SDL_FreeSurface(surf_lv);
             

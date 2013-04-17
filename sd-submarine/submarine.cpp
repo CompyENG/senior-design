@@ -416,6 +416,7 @@ void update_motors(int8_t * sub_state, int8_t * joy_data, uint32_t joy_data_len,
         }
         
         // Mode
+        /*
         if(joy_data[SubJoystick::MODE] == 1 && sub_state[SubJoystick::MODE] == 0) {
             if(*mode == 0) {
                 cam.write_script_message("modev");
@@ -432,5 +433,6 @@ void update_motors(int8_t * sub_state, int8_t * joy_data, uint32_t joy_data_len,
         } else if(joy_data[SubJoystick::MODE] == 0 && sub_state[SubJoystick::MODE] == 1) {
             sub_state[SubJoystick::MODE] = 0;
         }
+        */
     }
 }
