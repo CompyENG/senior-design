@@ -127,6 +127,13 @@ int main(int argc, char * argv[]) {
         }
     }
     
+    // For FPS counting
+    int frame = 0;  // Keep track of frame count
+    Timer fps;      // Used to calculate FPS
+    Timer update;   // Used to update log
+    update.start();
+    fps.start();
+    
 
     //While the user hasn't quit
     while( signalHandler.gotAnySignal() == false && quit == false )
@@ -223,6 +230,13 @@ int main(int argc, char * argv[]) {
         SDL_SoftStretch(surf_lv, NULL, screen, NULL);
 
         SDL_Flip(screen);
+        
+        // For FPS counting
+        frame++;    // Increase frame counter
+        if( update.get_ticks() > 1000 ) {   // Update log once a second
+            std::cout << "Average FPS: " << frame / ( fps.get_ticks() / 1000.f ) << std::endl;
+            update.start();
+        }
         
         /*
         if(mode == 1) {
