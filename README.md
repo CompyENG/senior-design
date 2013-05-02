@@ -1,7 +1,8 @@
 senior-design
 =============
 
-A repository for work on my senior design project: a submarine with a camera.
+A repository containing code for the submarine senior design project at
+Valparaiso University.  For more information, see http://valposub.com
 
 The brains of the project are two Raspberry Pis: one on the surface, one on the 
 submarine.  The surface Raspberry Pi is connected to a gamepad (USB) and a small
